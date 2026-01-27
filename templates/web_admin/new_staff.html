@@ -1,0 +1,106 @@
+{% extends "web_admin/header_footer.html" %}
+
+{% block content %}
+<div class="container py-5">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="text-center mb-4 fw-bold border-bottom pb-2">Faculty Verification Queue</h2>
+
+    {% if staffs %}
+    
+    <!-- DESKTOP TABLE VIEW -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-bordered table-striped align-middle text-center shadow-sm rounded-3">
+            <thead class="table-primary">
+                <tr>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Position</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for staff in staffs %}
+                <tr>
+                    <td>
+                        {% if staff.profile_photo %}
+                            <img src="{{ staff.profile_photo.url }}" alt="{{ staff.name }}'s photo"
+                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
+                        {% else %}
+                            <i class="bx bx-user-circle" style="font-size: 50px; color: #ccc;"></i>
+                        {% endif %}
+                    </td>
+                    <td>{{ staff.name }}</td>
+                    <td>{{ staff.dep }}</td>
+                    <td>{{ staff.pos }}</td>
+                    <td>{{ staff.login_info.email }}</td>
+                    <td>{{ staff.pho }}</td>
+                    <td>
+                        <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+                            <a href="{% url 'verify_staff' staff.id 1 %}" class="btn btn-success btn-sm">Verify</a>
+                            <a href="{% url 'reject_staff' staff.id %}" class="btn btn-danger btn-sm" onclick="return resone(this.href)">Reject</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MOBILE CARD VIEW -->
+
+    <div class="d-md-none">
+        {% for staff in staffs %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    {% if staff.profile_photo %}
+                        <img src="{{ staff.profile_photo.url }}" alt="Photo"
+                             class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                        <i class="bx bx-user-circle" style="font-size: 50px; color: #ccc;"></i>
+                    {% endif %}
+                    <h5 class="mb-0">{{ staff.name }}</h5>
+                </div>
+                <p class="mb-1"><strong>Department:</strong> {{ staff.dep }}</p>
+                <p class="mb-1"><strong>Position:</strong> {{ staff.pos }}</p>
+                <p class="mb-1"><strong>Email:</strong> {{ staff.login_info.email }}</p>
+                <p class="mb-3"><strong>Phone:</strong> {{ staff.pho }}</p>
+                <div class="d-flex flex-column gap-2">
+                    <a href="{% url 'verify_staff' staff.id 1 %}" class="btn btn-success">Verify</a>
+                    <a href="{% url 'reject_staff' staff.id %}" class="btn btn-danger" onclick="return resone(this.href)">Reject</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="alert alert-info text-center mt-5" style="margin-bottom: 17vw;">
+        <h4 class="mb-0">No new staff members</h4>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function resone(baseUrl) {
+    const reason = prompt("Please specify the reason for rejection, or press Cancel if you prefer not to provide one.");
+    if (reason !== null) {
+        const encodedReason = encodeURIComponent(reason);
+        const newUrl = `${baseUrl}?reason=${encodedReason}`;
+        window.location.href = newUrl;
+    }
+    return false;
+}
+</script>
+{% endblock %}

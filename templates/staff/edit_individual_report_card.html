@@ -1,0 +1,117 @@
+{% extends "staff/head_foot.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container my-5 px-3 flex-grow-1" style="padding-top: 80px">
+  <div class="card shadow-sm mx-auto w-100" style="max-width: 900px;">
+    <!-- Header -->
+    <div class="card-header text-white p-4"
+         style="background: linear-gradient(135deg, #4a90e2 0%, #0056b3 100%);">
+      <h4 class="mb-0 fw-bold">Edit Report Card</h4>
+      <p class="mb-0 mt-2 opacity-75">
+        Student: {{ student.name }} ({{ student.reg_no }})
+      </p>
+    </div>
+
+    <!-- Body -->
+    <div class="card-body p-4">
+      <form method="post">
+        {% csrf_token %}
+        {{ formset.management_form }}
+
+        {% if formset.non_form_errors %}
+          <div class="alert alert-danger">{{ formset.non_form_errors }}</div>
+        {% endif %}
+
+        <!-- Table -->
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th class="w-40">Exam Details</th>
+                <th class="w-40">Marks Scored</th>
+                <th class="text-center w-20">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for form in formset %}
+              <tr>
+                <td>
+                  {{ form.id }}
+                  {% if form.instance.pk %}
+                    <div class="fw-bold">{{ form.instance.exam.subject }}</div>
+                    <div class="text-muted small">
+                      {{ form.instance.exam.get_exam_type_display }} • 
+                      {{ form.instance.exam.exam_date|date:"M d, Y" }}
+                    </div>
+                    <div class="d-none">{{ form.exam }}</div>
+                  {% else %}
+                    {{ form.exam }}
+                  {% endif %}
+                  {% if form.exam.errors %}
+                    <div class="text-danger small">{{ form.exam.errors }}</div>
+                  {% endif %}
+                </td>
+
+                <td>
+                  <div class="form-group">
+                    {{ form.marks }}
+                  </div>
+                </td>
+
+                <td class="text-center">
+                  {% if formset.can_delete %}
+                    {{ form.DELETE }}
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex flex-wrap justify-content-between mt-4 gap-2">
+          <a href="{% url 'individual_report_card' student.id %}" 
+             class="btn btn-outline-secondary flex-fill flex-md-grow-0">
+            <i class="fas fa-arrow-left"></i> Cancel
+          </a>
+          <button type="submit" class="btn btn-primary px-4 flex-fill flex-md-grow-0">
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Inputs scale nicely on all devices */
+  input[type="number"],
+  select {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 576px) {
+    .card-header h4 {
+      font-size: 1.2rem;
+    }
+    .card-header p {
+      font-size: 0.9rem;
+    }
+    table th, table td {
+      font-size: 0.85rem;
+      padding: 0.6rem;
+    }
+    .btn {
+      width: 100%;
+    }
+  }
+</style>
+
+{% endblock %}

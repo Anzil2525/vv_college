@@ -1,0 +1,121 @@
+{% extends "staff/head_foot.html" %}
+{% block content %}
+
+<style>
+    .attendance-wrapper {
+        padding-top: 110px;
+        padding-bottom: 60px;
+    }
+
+    h2 {
+        text-align: center;
+        font-weight: 600;
+        margin-bottom: 2rem;
+    }
+
+    .table-scroll-wrapper {
+        overflow-x: auto;
+        width: 100%;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+
+    table {
+        min-width: 900px; /* force scroll on small screens */
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    table th,
+    table td {
+        vertical-align: middle;
+        text-align: center;
+        white-space: nowrap;
+        background: #fff;
+        z-index: 1;
+    }
+
+    table th:first-child,
+    table td:first-child {
+        position: sticky;
+        left: 0;
+        background-color: #f8f9fa;
+        z-index: 2;
+        text-align: left;
+    }
+
+    .table thead th:first-child {
+        z-index: 3; /* ensure it's above the others */
+    }
+
+    .btn-group-mobile {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .btn-group-mobile {
+            flex-direction: column;
+        }
+
+        .btn-group-mobile .btn {
+            width: 100%;
+        }
+
+        table {
+            font-size: 0.85rem;
+        }
+    }
+</style>
+
+<div class="container attendance-wrapper">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2>Take Attendance - {{ today }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="table-scroll-wrapper">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Student</th>
+                        <th>1st Hour</th>
+                        <th>2nd Hour</th>
+                        <th>3rd Hour</th>
+                        <th>4th Hour</th>
+                        <th>5th Hour</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student, form in attendance_data %}
+                    <tr>
+                        <td>{{ student.name }}</td>
+                        <td>{{ form.first_hour }}</td>
+                        <td>{{ form.second_hour }}</td>
+                        <td>{{ form.third_hour }}</td>
+                        <td>{{ form.fourth_hour }}</td>
+                        <td>{{ form.fifth_hour }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="btn-group-mobile">
+            <button type="submit" class="btn btn-primary">Save Attendance</button>
+            <!-- <a href="#" class="btn btn-warning">Inform Guardian</a> -->
+        </div>
+    </form>
+</div>
+
+{% endblock %}

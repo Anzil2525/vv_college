@@ -1,0 +1,137 @@
+{% extends "staff/head_foot.html" %}
+
+{% block content %}
+<div class="container py-4" style="margin-top: 120px; padding-bottom: 2vw;">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="text-center mb-4">Verified Students in Your Department</h2>
+
+    {% if students %}
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Reg. No</th>
+                    <th>Department</th>
+                    <th>Course</th>
+                    <td>Sem</td>
+                    <th>Guardian Info</th>
+                    <th>Address</th>
+                    <th>Blood Type</th>
+                    <th>Contact</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr class="d-block d-md-table-row mb-3 mb-md-0 border rounded-2 p-2 px-md-0 shadow-sm shadow-md-0">
+                    <td data-label="Name">{{ student.name }}</td>
+                    <td data-label="Reg. No">{{ student.reg_no }}</td>
+                    <td data-label="Department">{{ student.dep.dep|default:"N/A" }}</td>
+                    <td data-label="Course">{{ student.course.course|default:"N/A"}}</td>
+                    <td data-label="Sem">{{ student.sem }}</td>
+                    <td data-label="Guardian Info">
+                        {% if student.parent_1 %}
+                            <div><strong>{{ student.parent_1.Guadin_Name }}</strong></div>
+                            <small class="text-muted d-block">
+                                📞 {{ student.parent_1.Guadin_phone_Number }}<br>
+                                📧 {{ student.parent_1.Guadin_email }}
+                            </small>
+                        {% else %}
+                            <span class="text-muted">Not Provided</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td data-label="Address">{{ student.address }}</td>
+                    <td data-label="Blood Type">
+                        <span class="badge bg-primary">{{ student.blood_type }}</span>
+                    </td>
+                    
+                    <td data-label="Contact">
+                        <div><strong>📞 {{ student.pho }}</strong></div>
+                        <small class="text-muted">📧 {{ student.login_info.email }}</small>
+                    </td>
+                    <td data-label="Actions" class="text-center align-middle">
+                        <div class="d-flex flex-column flex-md-row gap-2">
+                            <a href="{% url 'view_student_all_attendance' student.id %}"
+                               class="btn btn-outline-success btn-sm w-100 w-md-auto">
+                                <i class="bi bi-eye me-1"></i> View
+                            </a>
+                            <a href="{% url 'rejoin_student' student.id %}" class="btn btn-primary">Rejoin</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center" style="padding-bottom: 17vw;">
+        <i class="fas fa-info-circle"></i> No verified students found in your department.
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .table {
+        font-size: 15px;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+        padding: 0.75rem;
+    }
+
+    .table td {
+        border-top: 1px solid #f0f0f0;
+    }
+
+    @media (max-width: 768px) {
+        .table thead {
+            display: none;
+        }
+
+        .table tr {
+            display: block;
+            background: #fff;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            border: 1px solid #eee;
+        }
+
+        .table td {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 14px;
+            border: none;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .table td:last-child {
+            border-bottom: none;
+        }
+
+        .table td::before {
+            content: attr(data-label);
+            font-weight: 500;
+            color: #444;
+            flex: 1;
+        }
+        
+    }
+
+    .btn-sm {
+        font-size: 13px;
+    }
+</style>
+{% endblock %}

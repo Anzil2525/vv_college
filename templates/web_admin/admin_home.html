@@ -1,0 +1,89 @@
+{% extends "web_admin/header_footer.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="padding-bottom: 2vw;">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <div class="row g-4">
+
+            <div class="ea-card-area pt-100 pb-70 bg-242424">
+            <div class="container">
+                <!-- <div class="section-title">
+                    <h2>Admin Dashboard</h2>
+                </div> -->
+
+                <div class="row justify-content-left">
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="ea-single-card-box style-four">
+                            <img src="{% static 'assets/img/varify_admin.png' %}" alt="image">
+                            <div class="content">
+                                <h3>Verification Queue</h3>
+                                <a href="{% url 'new_staff' %}" class="link-btn">View</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="ea-single-card-box style-four">
+                            <img src="{% static 'assets/img/fac.png' %}" alt="image">
+                            <div class="content">
+                                <h3>Faculty Directory</h3>
+                                <a href="{% url 'view_staff_based_on_dep' %}" class="link-btn">View</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="ea-single-card-box style-four">
+                            <img src="{% static 'assets/img/students.png' %}" alt="image">
+                            <div class="content">
+                                <h3>Student Directory</h3>
+                                <a href="{% url 'student_cat_admin' %}" class="link-btn">View</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="ea-single-card-box style-four">
+                            <img src="{% static 'assets/img/rej.png' %}" alt="image">
+                            <div class="content">
+                                <h3>Rejected Requests</h3>
+                                <a href="{% url 'view_rejected_staff' %}" class="link-btn">View</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="ea-single-card-box style-four">
+                            <img src="{% static 'assets/img/depa.png' %}" alt="image">
+                            <div class="content">
+                                <h3>Departments</h3>
+                                <a href="{% url 'view_dep' %}" class="link-btn">View</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="ea-single-card-box style-four">
+                            <img src="{% static 'assets/img/leave_application.png' %}" alt="image">
+                            <div class="content">
+                                <h3>Leave Application</h3>
+                                <a href="{% url 'view_leave_application_admin' %}" class="link-btn">View</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

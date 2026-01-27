@@ -1,0 +1,57 @@
+{% extends "staff/head_foot.html" %}
+{% load static %}
+{% block content %}
+<div class="container" style="padding-top:90px;">
+	<h2 class="mb-3">Monthly Attendance Report - {{ course.course }} (Sem {{ sem }})</h2>
+	<p><strong>Month:</strong> {{ month_name }} {{ year }}</p>
+
+	<a href="{% url 'class_monthly_report' course.course sem %}?year={{ year }}&month={{ month }}" class="btn btn-warning">Download</a>
+    <br><br>
+
+	<div class="table-responsive">
+		<table class="table table-bordered table-striped">
+			<thead class="table-dark">
+				<tr>
+					<th>Reg No</th>
+					<th>Student Name</th>
+					
+					<th>Course</th>
+					{% for d in days %}
+						<th style="min-width:40px; text-align:center;">{{ d.day }}</th>
+					{% endfor %}
+					<th>Days Recorded</th>
+					<th>Total</th>
+					<th>Percentage</th>
+                    <th>Signature</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for s in students_stats %}
+				<tr>
+					<td>{{ s.reg_no }}</td>
+					<td>{{ s.name }}</td>
+					
+					<td>{{ s.course }}</td>
+					{% for day in s.daily %}
+						<td style="text-align:center;">
+							{% if day.status == 'Full' %}
+								F
+							{% elif day.status == 'Half' %}
+								H
+							{% else %}
+								-
+							{% endif %}
+						</td>
+					{% endfor %}
+					<td style="text-align:center;">{{ s.num_days }}</td>
+					<td style="text-align:center;">{{ s.total }}</td>
+					<td style="text-align:center;">{{ s.percent|floatformat:2 }}%</td>
+                    <td></td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}
+

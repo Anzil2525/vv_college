@@ -1,0 +1,182 @@
+{% extends "staff/head_foot.html" %}
+{% load static %}
+{% block content %}
+<style>
+    .bi-search {
+  /* Basic styling */
+  background: none;
+  border: none;
+  padding: 10px; /* Add some clickable area */
+  cursor: pointer;
+  
+  /* Icon color */
+  color: #5a5a5a; /* Medium grey */
+  font-size: 1.5rem; /* Make the icon a bit bigger */
+  
+  /* Hover effect for interaction */
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.bi-search:hover {
+  color: #007bff; /* Bright blue on hover */
+  transform: scale(1.1); /* Slightly enlarge the icon */
+}
+</style>
+<div class="container mt-5" style="padding-top: 90px;">
+    <div id="monthely-report" style="padding: 3vh; display:flex; gap:8px; align-items:center;">
+        <label for="report-month">Month</label>
+        <select id="report-month" name="report-month"></select>
+
+        <label for="report-year">Year</label>
+        <select id="report-year" name="report-year"></select>
+
+        <a href="{% url 'view_monthly_report' course.course sem %}" id="monthly-report-btn" class="btn btn-warning">Monthly Report</a>
+    </div>
+    
+    <div id="data-form">
+        <form method="post" style="padding: 3vh; display:flex; gap:8px; align-items:center;">
+            {% csrf_token %}
+            <label for="date">Enter Date:</label>
+            <input type="date" name="date" value="{{ date|date:'Y-m-d' }}">
+            <button type="submit" class="bi bi-search" title="Search by date"></button>
+        </form>
+    </div>
+
+    
+
+    <script>
+        (function(){
+            // Populate month select
+            const monthSelect = document.getElementById('report-month');
+            const monthNames = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+            const monthLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            for(let i=0;i<12;i++){
+                const opt = document.createElement('option');
+                opt.value = monthNames[i];
+                opt.text = monthLabels[i];
+                monthSelect.appendChild(opt);
+            }
+
+            // Populate year select (last 6 years + current)
+            const yearSelect = document.getElementById('report-year');
+            const now = new Date();
+            const curYear = now.getFullYear();
+            for(let y=curYear; y>=curYear-6; y--){
+                const opt = document.createElement('option');
+                opt.value = String(y);
+                opt.text = String(y);
+                yearSelect.appendChild(opt);
+            }
+
+            // If a date is present in the date input, use it to set default month/year
+            const dateInput = document.querySelector('input[name="date"]');
+            if(dateInput && dateInput.value){
+                const parts = dateInput.value.split('-');
+                if(parts.length===3){
+                    const y = parts[0];
+                    const m = parts[1];
+                    yearSelect.value = y;
+                    monthSelect.value = m;
+                }
+            } else {
+                // default to current month/year
+                yearSelect.value = String(curYear);
+                monthSelect.value = String(String(now.getMonth()+1).padStart(2,'0'));
+            }
+
+            // Button should open the view_monthly_report URL with query params
+            const baseUrl = "{% url 'view_monthly_report' course.course sem %}";
+            document.getElementById('monthly-report-btn').addEventListener('click', function(e){
+                e.preventDefault();
+                let year = yearSelect.value || String(curYear);
+                let month = monthSelect.value || String(String(now.getMonth()+1).padStart(2,'0'));
+                const url = `${baseUrl}?year=${year}&month=${month}`;
+                window.location.href = url;
+            });
+        })();
+    </script>
+
+    <h2 class="text-center mb-4">{{date}} - {{ course_name }} (Sem {{ sem }}, {{course}})</h2>
+
+    {% if attendance %}
+    <div class="table-responsive shadow rounded">
+        <table class="table table-bordered table-striped align-middle text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th style="position: sticky; left: 0; top: 0; z-index: 1;">Student</th>
+                    <th>1st Hour</th>
+                    <th>2nd Hour</th>
+                    <th>3rd Hour</th>
+                    <th>4th Hour</th>
+                    <th>5th Hour</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for att in attendance %}
+                <tr>
+                    <td class="fw-bold" style="position: sticky; left: 0; top: 0; z-index: 1; background-color: #fff;">{{ att.student.name }}</td>
+
+                    <td>
+                        {% if att.first_hour == "P" %}
+                            ✅ <br><small>{{ att.first_attendance_time }}</small>
+                        {% elif att.first_hour == "A" %}
+                            ❌ <br><small>{{ att.first_attendance_time }}</small>
+                        {% else %}
+                            ⏳
+                        {% endif %}
+                        <br><small class="text-muted">Faculty: {{ att.first_attendance_taken_by }}</small>
+                    </td>
+
+                    <td>
+                        {% if att.second_hour == "P" %}
+                            ✅ <br><small>{{ att.second_attendance_time }}</small>
+                        {% elif att.second_hour == "A" %}
+                            ❌ <br><small>{{ att.second_attendance_time }}</small>
+                        {% else %}
+                            ⏳
+                        {% endif %}
+                        <br><small class="text-muted">Faculty: {{ att.second_attendance_taken_by }}</small>
+                    </td>
+
+                    <td>
+                        {% if att.third_hour == "P" %}
+                            ✅ <br><small>{{ att.third_attendance_time }}</small>
+                        {% elif att.third_hour == "A" %}
+                            ❌ <br><small>{{ att.third_attendance_time }}</small>
+                        {% else %}
+                            ⏳
+                        {% endif %}
+                        <br><small class="text-muted">Faculty: {{ att.third_attendance_taken_by }}</small>
+                    </td>
+
+                    <td>
+                        {% if att.fourth_hour == "P" %}
+                            ✅ <br><small>{{ att.fourth_attendance_time }}</small>
+                        {% elif att.fourth_hour == "A" %}
+                            ❌ <br><small>{{ att.fourth_attendance_time }}</small>
+                        {% else %}
+                            ⏳
+                        {% endif %}
+                        <br><small class="text-muted">Faculty: {{ att.fourth_attendance_taken_by }}</small>
+                    </td>
+
+                    <td>
+                        {% if att.fifth_hour == "P" %}
+                            ✅ <br><small>{{ att.fifth_attendance_time }}</small>
+                        {% elif att.fifth_hour == "A" %}
+                            ❌ <br><small>{{ att.fifth_attendance_time }}</small>
+                        {% else %}
+                            ⏳
+                        {% endif %}
+                        <br><small class="text-muted">Faculty: {{ att.fifth_attendance_taken_by }}</small>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-warning text-center">No attendance records found for {{date}}.</div>
+    {% endif %}
+</div>
+{% endblock %}

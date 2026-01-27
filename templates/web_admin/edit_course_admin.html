@@ -1,0 +1,89 @@
+{% extends "web_admin/header_footer.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+    .resend-form-wrapper {
+        padding-top: 120px;  /* prevents overlap with navbar */
+        padding-bottom: 60px;
+        background-color: rgb(204, 204, 204);
+        border-radius: 25px;
+    }
+
+    .section-title h2 {
+        text-align: center;
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: 30px;
+    }
+
+    .ea-contact-form input,
+    .ea-contact-form select,
+    .ea-contact-form textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        margin-bottom: 15px;
+        font-size: 1rem;
+    }
+
+    .default-btn {
+        background-color: #ff6600;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .default-btn:hover {
+        background-color: #e55d00;
+    }
+
+    @media (max-width: 768px) {
+        .resend-form-wrapper {
+            padding-top: 100px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .default-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<section class="resend-form-wrapper">
+    <div class="container">
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                    <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="section-title">
+            <h2>Edit Course</h2>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10 ">
+                <form method="post" enctype="multipart/form-data" class="ea-contact-form style-two">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+
+                    <div class="text-center">
+                        <button type="submit" class="default-btn mt-3">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

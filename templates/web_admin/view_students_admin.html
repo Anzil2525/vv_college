@@ -1,0 +1,174 @@
+{% extends "web_admin/header_footer.html" %}
+
+{% block content %}
+<div class="container py-4">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="text-center mb-4 fw-bold border-bottom pb-2">Verified Students in Your Department</h2>
+
+    {% if students %}
+
+    <!-- Search Input -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-8 col-lg-6">
+            <input type="text" id="studentSearchInput" class="form-control form-control-lg" placeholder="Search by name, reg no, course...">
+        </div>
+    </div>
+
+    <!-- Desktop Table -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-striped table-hover shadow-sm rounded-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Reg. No.</th>
+                    <!-- <th>Department</th>
+                    <th>Course</th> -->
+                    <!-- <th>Sem</th> -->
+                    <th>Guardian Info</th>
+                    <th>Contact Details</th>
+                    <th>Blood Type</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr class="student-entry">
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.reg_no }}</td>
+                    <!-- <td>{{ student.dep.dep|default:"N/A" }}</td>
+                    <td>{{ student.course.course|default:"N/A" }}</td> -->
+                    <!-- <td>{{ student.sem }}</td> -->
+                    <td>
+                        {% if student.parent_1 %}
+                            <strong>Name:</strong> {{ student.parent_1.Guadin_Name }}<br>
+                            <small class="text-muted">
+                                Phone: {{ student.parent_1.Guadin_phone_Number }}<br>
+                                Email: {{ student.parent_1.Guadin_email }}
+                            </small>
+                        {% else %}
+                            <span class="text-muted">Not Provided</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>Phone:</strong> {{ student.pho }}<br>
+                        <small class="text-muted">Email: {{ student.login_info.email }}</small>
+                    </td>
+                    <td data-label="Blood Type">
+                        <span class="badge bg-primary">{{ student.blood_type }}</span>
+                    </td>
+                    <td>
+                        <a href="{% url 'view_student_all_attendance_admin' student.id %}" class="btn btn-success btn-sm">Attendance</a>
+                        
+                        <a href="{% url 'view_report_card_admin' student.id %}" class="btn btn-primary btn-sm" style="margin-top: 1rem;">Report Card</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div class="d-md-none">
+        {% for student in students %}
+        <div class="card mb-3 shadow-sm student-entry">
+            <div class="card-body">
+                <h5 class="card-title mb-2">{{ student.name }}</h5>
+                <p class="mb-1"><strong>Reg. No:</strong> {{ student.reg_no }}</p>
+                <p class="mb-1"><strong>Department:</strong> {{ student.dep.dep|default:"N/A" }}</p>
+                <p class="mb-1"><strong>Course:</strong> {{ student.course.course|default:"N/A" }}</p>
+                <p class="mb-1"><strong>Sem:</strong> {{ student.sem }}</p>
+                <p class="mb-1"><strong>Blood Type:</strong> {{student.blood_type }}</p>
+                <p class="mb-1">
+                    <strong>Guardian:</strong>
+                    {% if student.parent_1 %}
+                        {{ student.parent_1.Guadin_Name }}<br>
+                        <small class="text-muted">Ph: {{ student.parent_1.Guadin_phone_Number }}<br>
+                        {{ student.parent_1.Guadin_email }}</small>
+                    {% else %}
+                        <span class="text-muted">Not Provided</span>
+                    {% endif %}
+                </p>
+                <p class="mb-1">
+                    <strong>Contact:</strong> {{ student.pho }}<br>
+                    <small class="text-muted">Email: {{ student.login_info.email }}</small>
+                </p>
+                <a href="{% url 'view_student_all_attendance_admin' student.id %}" class="btn btn-success w-100 mt-2">
+                    View Attendance
+                </a>
+                <a href="{% url 'view_report_card_admin' student.id %}" class="btn btn-primary w-100 mt-2" style="margin-top: 1rem;">Report Card</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div id="noResultsMessage" class="alert alert-warning text-center mt-4" style="display: none;">
+        No students match your search.
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center" style="padding-bottom: 17vw;">
+        <i class="fas fa-info-circle"></i> No verified students found in your department.
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .table {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-top: 2rem;
+    }
+
+    .table th {
+        white-space: nowrap;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('studentSearchInput');
+
+    // Only run the search script if the search input exists on the page
+    if (searchInput) {
+        const studentEntries = document.querySelectorAll('.student-entry');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+
+        searchInput.addEventListener('keyup', function() {
+            const filter = searchInput.value.toLowerCase();
+            let visibleCount = 0;
+
+            studentEntries.forEach(function(entry) {
+                if (entry.textContent.toLowerCase().includes(filter)) {
+                    entry.style.display = '';
+                    visibleCount++;
+                } else {
+                    entry.style.display = 'none';
+                }
+            });
+
+            // Show/hide the "no results" message
+            if (studentEntries.length > 0) {
+                noResultsMessage.style.display = (visibleCount === 0) ? 'block' : 'none';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

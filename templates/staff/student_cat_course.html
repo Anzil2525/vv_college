@@ -1,0 +1,103 @@
+{% extends "staff/head_foot.html" %}
+
+{% block content %}
+<div class="container py-4" style="margin-top: 120px; padding-bottom: 2vw;">
+    {% if messages %}
+    <div style="margin-bottom: 1rem;">
+        {% for message in messages %}
+        <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <h2 class="text-center mb-4 fw-bold border-bottom pb-2">Courses Offered</h2>
+
+    {% if courses %}
+
+    <!-- DESKTOP TABLE VIEW -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-hover align-middle text-center shadow-sm rounded-4">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Course</th>
+
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in courses %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ i.course }}</td>
+
+                    <td>
+                        <a href="{% url 'view_students' sem i.course %}"
+                            class="btn btn-sm btn-primary rounded-pill me-2">
+                            View Students
+                        </a>
+                        <a href="{% url 'take_attendance' sem i.course %}" class="btn btn-sm btn-success rounded-pill">
+                            Take Attendance
+                        </a>
+                        <a href="{% url 'view_all_att_by_staff' i.course sem %}" class="btn-sm btn-primary rounded-pill">
+                            View Attendance
+                        </a>
+                        <a href="{% url 'reg_examination' i.course sem %}" class="btn-sm btn-success rounded-pill" style="margin-left: 3px;">
+                            Examination
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MOBILE CARD VIEW -->
+    <center>
+        <div class="d-md-none">
+            {% for i in courses %}
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-center">{{ i.course }}</h5>
+                    <p class="card-text text-center text-muted small">
+
+                    </p>
+                    <div class="d-flex flex-column gap-2 mt-3">
+                        <a href="{% url 'view_students' sem i.course %}" class="btn btn-primary w-100">
+                            View Students
+                        </a>
+                        <a href="{% url 'take_attendance' sem i.course %}" class="btn btn-success w-100">
+                            Take Attendance
+                        </a>
+                        <a href="{% url 'view_all_att_by_staff' i.course sem %}" class="btn btn-primary w-100">
+                            View Attendance
+                        </a>
+                        <a href="{% url 'reg_examination' i.course sem %}" class="btn btn-success w-100">
+                            Examination
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </center>
+
+    {% else %}
+    <div class="alert alert-info text-center mt-5">
+        <i class="fas fa-info-circle"></i> No courses found.
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .card {
+        border-radius: 16px;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+    }
+</style>
+{% endblock %}

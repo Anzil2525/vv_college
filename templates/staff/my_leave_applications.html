@@ -1,0 +1,137 @@
+{% extends "staff/head_foot.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid py-4" style="margin-top: 90px;">
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <h2 class="text-center mb-4">My Leave Applications</h2>
+
+    <div class="row justify-content-center mb-4">
+        <div class="col-11 col-md-8 col-lg-6">
+            <input type="text" id="leaveSearchInput" class="form-control form-control-lg" placeholder="Search by leave type, status, date...">
+        </div>
+    </div>
+
+    {% if leaves %}
+    <!-- 📱 Mobile View: Card layout -->
+    <div class="d-md-none" id="mobileCardContainer">
+        {% for leave in leaves %}
+        <div class="card mb-3 shadow-sm leave-entry">
+            <div class="card-body">
+                <h5 class="card-title">{{ leave.get_leave_type_display }}</h5>
+                <p class="mb-1"><strong>From:</strong> {{ leave.from_staff.name }}</p>
+                <p class="mb-1"><strong>To:</strong> {{ leave.to_staff.name|default:"HOD" }}</p>
+                <p class="mb-1"><strong>Start:</strong> {{ leave.start_date }}</p>
+                <p class="mb-1"><strong>End:</strong> {{ leave.end_date }}</p>
+                <p class="mb-1"><strong>Days:</strong> {{ leave.num_of_days }}</p>
+                <p class="mb-1"><strong>Submitted:</strong> {{ leave.submitted_on }}</p>
+                <p class="mb-1"><strong>Reason:</strong><br>{{ leave.reason }}</p>
+                <p class="mb-2"><strong>Status:</strong> 
+                    <span class="badge 
+                        {% if leave.status == 'P' %}bg-warning
+                        {% elif leave.status == 'H' %}bg-info
+                        {% elif leave.status == 'HR' or leave.status == 'R' %}bg-danger
+                        {% elif leave.status == 'A' %}bg-success
+                        {% elif leave.status == 'FH' %}bg-warning
+                        {% endif %}">
+                        {{ leave.get_status_display }}
+                    </span>
+                </p>
+                {% if leave.status == 'P' or leave.status == 'FH' %}
+                    <a href="{% url 'cancle_leave' leave.id %}" class="btn btn-sm btn-danger">Cancel</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        <p id="noResultsMessageMobile" class="text-center mt-3" style="display: none;">No matching leave applications found.</p>
+    </div>
+
+    <!-- 💻 Desktop View: Table layout -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-striped table-hover align-middle shadow-sm" id="leaveTable">
+            <thead class="table-dark">
+                <tr>
+                    <th>Leave Type</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Days</th>
+                    <th>Submitted</th>
+                    <th style="min-width: 200px;">Reason</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for leave in leaves %}
+                <tr class="leave-entry">
+                    <td>{{ leave.get_leave_type_display }}</td>
+                    <td>{{ leave.from_staff.name }}</td>
+                    <td>{{ leave.to_staff.name|default:"HOD" }}</td>
+                    <td>{{ leave.start_date }}</td>
+                    <td>{{ leave.end_date }}</td>
+                    <td>{{ leave.num_of_days }}</td>
+                    <td>{{ leave.submitted_on }}</td>
+                    <td style="white-space: pre-wrap;">{{ leave.reason }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if leave.status == 'P' %}bg-warning
+                            {% elif leave.status == 'H' %}bg-info
+                            {% elif leave.status == 'HR' or leave.status == 'R' %}bg-danger
+                            {% elif leave.status == 'A' %}bg-success
+                            {% elif leave.status == 'FH' %}bg-warning
+                            {% endif %}">
+                            {{ leave.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if leave.status == 'P' or leave.status == 'FH' %}
+                            <a href="{% url 'cancle_leave' leave.id %}" class="btn btn-sm btn-danger">Cancel</a>
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p class="text-center">No leave applications found.</p>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('leaveSearchInput');
+    const leaveEntries = document.querySelectorAll('.leave-entry');
+    const noResultsTable = document.getElementById('noResultsMessage');
+    const noResultsMobile = document.getElementById('noResultsMessageMobile');
+
+    searchInput.addEventListener('keyup', function() {
+        const filter = searchInput.value.toLowerCase();
+        let visibleCount = 0;
+
+        leaveEntries.forEach(function(entry) {
+            const match = entry.innerText.toLowerCase().includes(filter);
+            entry.style.display = match ? '' : 'none';
+            if (match) visibleCount++;
+        });
+
+        if (noResultsTable) noResultsTable.style.display = (visibleCount === 0) ? 'block' : 'none';
+        if (noResultsMobile) noResultsMobile.style.display = (visibleCount === 0) ? 'block' : 'none';
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "staff/head_foot.html" %}
+{% load static %}
+{% block content %}
+
+    <div class="ea-flip-box-area pb-70 pt-100 bg-gradient-color" style="padding-top: 90px; padding-bottom: 2vw;">
+            <div class="container">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+                <div class="section-title">
+                    <h2>Faculty Dashboard</h2>
+                </div>
+
+                <div class="row justify-content-start">
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="ea-single-card-box style-four">
+                            <img src="{% static 'assets/img/varify.png' %}" alt="image">
+                            <div class="content">
+                                <h3>Verification Queue</h3>
+                                <a href="{% url 'new_students' %}" class="link-btn">View</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="ea-single-card-box style-four">
+                            <img src="{% static 'assets/img/students.png' %}" alt="image">
+                            <div class="content">
+                                <h3>Student Directory</h3>
+                                <a href="{% url 'student_cat' %}" class="link-btn">View</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="ea-single-card-box style-four">
+                            <img src="{% static 'assets/img/reject_staff_img.png' %}" alt="image">
+                            <div class="content">
+                                <h3>Rejected Requests</h3>
+                                <a href="{% url 'rejected_students' %}" class="link-btn">View</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="ea-single-card-box style-four">
+                            <img src="{% static 'assets/img/apply_for_leave.png' %}" alt="image">
+                            <div class="content">
+                                <h3>File for Leave</h3>
+                                <a href="{% url 'leave_application' %}" class="link-btn">View</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="ea-single-card-box style-four">
+                            <img src="{% static 'assets/img/time_table.jpg' %}" alt="image">
+                            <div class="content">
+                                <h3>Time Table</h3>
+                                <a href="{% url 'select_sem_for_timetable' %}" class="link-btn">View</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if pos == "HOD" %}
+
+                        <div class="col-lg-4 col-md-6 col-sm-6">
+                            <div class="ea-single-card-box style-four">
+                                <img src="{% static 'assets/img/leave_application.png' %}" alt="image">
+                                <div class="content">
+                                    <h3>Leave Applications</h3>
+                                    <a href="{% url 'leave_application_hod' %}" class="link-btn">View</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-6 col-sm-6">
+                            <div class="ea-single-card-box style-four">
+                                <img src="{% static 'assets/img/leave_history_hod.png' %}" alt="image">
+                                <div class="content">
+                                    <h3>Leave History</h3>
+                                    <a href="{% url 'leave_history_hod' %}" class="link-btn">View</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="ea-single-card-box style-four">
+                            <img src="{% static 'assets/img/my_leave_application.png' %}" alt="image">
+                            <div class="content">
+                                <h3>My Leave Applications</h3>
+                                <a href="{% url 'my_leave_applications' %}" class="link-btn">View</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="ea-single-card-box style-four">
+                            <img src="{% static 'assets/img/temp.jpg' %}" alt="image">
+                            <div class="content">
+                                <h3>Temp Discontinued</h3>
+                                <a href="{% url 'view_temp_Discontinue' %}" class="link-btn">View</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends "staff/head_foot.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .timetable-container {
+        padding: 90px 20px 40px;
+    }
+
+    .timetable-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .timetable-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th,
+    td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    th {
+        background-color: #f4f6f9;
+        font-weight: 600;
+    }
+
+    .subject {
+        font-weight: 500;
+        color: #222;
+    }
+
+    .staff {
+        font-size: 13px;
+        color: #555;
+    }
+
+    .no-data {
+    max-width: 700px;
+    margin: 80px auto;
+    padding: 50px 30px;
+    background: linear-gradient(135deg, #fff7ed, #ffedd5);
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+}
+
+.no-data h3 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 12px;
+}
+
+.no-data p {
+    font-size: 16px;
+    color: #6b7280;
+    margin-bottom: 25px;
+}
+
+
+    .create-btn {
+        margin-bottom: 20px;
+        display: inline-block;
+    }
+
+    .page-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        gap: 15px;
+    }
+
+    .page-title {
+        font-size: 40px;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    .btn-primary {
+        background: rgb(59, 157, 222);
+        color: #fff;
+        padding: 12px 22px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    
+</style>
+
+<div class="timetable-container">
+
+    <div class="page-header">
+        <center>
+            <div class="page-title">📅 Time Table</div>
+        </center>
+
+        {% if pos == "HOD" %}
+        <center>
+            <a href="{% url 'setting_time_table_hod_7d' %}" class="btn-primary">
+            ➕ Create Time Table
+        </a>
+        </center>
+        {% endif %}
+    </div>
+
+    {% if time_tables %}
+    {% for tt in time_tables %}
+    <div class="timetable-card">
+        <div class="timetable-title">
+            {{ tt.course }} – Semester {{ tt.sem }} 
+            <hr>
+            {% if tt.day == 'MO' %}<span style="color: #3b82f6;">Monday</span>
+            {% elif tt.day == 'TU' %}<span style="color: #10b981;">Tuesday</span>
+            {% elif tt.day == 'WE' %}<span style="color: #f59e0b;">Wednesday</span>
+            {% elif tt.day == 'TH' %}<span style="color: #8b5cf6;">Thursday</span>
+            {% elif tt.day == 'FR' %}<span style="color: #ec4899;">Friday</span>
+            {% elif tt.day == 'SA' %}<span style="color: #ef4444;">Saturday</span>
+            {% elif tt.day == 'SU' %}<span style="color: #6b7280;">Sunday</span>
+            {% else %}{{ tt.day }}{% endif %}
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Hour</th>
+                    <th>Subject</th>
+                    <th>Staff</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1st Hour</td>
+                    <td class="subject">{{ tt.first_hour_subject }}</td>
+                    <td class="staff">{{ tt.first_houre_staff }}</td>
+                </tr>
+                <tr>
+                    <td>2nd Hour</td>
+                    <td class="subject">{{ tt.second_hour_subject }}</td>
+                    <td class="staff">{{ tt.second_hour_staff }}</td>
+                </tr>
+                <tr>
+                    <td>3rd Hour</td>
+                    <td class="subject">{{ tt.third_hour_subject }}</td>
+                    <td class="staff">{{ tt.third_hour_staff }}</td>
+                </tr>
+                <tr>
+                    <td>4th Hour</td>
+                    <td class="subject">{{ tt.fourth_hour_subject }}</td>
+                    <td class="staff">{{ tt.fourth_hour_staff }}</td>
+                </tr>
+                <tr>
+                    <td>5th Hour</td>
+                    <td class="subject">{{ tt.fifth_hour_subject }}</td>
+                    <td class="staff">{{ tt.fifth_hour_staff }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="no-data">
+        <h3>No timetable available</h3>
+        <p>Please contact HOD</p>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,542 @@
+
+{% load static %}
+
+<!doctype html>
+<html lang="zxx">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Links of CSS files -->
+        <link rel="stylesheet" href="../static/assets/css/bootstrap.min.css">
+        <link rel="stylesheet" href="../static/assets/css/animate.min.css">
+        <link rel="stylesheet" href="../static/assets/css/aos.css">
+        <link rel="stylesheet" href="../static/assets/css/boxicons.min.css">
+        <link rel="stylesheet" href="../static/assets/css/magnific-popup.min.css">
+        <link rel="stylesheet" href="../static/assets/css/meanmenu.min.css">
+        <link rel="stylesheet" href="../static/assets/css/owl.carousel.min.css">
+        <link rel="stylesheet" href="../static/assets/css/owl.theme.default.min.css">
+        <link rel="stylesheet" href="../static/assets/css/progressbar.min.css">
+        <link rel="stylesheet" href="../static/assets/css/odometer.min.css">
+        <link rel="stylesheet" href="../static/assets/css/calendar.css">
+        <link rel="stylesheet" href="../static/assets/css/style.css">
+        <link rel="stylesheet" href="../static/assets/css/responsive.css">
+
+        <title>Kvvs</title>
+
+                <style>
+            /* Default color for the select box text when a valid department is selected */
+            #dep {
+              color: #3a3a3e;
+            }
+
+            /* Color for the "Select Department ▼" placeholder text */
+            #dep:invalid {
+              color: #999999; /* You can change this to your desired placeholder color */
+            }
+
+            /* Optional: Style for all options in the dropdown list itself */
+            #dep option {
+              color: black; /* Or #3a3a3e to match selected valid text */
+            }
+            /* Ensure the disabled placeholder option in the list also gets the placeholder color */
+            #dep option[value=""]{
+                color: #999999; /* Match the :invalid color */
+            }
+            /* Ensure the disabled placeholder option in the list also gets the placeholder color */
+            #dep option[value=""]{
+                color: #999999; /* Match the :invalid color */
+            }
+
+            /* Default color for the year of admission select box text when a valid year is selected */
+            #year_of_admision {
+              color: #3a3a3e;
+            }
+
+            /* Color for the "Year of Admision ▼" placeholder text */
+            #year_of_admision:invalid {
+              color: #999999; /* Placeholder color, same as department */
+            }
+
+            /* Style for all options in the year of admission dropdown list */
+            #year_of_admision option {
+              color: black; /* Or #3a3a3e */
+            }
+            #year_of_admision option[value=""]{
+                color: #999999; /* Match the :invalid color */
+            }
+
+            /* Default color for the course select box text when a valid course is selected */
+            #course {
+              color: #3a3a3e;
+            }
+
+            /* Color for the "Select Course ▼" placeholder text */
+            #course:invalid {
+              color: #999999; /* Placeholder color, same as department */
+            }
+
+            /* Style for all options in the course dropdown list */
+            #course option {
+              color: black; /* Or #3a3a3e */
+            }
+            #course option[value=""]{
+                color: #999999; /* Match the :invalid color */
+            }
+
+            /* Default color for the blood type select box text when a valid type is selected */
+            #blood_type {
+              color: #3a3a3e;
+            }
+
+            /* Color for the "Select Blood Type ▼" placeholder text */
+            #blood_type:invalid {
+              color: #999999; /* Placeholder color, same as department */
+            }
+
+            /* Style for all options in the blood type dropdown list */
+            #blood_type option {
+              color: black; /* Or #3a3a3e */
+            }
+        </style>
+
+        <link rel="icon" type="image/png" href="../static/assets/img/favicon.png">
+    </head>
+    <body>
+
+        <!-- Start Navbar Area -->
+        <div class="ea-navbar-area bg-white">
+            <div class="ea-responsive-nav">
+                <div class="container">
+                    <div class="ea-responsive-menu">
+                        <div class="logo">
+                            <a href="{% url 'log_out_function'  %}"><img src="../static/assets/img/logo.png" alt="logo"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ea-nav">
+                <div class="container">
+                    <nav class="navbar navbar-expand-md navbar-light">
+                        <a class="navbar-brand" href="{% url 'log_out_function'  %}"><img src="../static/assets/img/logo.png" alt="logo"></a>
+
+                        <div class="collapse navbar-collapse mean-menu">
+                            <ul class="navbar-nav">
+
+                                <li class="nav-item"><a href="{% url 'log_out_function' %}" class="nav-link">Home</a></li>
+
+                                <!-- <li class="nav-item"><a href="#demos" class="dropdown-toggle nav-link">Free Demos</a>
+                                    <ul class="dropdown-menu">
+
+                                        <li class="nav-item"><a href="card.html" class="nav-link">Card</a></li>
+
+                                        <li class="nav-item"><a href="flip-box.html" class="nav-link">Flipbox</a></li>
+										
+										<li class="nav-item"><a href="team-member.html" class="nav-link">Team</a></li>
+										
+										<li class="nav-item"><a href="testimonial.html" class="nav-link">Testimonial</a></li>
+										
+										<li class="nav-item"><a href="timeline.html" class="nav-link">Timeline</a></li>
+										
+										<li class="nav-item"><a href="contact-form-7.html" class="nav-link">Contact Form 7</a></li>
+										
+										<li class="nav-item"><a href="logo-carousel.html" class="nav-link">Logo Carousel</a></li>
+										
+										<li class="nav-item"><a href="progress-bar.html" class="nav-link">Progress Bar</a></li>
+
+                                        <li class="nav-item"><a href="fun-factor.html" class="nav-link">Fun Factor</a></li>
+
+                                        <li class="nav-item"><a href="social-media.html" class="nav-link">Social Media</a></li>
+
+                                        <li class="nav-item"><a href="business-hours.html" class="nav-link">Business Hours</a></li>
+                                        
+                                        <li class="nav-item"><a href="blog-post.html" class="nav-link">Blog Post</a></li>
+
+                                    </ul>
+                                </li> -->
+
+                            </ul>
+
+                            <div class="others-option d-flex align-items-center">
+                                <div>
+                                <a href="{% url 'staff_reg' %}" class="default-btn" style="padding: 6px 12px; font-size: 0.9rem;">Faculty Registration</a>
+                                <a href="{% url 'student_reg' %}" class="default-btn" style="padding: 6px 12px; font-size: 0.9rem;">Student Registration</a>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="others-option-for-responsive">
+                <div class="container">
+                    <div class="dot-menu">
+                        <div class="inner">
+                            <div class="circle circle-one"></div>
+                            <div class="circle circle-two"></div>
+                            <div class="circle circle-three"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="container">
+                        <div class="option-inner">
+                            <div class="others-option d-flex align-items-center">
+                                <div class="option-item">
+                                    <a href="{% url 'staff_reg' %}" class="default-btn" style="padding: 6px 12px; font-size: 0.9rem;">Faculty Registration</a>
+                                    <a href="{% url 'student_reg' %}" class="default-btn" style="margin-top: 1vw; padding: 6px 12px; font-size: 0.9rem;">Student Registration</a>
+                                                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- End Navbar Area -->
+
+        <!-- Start Contact Form Design Seven Area -->
+        <section class="ea-contact-form-area style-seven pb-100 pt-100">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+            <div class="container">
+                
+
+                <div class="ea-contact-bg">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <div class="ea-img-two">
+                                <img src="../static/assets/img/register.jpg" alt="Image">
+                            </div>
+                        </div>
+    
+                        <div class="col-lg-6">
+                            <form class="ea-contact-form style-seven" method="post">
+                                {% csrf_token %}
+                                <h3>Registration Form</h3>
+    
+                                <div class="row">
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <input type="text" name="name" id="name" class="form-control" placeholder="Name" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <input type="number" name="reg_no" id="reg_no" class="form-control" placeholder="Reg no/ APAAR Id" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <input type="number" name="sem" id="sem" class="form-control" placeholder="semester" required>
+                                        </div>
+                                    </div>
+
+            
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <input type="email" name="email" id="email" class="form-control" placeholder="example@gmail.com" required>
+                                        </div>
+                                    </div>
+            
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <input type="tel" name="pho" id="pho" class="form-control" placeholder="Enter Your Phone no" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <select name="blood_type" id="blood_type" class="form-control" required>
+                                                <option value="" disabled selected>Select Blood Type ▼</option>
+                                                <option value="A+">A+</option>
+                                                <option value="A-">A-</option>
+                                                <option value="B+">B+</option>
+                                                <option value="B-">B-</option>
+                                                <option value="AB+">AB+</option>
+                                                <option value="AB-">AB-</option>
+                                                <option value="O+">O+</option>
+                                                <option value="O-">O-</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-10 col-sm-6">
+                                        <div class="form-group">
+                                            <textarea name="address" id="address" class="form-control" placeholder="Address" required></textarea>
+                                        </div>
+                                    </div>
+            
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <select name="dep" id="dep" class="form-control" required>
+                                                <option value="" disabled selected>Select Department ▼</option>
+                                                {% for department in departments %}
+                                                    <option value="{{department.id}}">{{department.dep}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <select name="course" id="course" class="form-control" required>
+                                                <option value="" disabled selected>Select Course ▼</option>
+                                                {% for i in course %}
+                                                    <option value="{{i.id}}">{{i.course}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <!-- <input type="number" name="year_of_admision" id="year_of_admision" class="form-control" placeholder="Year of Admision" required> -->
+                                             <select name="year_of_admision" id="year_of_admision" class="form-control" required>
+                                                <option value="" disabled selected >Year of Admision ▼</option>
+                                                {% for year in year_list %}
+                                                    <option value="{{year}}">{{year}}</option>
+                                                {% endfor %}
+                                             </select>
+                                        </div>
+                                    </div>
+            
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <input type="password" name="password" class="form-control" id="password" cols="30" rows="1" placeholder="Enter your password" required>
+                                        </div>
+                                    </div>
+
+                                    <h3>Details of Guardian</h3>
+
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <input type="text" name="Guadin_Name" id="Guadin_Name" class="form-control" placeholder="Guardian's Name" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <input type="email" name="Guadin_email" id="Guadin_email" class="form-control" placeholder="example@gmail.com" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <input type="tel" name="Guadin_phone_Number" id="Guadin_phone_Number" class="form-control" placeholder="Guardian's Phone Number" required>
+                                        </div>
+                                    </div>
+
+            
+                                    <div class="col-lg-12 col-md-12">
+                                        <button type="submit" class="submit-btn">
+                                            Submit
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- End Contact Form Design Seven Area -->
+
+        <!-- Start Footer Area -->
+        <div class="copyright-area">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-4 col-md-4">
+                        <a href="{% url 'log_out_function'  %}" class="logo d-inline-block">
+                            <img src="../static/assets/img/logo.png" alt="image">
+                        </a>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4 text-center">
+                        <p>© Copyright 2025. K.V.V.S College of Science & Technology. | All Rights Reserved.</p>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4">
+                        <ul class="social-links">
+                            <li><a href="https://www.facebook.com/p/KVVS-College-of-Science-and-Technology-Adoor-100083160409122/" class="facebook" target="_self"><i class='bx bxl-facebook'></i></a></li>
+                            <li><a href="https://www.instagram.com/kvvs_college_adoor/" class="instagram" target="_self"><i class='bx bxl-instagram'></i></a></li>
+                            <li><a href="#" class="twitter" target="_self"><i class='bx bxl-twitter'></i></a></li>
+                            <li><a href="https://www.linkedin.com/authwall?trk=gf&trkInfo=AQGdt0zVIZLH2wAAAZjQk2eQJHbkMuxZhahs4qMbapeVAXixQYrpiRMuURJd6-EjZGvSsRN6a8NxcrHZ1hedZESqqnsZYT_t1PzoDbOOcYIBa2uUgqj8srAHsjJDuSmCQq8tu78=&original_referer=&sessionRedirect=https%3A%2F%2Fwww.linkedin.com%2Fschool%2Fkvvs-college-of-science-%26-technology-kaithaparambu-enathu-adoor%2Fpeople%2F%3ForiginalSubdomain%3Din" class="linkedin" target="_self"><i class='bx bxl-linkedin'></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Footer Area -->
+
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const validators = [];
+        
+          // Reusable validation function
+          function handleValidation(input, pattern, validMsg, invalidMsg) {
+            const feedback = document.createElement('small');
+            feedback.style.display = 'block';
+            input.parentNode.appendChild(feedback);
+        
+            function validate() {
+              const value = input.value.trim();
+              if (!value) {
+                feedback.textContent = '❌ This field is required';
+                feedback.style.color = 'red';
+                return false;
+              } else if (!pattern.test(value)) {
+                feedback.textContent = '❌ ' + invalidMsg;
+                feedback.style.color = 'red';
+                return false;
+              } else {
+                feedback.textContent = '✅ ' + validMsg;
+                feedback.style.color = 'green';
+                return true;
+              }
+            }
+        
+            input.addEventListener('input', validate);
+            validators.push(validate);
+          }
+        
+          // ✅ Name validation (letters and spaces only)
+          const nameInput = document.querySelector('input[name="name"]');
+          if (nameInput) {
+            handleValidation(
+              nameInput,
+              /^[A-Za-z ]+$/,  // No limit on characters
+              'Valid name',
+              'Name must contain only letters and spaces'
+            );
+          }
+
+           const gudName = document.querySelector('input[name="Guadin_Name"]');
+          if (gudName) {
+            handleValidation(
+              gudName,
+              /^[A-Za-z ]+$/,  // No limit on characters
+              'Valid name',
+              'Name must contain only letters and spaces'
+            );
+          }
+
+      
+        
+          // ✅ Contact validation (10 digits)
+          const contactInput = document.querySelector('input[name="pho"]');
+          if (contactInput) {
+            handleValidation(
+              contactInput,
+              /^\d{10}$/,
+              'Valid phone number',
+              'Enter a valid 10-digit phone number'
+            );
+          }
+
+          const gudpho = document.querySelector('input[name="Guadin_phone_Number"]');
+          if (gudpho) {
+            handleValidation(
+              gudpho,
+              /^\d{10}$/,
+              'Valid phone number',
+              'Enter a valid 10-digit phone number'
+            );
+          }
+        
+          // ✅ Email validation
+          const emailInput = document.querySelector('input[name="email"]');
+          if (emailInput) {
+            handleValidation(
+              emailInput,
+              /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              'Valid email address',
+              'Enter a valid email address'
+            );
+          }
+
+          const gudemail = document.querySelector('input[name="Guadin_email"]');
+          if (gudemail) {
+            handleValidation(
+              gudemail,
+              /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              'Valid email address',
+              'Enter a valid email address'
+            );
+          }
+        
+          // ✅ Password validation (min 8 chars, upper, lower, number, special char)
+          const passwordInput = document.querySelector('input[name="password"]');
+          if (passwordInput) {
+            handleValidation(
+              passwordInput,
+              /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/,
+              'Strong password',
+              'Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character'
+            );
+          }
+
+        
+          // Real-time "This field is required" for other fields
+          const requiredFields = ['sem', 'blood_type', 'dep', 'course', 'address', 'year_of_admision', 'reg_no'];
+          requiredFields.forEach(fieldName => {
+            const input = document.querySelector(`[name="${fieldName}"]`);
+            if (input) {
+              const feedback = document.createElement('small');
+              feedback.style.display = 'block';
+              input.parentNode.appendChild(feedback);
+        
+              input.addEventListener('input', function () {
+                if (input.value.trim() === '') {
+                  feedback.textContent = '❌ This field is required';
+                  feedback.style.color = 'red';
+                } else {
+                  feedback.textContent = '';
+                }
+              });
+            }
+          });
+        
+          // Prevent form submission if any validation fails
+          const form = document.querySelector('form');
+          if (form) {
+            form.addEventListener('submit', function (e) {
+              let isValid = true;
+              validators.forEach(validateFn => {
+                if (!validateFn()) isValid = false;
+              });
+              if (!isValid) {
+                e.preventDefault();
+                alert("❌ Please fill all required fields and fix validation errors.");
+              }
+            });
+          }
+        });
+        </script>
+
+        <!-- Links of JS files -->
+        <script src="../static/assets/js/jquery.min.js"></script>
+        <script src="../static/assets/js/bootstrap.bundle.min.js"></script>
+        <script src="../static/assets/js/magnific-popup.min.js"></script>
+        <script src="../static/assets/js/meanmenu.min.js"></script>
+        <script src="../static/assets/js/sidebar-menu.js"></script>
+        <script src="../static/assets/js/owl.carousel.min.js"></script>
+        <script src="../static/assets/js/progressbar.min.js"></script>
+        <script src="../static/assets/js/appear.min.js"></script>
+        <script src="../static/assets/js/odometer.min.js"></script>
+        <script src="../static/assets/js/apexcharts.js"></script>
+        <script src="../static/assets/js/calendar.js"></script>
+        <script src="../static/assets/js/aos.js"></script>
+        <script src="../static/assets/js/main.js"></script>
+    </body>
+</html>

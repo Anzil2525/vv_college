@@ -1,0 +1,236 @@
+{% load static %}
+
+<!doctype html>
+<html lang="zxx">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Links of CSS files -->
+        <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/animate.min.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/aos.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/boxicons.min.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/magnific-popup.min.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/meanmenu.min.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/owl.carousel.min.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/owl.theme.default.min.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/progressbar.min.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/odometer.min.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/calendar.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+        <link rel="stylesheet" href="{% static 'assets/css/responsive.css' %}">
+
+        <title>KVVS</title>
+
+        
+    </head>
+    <body class="landing-page">
+
+        <!-- Start Navbar Area -->
+        <div class="ea-navbar-area">
+            <div class="ea-responsive-nav">
+                <div class="container">
+                    <div class="ea-responsive-menu">
+                        <div class="logo">
+                            <a href="{% url 'log_out_function' %}"><img src="{% static 'assets/img/logo.png' %}" alt="logo"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ea-nav">
+                <div class="container">
+                    <nav class="navbar navbar-expand-md navbar-light">
+
+                        <a class="navbar-brand" href="{% url 'log_out_function' %}"><img src="{% static 'assets/img/logo.png' %}" alt="logo"></a>
+
+                        <div class="collapse navbar-collapse mean-menu">
+                            <ul class="navbar-nav">
+
+                                 <li class="nav-item"><a href="{% url 'log_out_function' %}" class="nav-link">Home</a></li>
+
+                                <!-- <li class="nav-item"><a href="#demos" class="dropdown-toggle nav-link">Free Demos</a>
+                                    <ul class="dropdown-menu"> -->
+
+                                        <!-- <li class="nav-item"><a href="card.html" class="nav-link">Card</a></li>
+
+                                        <li class="nav-item"><a href="flip-box.html" class="nav-link">Flipbox</a></li>
+										
+										<li class="nav-item"><a href="team-member.html" class="nav-link">Team</a></li>
+										
+										<li class="nav-item"><a href="testimonial.html" class="nav-link">Testimonial</a></li>
+										
+										<li class="nav-item"><a href="timeline.html" class="nav-link">Timeline</a></li>
+										
+										<li class="nav-item"><a href="contact-form-7.html" class="nav-link">Contact Form 7</a></li>
+										
+										<li class="nav-item"><a href="logo-carousel.html" class="nav-link">Logo Carousel</a></li>
+										
+										<li class="nav-item"><a href="progress-bar.html" class="nav-link">Progress Bar</a></li>
+
+                                        <li class="nav-item"><a href="fun-factor.html" class="nav-link">Fun Factor</a></li>
+
+                                        <li class="nav-item"><a href="social-media.html" class="nav-link">Social Media</a></li>
+
+                                        <li class="nav-item"><a href="business-hours.html" class="nav-link">Business Hours</a></li>
+                                        
+                                        <li class="nav-item"><a href="blog-post.html" class="nav-link">Blog Post</a></li> -->
+
+                                    <!-- </ul>
+                                </li> -->
+
+                                <!-- <li class="nav-item"><a href="#features" class="nav-link">Features</a></li>
+
+                                <li class="nav-item"><a href="#call-to-action" class="nav-link">Call To Action</a></li> -->
+
+                            </ul>
+
+                            <div class="others-option d-flex align-items-center">
+                                <div class="option-item">
+                                    <a href="{% url 'login' %}" class="default-btn">Login</a>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="others-option-for-responsive">
+                <div class="container">
+                    <div class="dot-menu">
+                        <div class="inner">
+                            <div class="circle circle-one"></div>
+                            <div class="circle circle-two"></div>
+                            <div class="circle circle-three"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="container">
+                        <div class="option-inner">
+                            <div class="others-option d-flex align-items-center">
+                                <div class="option-item">
+                                    <a href="{% url 'login' %}" class="default-btn">Login</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Navbar Area -->
+
+        <!-- Start Banner Area -->
+        <div class="banner-area">
+            <div class="container">
+                <div class="row align-items-center m-0">
+                    <div class="col-lg-6 col-md-12 p-0">
+                        <div class="banner-content">
+                            <h1>Welcome to</h1>
+                            <h6> <span>KVVS College of Science and Technology,</span> Kaithaparambu, Adoor, Pathanamthitta District, Kerala.</h6>
+                            <div class="btn-box d-flex justify-content-center align-items-center flex-wrap" style="gap: 20px; margin-top: 30px;">
+                                <a href="{% url 'staff_reg' %}" class="default-btn">Faculty Registration</a>
+                                <a href="{% url 'student_reg' %}" class="default-btn">Student Registration</a>
+                                <a href="{% url 'guardian_reg' %}" class="default-btn">Guardian Registration</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-md-12 p-0">
+                        <div class="banner-image">
+                            <img src="{% static 'assets/img/banner.png' %}" alt="image">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Banner Area -->
+
+        <!-- Start Preview Demos Area -->
+        <!-- End Preview Demos Area -->
+        
+        <!-- Start Preview Features Area -->
+        <section id="features" class="preview-features-area bg-f7f7ff ptb-100">
+            <div class="container">
+                <div class="section-title" data-aos="fade-up" data-aos-duration="1200">
+                    <h2>Our Vision</h2>
+                    <p>KVVS College of Science & Technology strives for excellence in higher education,
+research and support services, by employing an integral approach
+to education, with the purpose of forming professionals, responsible citizens
+and epitomes of fundamental human values like commitment, compassion
+and optimism, who ought to be actively involved in creative nation
+building and enhancement of human existence.</p>
+                </div>
+                </div>
+            </div>
+            <div class="shape-1">
+                <img src="{% static 'assets/img/box-shape-1.png' %}" alt="Image">
+            </div>
+            <div class="shape-2">
+                <img src="{% static 'assets/img/box-shape-2.png' %}" alt="Image">
+            </div>
+        </section>
+        <!-- End Preview Features Area -->
+
+        <!-- Start Call To Action Area -->
+        <div id="call-to-action" class="call-to-action-area ptb-100">
+            <div class="container">
+                <div class="call-to-action-content" data-aos="fade-up" data-aos-duration="1200">
+                    <h2>Our Mission</h2>
+                    <p>To transform young men and women into professionally competent,
+socially committed and morally upright individuals who are
+well equipped for outstanding performance in the application
+of human resources and potentialities on a global dimension
+and are empowered to serve humanity impelled by their
+unwavering commitment to the ultimate values of human existence.</p>
+                    
+                </div>
+            </div>
+        </div>
+        <!-- End Call To Action Area -->
+
+        <!-- Start Footer Area -->
+        <div class="copyright-area">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-4 col-md-4">
+                        <a href="{% url 'log_out_function'  %}" class="logo d-inline-block">
+                            <img src="{% static 'assets/img/logo.png' %}" alt="image">
+                        </a>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4 text-center">
+                        <p>© Copyright 2025. K.V.V.S College of Science & Technology. | All Rights Reserved. </p>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4">
+                        <ul class="social-links">
+                            <li><a href="https://www.facebook.com/p/KVVS-College-of-Science-and-Technology-Adoor-100083160409122/" class="facebook"><i class='bx bxl-facebook'></i></a></li>
+                            <li><a href="https://www.instagram.com/kvvs_college_adoor/" class="instagram"><i class='bx bxl-instagram'></i></a></li>
+                            <li><a href="#" class="twitter"><i class='bx bxl-twitter'></i></a></li>
+                            <li><a href="https://www.linkedin.com/authwall?trk=gf&trkInfo=AQGdt0zVIZLH2wAAAZjQk2eQJHbkMuxZhahs4qMbapeVAXixQYrpiRMuURJd6-EjZGvSsRN6a8NxcrHZ1hedZESqqnsZYT_t1PzoDbOOcYIBa2uUgqj8srAHsjJDuSmCQq8tu78=&original_referer=&sessionRedirect=https%3A%2F%2Fwww.linkedin.com%2Fschool%2Fkvvs-college-of-science-%26-technology-kaithaparambu-enathu-adoor%2Fpeople%2F%3ForiginalSubdomain%3Din" class="linkedin"><i class='bx bxl-linkedin'></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- End Footer Area -->
+
+        <!-- Links of JS files -->
+        <script src="{% static 'assets/js/jquery.min.js' %}"></script>
+        <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
+        <script src="{% static 'assets/js/magnific-popup.min.js' %}"></script>
+        <script src="{% static 'assets/js/meanmenu.min.js' %}"></script>
+        <script src="{% static 'assets/js/sidebar-menu.js' %}"></script>
+        <script src="{% static 'assets/js/owl.carousel.min.js' %}"></script>
+        <script src="{% static 'assets/js/progressbar.min.js' %}"></script>
+        <script src="{% static 'assets/js/appear.min.js' %}"></script>
+        <script src="{% static 'assets/js/odometer.min.js' %}"></script>
+        <script src="{% static 'assets/js/apexcharts.js' %}"></script>
+        <script src="{% static 'assets/js/calendar.js' %}"></script>
+        <script src="{% static 'assets/js/aos.js' %}"></script>
+        <script src="{% static 'assets/js/main.js' %}"></script>
+    </body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance Report - {{ student.name }}</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        h1, h2, h3 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .header-info p { margin: 5px 0; }
+        .summary { margin-top: 30px; padding: 15px; border: 1px solid #ccc; }
+        .summary p { font-size: 1.1em; }
+    </style>
+</head>
+<body>
+    <h1>KVVS College of Science & Technology</h1>
+    <h2>Attendance Report</h2>
+
+    <div class="header-info">
+        <p><strong>Student Name:</strong> {{ student.name }}</p>
+        <p><strong>Registration No:</strong> {{ student.reg_no }}</p>
+        <p><strong>Course:</strong> {{ student.course.course }}</p>
+        <p><strong>Current Semester:</strong> {{ current_semester }}</p>
+        <p><strong>Report Month:</strong> {{ month_name }} {{ year }}</p>
+        <p><strong>Generated on:</strong> {{ today_date|date:"F d, Y" }}</p>
+    </div>
+
+    <h3>Monthly Attendance Details ({{ month_name }} {{ year }})</h3>
+    {% if monthly_attendance_records %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Status (Day)</th>
+                    <th>H1</th>
+                    <th>H2</th>
+                    <th>H3</th>
+                    <th>H4</th>
+                    <th>H5</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for att in monthly_attendance_records %}
+                <tr>
+                    <td>{{ att.date|date:"d-M-Y" }}</td>
+                    <td>
+                        {% if att.today == 1.0 %}Full Day Present
+                        {% elif att.today == 0.5 %}Half Day Present
+                        {% elif att.today == 0.0 %}Absent
+                        {% else %}No Record
+                        {% endif %}
+                    </td>
+                    <td>{{ att.first_hour|default:"-" }}</td>
+                    <td>{{ att.second_hour|default:"-" }}</td>
+                    <td>{{ att.third_hour|default:"-" }}</td>
+                    <td>{{ att.fourth_hour|default:"-" }}</td>
+                    <td>{{ att.fifth_hour|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No attendance records found for {{ month_name }} {{ year }}.</p>
+    {% endif %}
+
+    <div class="summary">
+        <h3>Attendance Summary</h3>
+        <p><strong>Monthly Attendance ({{ month_name }} {{ year }}):</strong> {{ monthly_percentage }}%</p>
+        <p><strong>Semester Attendance (Semester {{ current_semester }}):</strong> {{ semester_percentage }}%</p>
+    </div>
+
+</body>
+</html>

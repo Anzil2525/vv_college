@@ -1,0 +1,188 @@
+{% extends "web_admin/header_footer.html" %}
+
+{% block title %}Student Attendance - {{ student.name }}{% endblock %}
+
+<!-- {% block ancher_tag %}
+<a class="nav-item nav-link" href="{% url 'staff_home' %}">Home</a>
+<a class="nav-item nav-link" href="{% url 'new_students' %}">New Students</a>
+<a class="nav-item nav-link" href="{% url 'student_cat' %}">View Students</a>
+<a class="nav-item nav-link" href="{% url 'rejected_students' %}">Rejected Students</a>
+{% endblock %} -->
+
+{% block content %}
+<style>
+    .calendar-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    .calendar-table th, .calendar-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+        height: 70px; /* Adjust height as needed */
+        vertical-align: top;
+    }
+    .calendar-table th {
+        background-color: #f2f2f2;
+    }
+    .calendar-day-empty {
+        background-color: #f9f9f9;
+    }
+    .calendar-day .day-number {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+    .present-full {
+        background-color: #d4edda; /* Light green */
+        color: #155724;
+    }
+    .present-half {
+        background-color: #fff3cd; /* Light yellow */
+        color: #856404;
+    }
+    .absent {
+        background-color: #f8d7da; /* Light red */
+        color: #721c24;
+    }
+    .no-record {
+        /* Style for days with no attendance record, if needed */
+        background-color: #e9ecef; /* Light grey */
+    }
+    .attendance-details {
+        font-size: 0.8em;
+        margin-top: 5px;
+    }
+    .calendar-navigation {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .calendar-navigation a {
+        text-decoration: none;
+        padding: 8px 15px;
+        background-color: #007bff;
+        color: white;
+        border-radius: 4px;
+    }
+    .calendar-navigation a:hover {
+        background-color: #0056b3;
+    }
+    .calendar-navigation span {
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+</style>
+
+<div class="container mt-4">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2>Attendance Record</h2>
+    <hr>
+    <p><strong>Student:</strong> {{ student.name }}</p>
+    <p><strong>Reg No:</strong> {{ student.reg_no }}</p>
+    <p><strong>Course:</strong> {{ student.course.course }}</p>
+    <p><strong>Semester:</strong> {{ student.sem }}</p>
+
+    <div class="calendar-navigation mt-4">
+        <a href="{% url 'view_student_all_attendance_admin' id=student.id %}?year={{ prev_nav_year }}&month={{ prev_nav_month }}">&laquo; Previous Month</a>
+        <span>{{ month_name }} {{ year }}</span>
+        <a href="{% url 'view_student_all_attendance_admin' id=student.id %}?year={{ next_nav_year }}&month={{ next_nav_month }}">Next Month &raquo;</a>
+    </div>
+
+    <table class="calendar-table">
+        <thead>
+            <tr>
+                {% for day_name in days_of_week %}
+                    <th>{{ day_name }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for week in weeks_data %}
+                <tr>
+                    {% for day_cell in week %}
+                        <td class="
+                            {% if day_cell.day_num == 0 %}
+                                calendar-day-empty
+                            {% else %}
+                                calendar-day
+                                {% if day_cell.attendance %}
+                                    {% if day_cell.attendance.today == 1.0 %}
+                                        present-full
+                                    {% elif day_cell.attendance.today == 0.5 %}
+                                        present-half
+                                    {% elif day_cell.attendance.today == 0.0 %}
+                                        absent
+                                    {% endif %}
+                                {% else %}
+                                    no-record
+                                {% endif %}
+                            {% endif %}
+                        ">
+                            {% if day_cell.day_num != 0 %}
+                                <span class="day-number">{{ day_cell.day_num }}</span>
+                                {% if day_cell.attendance %}
+                                    <div class="attendance-details">
+                                    {% if day_cell.attendance.today == 1.0 %}
+                                        Full Day
+                                    {% elif day_cell.attendance.today == 0.5 %}
+                                        Half Day
+                                    {% elif day_cell.attendance.today == 0.0 %}
+                                        Absent
+                                    {% endif %}
+                                    <br>
+                                    <!-- <medium>
+                                        H1:{{ day_cell.attendance.first_hour|slice:":2" }}|
+                                        H2:{{ day_cell.attendance.second_hour|slice:":2" }}|
+                                        H3:{{ day_cell.attendance.third_hour|slice:":2" }}|
+                                        H4:{{ day_cell.attendance.fourth_hour|slice:":2" }}|
+                                        H5:{{ day_cell.attendance.fifth_hour|slice:":2" }}
+                                    </medium> -->
+                                    <br>
+                                    <a href="{% url 'attendance_details_admin' student.id day_cell.date_obj|date:'Y-m-d' %}">View Details</a>
+                                    </div>
+                                {% elif day_cell.date_obj and day_cell.date_obj <= today_date %} 
+                                    <!-- Only show 'No Record' for past/today dates if desired -->
+                                    <!-- <div class="attendance-details">No Record</div> -->
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <a href="{% url 'generate_student_attendance_pdf' student.id year month %}" class="btn btn-warning" target="_blank">Download PDF</a>
+
+    {% comment %}
+    <h3 class="mt-5">All Attendance Records (List View):</h3>
+    <ul class="list-group">
+        {% for att in all_attendance_records %}
+            <li class="list-group-item">
+                {{ att.date|date:"Y-m-d" }}: 
+                <strong>Today Value: {{ att.today }}</strong>
+                (1st: {{ att.first_hour }}, 2nd: {{ att.second_hour }}, 3rd: {{ att.third_hour }}, 4th: {{ att.fourth_hour }}, 5th: {{ att.fifth_hour }})
+            </li>
+        {% empty %}
+            <li class="list-group-item">No attendance records found for this student.</li>
+        {% endfor %}
+    </ul>
+    {% endcomment %}
+</div>
+{% endblock %}
+
+{% block script_needed %}
+<!-- Add any specific JavaScript needed for this page here -->
+{% endblock %}
+\ No newline at end of file

@@ -1,0 +1,240 @@
+{% extends "student/head_foot_student.html" %}
+
+{% block content %}
+
+<div class="attendance-container" style="margin-top: 90px;">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="attendance-title">
+        Attendance Details for <span class="student-name">{{ student.name }}</span> 
+        on <span class="attendance-date">{{ attendance.date }}</span>
+    </h2>
+
+    <div class="attendance-card">
+
+        <!-- Table view (desktop/tablet) -->
+        <div class="attendance-table-wrapper">
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>Hour</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                        <th>Marked By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>First Hour</td>
+                        <td class="{% if attendance.first_hour == 'P' %}present{% else %}absent{% endif %}">
+                            {{ attendance.first_hour }}
+                        </td>
+                        <td>{{ attendance.first_attendance_time }}</td>
+                        <td>{{ attendance.first_attendance_taken_by }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Second Hour</td>
+                        <td class="{% if attendance.second_hour == 'P' %}present{% else %}absent{% endif %}">
+                            {{ attendance.second_hour }}
+                        </td>
+                        <td>{{ attendance.second_attendance_time }}</td>
+                        <td>{{ attendance.second_attendance_taken_by }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Third Hour</td>
+                        <td class="{% if attendance.third_hour == 'P' %}present{% else %}absent{% endif %}">
+                            {{ attendance.third_hour }}
+                        </td>
+                        <td>{{ attendance.third_attendance_time }}</td>
+                        <td>{{ attendance.third_attendance_taken_by }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Fourth Hour</td>
+                        <td class="{% if attendance.fourth_hour == 'P' %}present{% else %}absent{% endif %}">
+                            {{ attendance.fourth_hour }}
+                        </td>
+                        <td>{{ attendance.fourth_attendance_time }}</td>
+                        <td>{{ attendance.fourth_attendance_taken_by }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Fifth Hour</td>
+                        <td class="{% if attendance.fifth_hour == 'P' %}present{% else %}absent{% endif %}">
+                            {{ attendance.fifth_hour }}
+                        </td>
+                        <td>{{ attendance.fifth_attendance_time }}</td>
+                        <td>{{ attendance.fifth_attendance_taken_by }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Card view (mobile only) -->
+        <div class="attendance-cards">
+            <div class="hour-card {% if attendance.first_hour == 'P' %}present-card{% else %}absent-card{% endif %}">
+                <h4>First Hour</h4>
+                <p><strong>Status:</strong> {{ attendance.first_hour }}</p>
+                <p><strong>Time:</strong> {{ attendance.first_attendance_time }}</p>
+                <p><strong>Marked By:</strong> {{ attendance.first_attendance_taken_by }}</p>
+            </div>
+
+            <div class="hour-card {% if attendance.second_hour == 'P' %}present-card{% else %}absent-card{% endif %}">
+                <h4>Second Hour</h4>
+                <p><strong>Status:</strong> {{ attendance.second_hour }}</p>
+                <p><strong>Time:</strong> {{ attendance.second_attendance_time }}</p>
+                <p><strong>Marked By:</strong> {{ attendance.second_attendance_taken_by }}</p>
+            </div>
+
+            <div class="hour-card {% if attendance.third_hour == 'P' %}present-card{% else %}absent-card{% endif %}">
+                <h4>Third Hour</h4>
+                <p><strong>Status:</strong> {{ attendance.third_hour }}</p>
+                <p><strong>Time:</strong> {{ attendance.third_attendance_time }}</p>
+                <p><strong>Marked By:</strong> {{ attendance.third_attendance_taken_by }}</p>
+            </div>
+
+            <div class="hour-card {% if attendance.fourth_hour == 'P' %}present-card{% else %}absent-card{% endif %}">
+                <h4>Fourth Hour</h4>
+                <p><strong>Status:</strong> {{ attendance.fourth_hour }}</p>
+                <p><strong>Time:</strong> {{ attendance.fourth_attendance_time }}</p>
+                <p><strong>Marked By:</strong> {{ attendance.fourth_attendance_taken_by }}</p>
+            </div>
+
+            <div class="hour-card {% if attendance.fifth_hour == 'P' %}present-card{% else %}absent-card{% endif %}">
+                <h4>Fifth Hour</h4>
+                <p><strong>Status:</strong> {{ attendance.fifth_hour }}</p>
+                <p><strong>Time:</strong> {{ attendance.fifth_attendance_time }}</p>
+                <p><strong>Marked By:</strong> {{ attendance.fifth_attendance_taken_by }}</p>
+            </div>
+        </div>
+
+        <div class="attendance-summary">
+            <strong>Total Attendance Value:</strong> {{ attendance.today }}
+        </div>
+    </div>
+</div>
+
+<style>
+.attendance-container {
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+}
+
+.attendance-title {
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #222;
+    text-align: center;
+}
+
+.student-name {
+    color: #0077cc;
+}
+
+.attendance-date {
+    color: #28a745;
+}
+
+.attendance-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 3px 10px rgba(0,0,0,0.1);
+}
+
+/* Table view (default) */
+.attendance-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    min-width: 500px;
+}
+
+.attendance-table th, .attendance-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.attendance-table th {
+    background: #333;
+    color: white;
+}
+
+/* Card view (hidden by default) */
+.attendance-cards {
+    display: none;
+}
+
+.hour-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #fdfdfd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.hour-card h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+}
+
+.present {
+    color: #28a745;
+    font-weight: bold;
+}
+.absent {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.present-card {
+    border-left: 5px solid #28a745;
+}
+.absent-card {
+    border-left: 5px solid #dc3545;
+}
+
+.attendance-summary {
+    font-size: 1.2rem;
+    padding: 10px;
+    background: #f1f1f1;
+    border-left: 5px solid #0077cc;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* Responsive Switch */
+@media (max-width: 768px) {
+    .attendance-table-wrapper {
+        display: none; /* Hide table */
+    }
+    .attendance-cards {
+        display: block; /* Show cards */
+    }
+    .attendance-title {
+        font-size: 1.3rem;
+    }
+}
+</style>
+
+{% endblock %}
+

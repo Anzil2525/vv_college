@@ -1,0 +1,142 @@
+{% extends "web_admin/header_footer.html" %}
+
+{% block content %}
+<div class="container py-5">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="text-center mb-4 fw-bold border-bottom pb-2">Verified Staff Members</h2>
+
+    {% if staffs %}
+    <!-- Search Input -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-8 col-lg-6">
+            <input type="text" id="staffSearchInput" class="form-control form-control-lg" placeholder="Search by name, department, email...">
+        </div>
+    </div>
+    
+    <!-- Desktop Table -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-bordered table-striped align-middle text-center shadow-sm">
+            <thead class="table-success">
+                <tr>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Phone No.</th>
+                    <th>Department</th>
+                    <th>Position</th>
+                    <th>Email</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for staff in staffs %}
+                <tr class="staff-entry">
+                    <td>
+                        {% if staff.profile_photo %}
+                            <img src="{{ staff.profile_photo.url }}" alt="{{ staff.name }}'s Photo" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
+                        {% else %}
+                            <i class="bx bx-user-circle" style="font-size: 50px; color: #ccc;"></i>
+                        {% endif %}
+                    </td>
+                    <td>{{ staff.name }}</td>
+                    <td>{{ staff.pho }}</td>
+                    <td>{{ staff.dep }}</td>
+                    <td>{{ staff.pos }}</td>
+                    <td>{{ staff.login_info.email }}</td>
+                    <td>
+                        <div class="d-grid gap-1">
+                            <a href="{% url 'view_leave_admin' staff.id %}" class="btn btn-success btn-sm">View Leaves</a>
+                            <button class="btn btn-danger btn-sm" onclick="confirmRemoval('{{ staff.login_info.id }}')">Remove</button>
+                            <a href="{% url 'promotion' staff.id %}" class="btn btn-primary btn-sm">Promotion</a>
+                            <a href="{% url 'reset_password_of_staff' staff.id %}" class="btn btn-warning btn-sm">Reset Password</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="row d-md-none g-3">
+        {% for staff in staffs %}
+        <div class="col-12 staff-entry">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="text-center mb-3">
+                        {% if staff.profile_photo %}
+                            <img src="{{ staff.profile_photo.url }}" alt="{{ staff.name }}'s Photo" style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%;">
+                        {% else %}
+                            <i class="bx bx-user-circle" style="font-size: 60px; color: #ccc;"></i>
+                        {% endif %}
+                    </div>
+                    <h5 class="card-title text-center">{{ staff.name }}</h5>
+                    <p class="mb-1"><strong>Phone:</strong> {{ staff.pho }}</p>
+                    <p class="mb-1"><strong>Dept:</strong> {{ staff.dep }}</p>
+                    <p class="mb-1"><strong>Position:</strong> {{ staff.pos }}</p>
+                    <p class="mb-2"><strong>Email:</strong> {{ staff.login_info.email }}</p>
+                    <div class="mt-auto d-grid gap-2">
+                        <a href="{% url 'view_leave_admin' staff.id %}" class="btn btn-success btn-sm">View Leaves</a>
+                        <button class="btn btn-danger btn-sm" onclick="confirmRemoval('{{ staff.login_info.id }}')">Remove</button>
+                        <a href="{% url 'promotion' staff.id %}" class="btn btn-primary btn-sm" style="margin-top: 3px;">Promotion</a>
+                        <a href="{% url 'reset_password_of_staff' staff.id %}" class="btn btn-warning btn-sm" style="margin-top: 3px;">Reset Password</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div id="noResultsMessage" class="alert alert-warning text-center mt-4" style="display: none;">
+        No staff members match your search.
+    </div>
+
+    {% else %}
+    <div class="alert alert-info text-center mt-4" style="margin-bottom: 17vh;">
+        No verified staff members found.
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function confirmRemoval(id) {
+        if (confirm("Are you sure you want to remove this staff member? All associated data will be deleted.")) {
+            window.location.href = "/delete_staff/" + id + "/";
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('staffSearchInput');
+        
+        // Only run the search script if the search input exists on the page
+        if (searchInput) {
+            const staffEntries = document.querySelectorAll('.staff-entry');
+            const noResultsMessage = document.getElementById('noResultsMessage');
+
+            searchInput.addEventListener('keyup', function() {
+                const filter = searchInput.value.toLowerCase();
+                let visibleCount = 0;
+
+                staffEntries.forEach(function(entry) {
+                    // The `textContent` property is slightly more performant than `innerText`
+                    if (entry.textContent.toLowerCase().includes(filter)) {
+                        entry.style.display = '';
+                        visibleCount++;
+                    } else {
+                        entry.style.display = 'none';
+                    }
+                });
+
+                noResultsMessage.style.display = (visibleCount === 0) ? 'block' : 'none';
+            });
+        }
+    });
+</script>
+{% endblock %}

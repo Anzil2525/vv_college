@@ -1,0 +1,82 @@
+{% extends "web_admin/header_footer.html" %}
+
+{% block content %}
+<div class="container py-5">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="mb-4 text-center fw-bold border-bottom pb-2">Semester</h2>
+
+    {% if sem %}
+
+    <!-- DESKTOP TABLE VIEW -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-bordered table-hover align-middle text-center shadow-sm rounded-4">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <!-- <th>Admission Year</th> -->
+                    <th>Current Semester</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in sem %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <!-- <td>{{ item.year_of_admision }}</td> -->
+                    <td>{{ item.min_sem }}</td>
+                    <td>
+                        <a href="{% url 'student_cat_dep_admin' item.sem %}" class="btn btn-sm btn-primary rounded-pill me-2">
+                            View
+                        </a>
+                        
+                        <a href="{% url 'pass_out_admin' item.sem %}" 
+                           class="btn btn-sm btn-warning rounded-pill"
+                           onclick="return confirm('Are you sure you want to mark the {{ item.sem }} batch as passed out? This action cannot be undone easily.');">
+                            Pass Out
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MOBILE CARD VIEW -->
+
+    <div class="d-md-none">
+        {% for item in sem %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <!-- <h5 class="card-title">Year: {{ item.year_of_admision }}</h5> -->
+                <p class="mb-1"><strong>Semester:</strong> {{ item.min_sem }}</p>
+                <div class="d-flex flex-column gap-2 mt-3">
+                    <a href="{% url 'student_cat_dep_admin' item.sem %}" class="btn btn-primary w-100">
+                        View
+                    </a>
+                    
+                    <a href="{% url 'pass_out_admin' item.sem %}" 
+                       class="btn btn-warning w-100"
+                       onclick="return confirm('Are you sure you want to mark the {{ item.sem }} batch as passed out? This action cannot be undone easily.');">
+                        Pass Out
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="alert alert-info text-center mt-4" style="margin-bottom: 17vw;">
+        No Students found.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

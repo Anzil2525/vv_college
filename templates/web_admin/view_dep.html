@@ -1,0 +1,67 @@
+{% extends "web_admin/header_footer.html" %}
+
+{% block content %}
+<div class="container py-5">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="text-center mb-4 fw-bold border-bottom pb-2">Departments List</h2>
+
+    {% if deps %}
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-striped table-bordered align-middle text-center shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Department Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dep in deps %}
+                <tr>
+                    <td>{{ dep.dep }}</td>
+                    <td>
+                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+                            <a href="{% url 'del_dep' dep.id %}" class="btn btn-danger btn-sm">Remove</a>
+                            <a href="{% url 'add_course' dep.id %}" class="btn btn-warning btn-sm text-dark">Add Course</a>
+                            <a href="{% url 'view_course' dep.id %}" class="btn btn-info btn-sm text-white">View Course</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="d-md-none">
+        {% for dep in deps %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ dep.dep }}</h5>
+                <div class="d-grid gap-2 mt-3">
+                    <a href="{% url 'del_dep' dep.id %}" class="btn btn-danger btn-sm">Remove</a>
+                    <a href="{% url 'add_course' dep.id %}" class="btn btn-warning btn-sm text-dark">Add Course</a>
+                    <a href="{% url 'view_course' dep.id %}" class="btn btn-info btn-sm text-white">View Course</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center mt-4">
+        No departments found.
+    </div>
+    {% endif %}
+
+    <div class="text-center mt-4" style="margin-bottom: 17vh;">
+        <a href="{% url 'dep_reg' %}" class="btn btn-primary">Register New Department</a>
+    </div>
+</div>
+{% endblock %}

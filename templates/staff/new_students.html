@@ -1,0 +1,173 @@
+{% extends "staff/head_foot.html" %}
+
+{% block content %}
+<div class="container py-4" style="margin-top: 90px; padding-bottom: 2vw;">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="text-center mb-4 fw-bold">Student Verification List</h2>
+
+    {% if students %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle shadow-sm rounded">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Reg. No</th>
+                    <th>Department</th>
+                    <th>Course</th>
+                    <th>Sem</th>
+                    <th>Guardian Info</th>
+                    <th>Address</th>
+                    <th>Blood Type</th>
+                    <th>Contact</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+    {% for student in students %}
+    <tr class="student-row">
+        <td data-label="Name">{{ student.name }}</td>
+        <td data-label="Reg. No">{{ student.reg_no }}</td>
+        <td data-label="Department">{{ student.dep.dep|default:"N/A" }}</td>
+        <td data-label="Course">{{ student.course.course|default:"N/A"}}</td>
+        <td data-label="Sem">{{student.sem}}</td>
+        <td data-label="Guardian Info">
+            {% if student.parent_1 %}
+                <div><strong>{{ student.parent_1.Guadin_Name }}</strong></div>
+                <small class="text-muted d-block">
+                    📞 {{ student.parent_1.Guadin_phone_Number }}<br>
+                    📧 {{ student.parent_1.Guadin_email }}
+                </small>
+            {% else %}
+                <span class="text-muted">Not Provided</span>
+            {% endif %}
+        </td>
+        
+        <td data-label="Address">{{ student.address }}</td>
+        <td data-label="Blood Type">
+            <span class="badge bg-primary">{{ student.blood_type }}</span>
+        </td>
+        
+        <td data-label="Contact">
+            <div><strong>📞 {{ student.pho }}</strong></div>
+            <small class="text-muted">📧 {{ student.login_info.email }}</small>
+        </td>
+
+        <td data-label="Actions" class="text-center">
+            <div class="d-flex flex-column flex-md-row justify-content-center gap-2">
+                <a href="{% url 'varify_students' student.id 1 %}" 
+                   class="btn btn-success btn-sm d-flex align-items-center gap-1">
+                    <i class="fas fa-check"></i> Verify
+                </a>
+                <a href="{% url 'reject_students' student.id %}" 
+                   class="btn btn-danger btn-sm d-flex align-items-center gap-1">
+                    <i class="fas fa-times"></i> Reject
+                </a>
+                <a href="{% url 'edit_student_details' student.id 1 %}" class="btn btn-warning">Edit</a>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center py-5">
+        <i class="fas fa-info-circle fa-lg"></i> No students found for verification.
+    </div>
+    {% endif %}
+</div>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+<style>
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table thead th {
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+    .table td, .table th {
+        vertical-align: middle;
+    }
+
+    .badge {
+        font-size: 0.85em;
+        padding: 0.4em 0.6em;
+    }
+    
+    /* Mobile-specific styles for table */
+    @media (max-width: 768px) {
+        .table-responsive {
+            overflow-x: hidden; /* Prevent horizontal scrolling on small screens */
+        }
+
+        .table {
+            border: 0;
+        }
+
+        .table thead {
+            display: none; /* Hide table headers on small screens */
+        }
+
+        .table tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6; /* Add a border to each "card" */
+            border-radius: 0.25rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Add a subtle shadow */
+        }
+
+        .table td {
+            display: block;
+            text-align: right;
+            padding-left: 50%; /* Make space for the label */
+            border-bottom: 1px solid #dee2e6; /* Separator for each data point */
+            position: relative;
+            word-wrap: break-word; /* Ensure long text wraps */
+        }
+
+        .table td::before {
+            content: attr(data-label); /* Use data-label for the pseudo-element */
+            position: absolute;
+            left: 0.75rem; /* Align label to the left */
+            width: calc(50% - 1.5rem); /* Adjust width for padding */
+            padding-right: 0.5rem;
+            white-space: nowrap;
+            font-weight: bold;
+            text-align: left;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .table {
+            font-size: 13px;
+        }
+
+        .btn-sm {
+            font-size: 12px;
+            padding: 0.25rem 0.4rem;
+        }
+
+        .d-flex.flex-md-row {
+            flex-direction: column !important;
+            align-items: center;
+        }
+        /* Adjust specific cells for better mobile display */
+        .table td:last-child {
+            border-bottom: 0; /* No border for the last item in the card */
+        }
+    }
+</style>
+{% endblock %}

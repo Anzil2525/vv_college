@@ -1,0 +1,89 @@
+{% extends "staff/head_foot.html" %}
+{% load static %}
+{% block content %}
+<style>
+    /* --- Container --- */
+    .course-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* Two cards per row */
+        gap: 2rem;
+        justify-items: center;
+        padding: 4rem 1rem;
+        margin-top: 120px;
+        padding-bottom: 2vw;
+    }
+
+    /* --- Course Card --- */
+    .course-card {
+        background: linear-gradient(145deg, #f5f8ff, #e0e8ff);
+        border-radius: 1rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 350px;
+        text-align: center;
+        padding: 2rem 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid #d2dfff;
+    }
+
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        background: linear-gradient(145deg, #e9efff, #d3deff);
+    }
+
+    /* --- Title --- */
+    .course-card h2 {
+        color: #1a237e;
+        font-weight: 700;
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* --- Take Attendance Button --- */
+    .btn-attendance {
+        background: linear-gradient(90deg, #007bff, #0056d2);
+        color: white;
+        font-weight: 600;
+        border: none;
+        border-radius: 50px;
+        padding: 0.6rem 1.4rem;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+
+    .btn-attendance:hover {
+        background: linear-gradient(90deg, #0056d2, #003ea1);
+        transform: scale(1.05);
+        color: #fff;
+    }
+
+    /* --- Divider Line --- */
+    .course-card hr {
+        border: none;
+        height: 2px;
+        background: #d3dcff;
+        width: 60%;
+        margin: 1.5rem auto 0;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 768px) {
+        .course-container {
+            grid-template-columns: 1fr; /* One card per row */
+        }
+    }
+</style>
+
+<div class="course-container">
+    {% for course in courses %}
+    <div class="course-card">
+        <h2>{{ course }}</h2>
+        <a href="{% url 'view_other_students' sem course.id %}" class="btn-attendance">Take Attendance</a>
+        <hr>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "web_admin/header_footer.html" %}
+
+{% block content %}
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+<div class="container py-5">
+    <h2 class="mb-4 text-center fw-bold border-bottom pb-2">Courses</h2>
+
+    {% if courses %}
+    
+    <!-- DESKTOP TABLE VIEW -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-bordered table-striped text-center align-middle shadow-sm rounded-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Course</th>
+                    <th>Action</th>
+                    <th>Attendance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in courses %}
+                <tr>
+                    <td>{{ course }}</td>
+                    <td>
+                        <a href="{% url 'view_students_admin' course.id sem %}" class="btn btn-sm btn-primary">
+                            View Students
+                        </a>
+                        <a href="{% url 'change_sem' sem course.id %}"
+                           class="btn btn-sm btn-warning"
+                           onclick="return confirm('Are you sure you want to promote the students to the next semester? This action cannot be undone.');">
+                            Change Sem
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'view_course_attendance' course sem %}" class="btn btn-sm btn-primary">View Attendance</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MOBILE CARD VIEW -->
+    
+    <div class="d-md-none">
+        {% for course in courses %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body text-center">
+                <h5 class="card-title">{{ course }}</h5>
+                <a href="{% url 'view_students_admin' course.id sem %}" class="btn btn-primary w-100 mt-2">
+                    View Students
+                </a>
+                <a href="{% url 'change_sem' sem course.id %}"
+                           class="btn btn-primary w-100 mt-2"
+                           onclick="return confirm('Are you sure you want to promote the students to the next semester? This action cannot be undone.');">
+                            Change Sem
+                        </a>
+                <a href="{% url 'view_course_attendance' course sem %}" class="btn btn-primary w-100 mt-2">
+                    View Attendance
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% else %}
+    <div class="alert alert-info text-center mt-4" style="margin-bottom: 17vw;">
+        No courses available.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

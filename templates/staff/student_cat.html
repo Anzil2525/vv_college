@@ -1,0 +1,174 @@
+{% extends "staff/head_foot.html" %}
+
+{% block content %}
+<style>
+    /* --- Page Background & Layout --- */
+    body {
+        background: linear-gradient(135deg, #c6d0ff 0%, #d2bfff 100%);
+        min-height: 100vh;
+    }
+
+    .container-custom {
+        margin-top: 7vw;
+        margin-bottom: 4vw;
+    }
+
+    /* --- Table Styling --- */
+    table {
+        border-radius: 0.8rem !important;
+        overflow: hidden;
+    }
+
+    thead.table-dark {
+        background-color: #343a40;
+        color: #fff;
+        border: none;
+    }
+
+    table td, table th {
+        vertical-align: middle;
+    }
+
+    /* --- Buttons --- */
+    .btn-primary {
+        background: linear-gradient(90deg, #007bff, #0056d2);
+        border: none;
+        transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(90deg, #0056d2, #003ea1);
+        transform: scale(1.05);
+    }
+
+    /* --- Links --- */
+    #other-dep a {
+        color: #004aad;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    #other-dep a:hover {
+        text-decoration: underline;
+    }
+
+    /* --- Other Departments Card --- */
+.other-dep-card {
+    background: linear-gradient(135deg, #f2f6ff, #dce4ff);
+    border-radius: 0.8rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.other-dep-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #e6edff, #cfd9ff);
+}
+
+.other-dep-card a {
+    color: #004aad;
+    font-weight: 600;
+}
+
+.other-dep-card a:hover {
+    color: #002d80;
+}
+
+
+    /* --- Card View --- */
+    .card {
+        border: none;
+        border-radius: 1rem;
+        background: #ffffffc7;
+        backdrop-filter: blur(10px);
+    }
+
+    .card-title {
+        color: #222;
+        font-weight: 600;
+    }
+
+    /* --- Alerts --- */
+    .alert {
+        border-radius: 0.75rem;
+        font-weight: 500;
+    }
+
+    /* --- Responsive Adjustments --- */
+    @media (max-width: 576px) {
+        .container-custom {
+            margin-top: 20vw;
+        }
+    }
+</style>
+
+<div class="container container-custom py-5">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <h2 class="mb-4 text-center fw-bold border-bottom pb-2">Semester</h2>
+
+    <!-- 🔹 Other Departments Card -->
+<div id="other-dep" class="mb-4" style="display: flex; justify-content: center; align-items: center; height: 100px;">
+    <div class="card other-dep-card text-center shadow-sm border-0">
+        <div class="card-body py-3">
+            <a href="{% url 'other_dep_att' %}" class="stretched-link text-decoration-none fw-semibold">
+                <span class="fs-5">🏛️ Other Departments</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+
+    {% if sem %}
+    <!-- ✅ Desktop Table View -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-bordered table-hover align-middle text-center shadow">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Current Semester</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in sem %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.sem }}</td>
+                    <td>
+                        <a href="{% url 'student_cat_course' item.sem %}" class="btn btn-sm btn-primary rounded-pill">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ✅ Mobile Card View -->
+    <div class="d-md-none">
+        {% for item in sem %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body text-center">
+                <h5 class="card-title">Current Sem: {{ item.sem }}</h5>
+                <a href="{% url 'student_cat_course' item.sem %}" class="btn btn-primary w-100 mt-3">View</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="alert alert-info text-center mt-5">
+        No Verified Students.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

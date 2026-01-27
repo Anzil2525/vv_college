@@ -1,0 +1,226 @@
+{% extends "staff/head_foot.html" %}
+{% load static %}
+{% block content %}
+
+<!-- Start Contact Form Design Seven Area -->
+<section class="ea-contact-form-area style-seven pb-100 pt-100">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <div class="container">
+        <div class="ea-contact-bg shadow-lg p-5 rounded bg-white">
+            <div class="row align-items-center">
+                <!-- Leave Balance Display -->
+                <div class="col-lg-5 mb-4 mb-lg-0">
+                    <div class="card border-0 text-center">
+                        <div class="card-body">
+                            <h4 class="card-title text-secondary mb-3">Remaining Paid Leave</h4>
+                            <p class="display-5 fw-bold text-success">
+                                {{ remining_days_of_paid_leave }} / 20 Days
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leave Application Form -->
+                <div class="col-lg-7">
+                    <form method="post" novalidate id="leaveForm" class="needs-validation">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label fw-medium">
+                                    {{ field.label }}
+                                </label>
+
+                                {% if "date" in field.id_for_label %}
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-calendar-date"></i></span>
+                                    {{ field }}
+                                </div>
+                                {% else %}
+                                    {{ field }}
+                                {% endif %}
+
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                        <div id="halfFullDaySection" class="mb-3" style="display:none;">
+                            <label class="form-label fw-medium">Leave Duration</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="leave_day_type" id="fullDay" value="1">
+                                    <label class="form-check-label" for="fullDay">Full Day</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="leave_day_type" id="halfDay" value="0.5">
+                                    <label class="form-check-label" for="halfDay">Half Day</label>
+                                </div>
+                            </div>
+                            <div id="leaveDayTypeError" class="text-danger small" style="display:none;">Please select Full Day or Half Day.</div>
+                        </div>
+
+                        <!-- Hidden input for leave_days -->
+                        <input type="hidden" name="leave_days" id="leave_days" value="">
+
+                        <div class="text-end mt-4">
+                            <button type="submit" class="btn btn-primary px-4 py-2">
+                                Submit Application
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- JS for calculating leave days -->
+<script>
+
+
+document.addEventListener('DOMContentLoaded', function () {
+          const validators = [];
+        
+          // Reusable validation function
+          function handleValidation(input, pattern, validMsg, invalidMsg) {
+            const feedback = document.createElement('small');
+            feedback.style.display = 'block';
+            input.parentNode.appendChild(feedback);
+        
+            function validate() {
+              const value = input.value.trim();
+              if (!value) {
+                feedback.textContent = '❌ This field is required';
+                feedback.style.color = 'red';
+                return false;
+              } else if (!pattern.test(value)) {
+                feedback.textContent = '❌ ' + invalidMsg;
+                feedback.style.color = 'red';
+                return false;
+              } else {
+                feedback.textContent = '✅ ' + validMsg;
+                feedback.style.color = 'green';
+                return true;
+              }
+            }
+        
+            input.addEventListener('input', validate);
+            validators.push(validate);
+          }
+
+        
+          // Real-time "This field is required" for other fields
+          const requiredFields = ['reason', 'leave_type'];
+          requiredFields.forEach(fieldName => {
+            const input = document.querySelector(`[name="${fieldName}"]`);
+            if (input) {
+              const feedback = document.createElement('small');
+              feedback.style.display = 'block';
+              input.parentNode.appendChild(feedback);
+        
+              input.addEventListener('input', function () {
+                if (input.value.trim() === '') {
+                  feedback.textContent = '❌ This field is required';
+                  feedback.style.color = 'red';
+                } else {
+                  feedback.textContent = '';
+                }
+              });
+            }
+          });
+        
+          // Prevent form submission if any validation fails
+          const form = document.querySelector('form');
+          if (form) {
+            form.addEventListener('submit', function (e) {
+              let isValid = true;
+              validators.forEach(validateFn => {
+                if (!validateFn()) isValid = false;
+              });
+              if (!isValid) {
+                e.preventDefault();
+                alert("❌ Please fill all required fields and fix validation errors.");
+              }
+            });
+          }
+        });
+
+
+document.getElementById('leaveForm').addEventListener('submit', function(e) {
+    const start = document.getElementById('id_start_date')?.value;
+    const end = document.getElementById('id_end_date')?.value;
+    const leaveDaysInput = document.getElementById('leave_days');
+    const halfFullDaySection = document.getElementById('halfFullDaySection');
+    const leaveDayTypeError = document.getElementById('leaveDayTypeError');
+
+    if (!start || !end) return;
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    if (start === end) {
+        // Show radio buttons and prevent submit until user selects
+        e.preventDefault();
+        halfFullDaySection.style.display = 'block';
+
+        // Check if already selected
+        const selected = document.querySelector('input[name="leave_day_type"]:checked');
+        if (!selected) {
+            leaveDayTypeError.style.display = 'block';
+            return;
+        } else {
+            leaveDayTypeError.style.display = 'none';
+            leaveDaysInput.value = selected.value;
+            this.submit();
+        }
+    } else {
+        halfFullDaySection.style.display = 'none';
+        leaveDayTypeError.style.display = 'none';
+        // Calculate difference in days (inclusive)
+        const diffTime = Math.abs(endDate - startDate);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        leaveDaysInput.value = diffDays;
+    }
+});
+
+// Hide radio group if dates change and are not the same
+document.getElementById('id_start_date').addEventListener('change', checkDates);
+document.getElementById('id_end_date').addEventListener('change', checkDates);
+
+function checkDates() {
+    const start = document.getElementById('id_start_date')?.value;
+    const end = document.getElementById('id_end_date')?.value;
+    const halfFullDaySection = document.getElementById('halfFullDaySection');
+    if (start && end && start === end) {
+        halfFullDaySection.style.display = 'block';
+    } else {
+        halfFullDaySection.style.display = 'none';
+        // Optionally uncheck radios
+        document.getElementById('fullDay').checked = false;
+        document.getElementById('halfDay').checked = false;
+    }
+}
+</script>
+
+{% endblock %}

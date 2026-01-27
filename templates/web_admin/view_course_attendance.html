@@ -1,0 +1,180 @@
+{% extends "web_admin/header_footer.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .hour-header-row th {
+        background: linear-gradient(135deg, #1f2933, #111827);
+        color: #ffffff;
+        padding: 12px 10px;
+        vertical-align: middle;
+        border: 1px solid #2c2f36;
+    }
+
+    .sticky-col {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: #111827;
+        font-weight: 700;
+    }
+
+    .hour-header {
+        text-align: center;
+        min-width: 160px;
+    }
+
+    .hour-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+        letter-spacing: 0.3px;
+    }
+
+    .hour-subject {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #e5e7eb;
+    }
+
+    .hour-staff {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        margin-top: 2px;
+    }
+</style>
+<div class="container mt-5">
+    <div id="data-form">
+        <form method="post" style="padding: 3vh;">
+            {% csrf_token %}
+            <label for="date">Enter Date:</label>
+            <input type="date" name="date">
+            <button type="submit" class="btn btn-primary btn-sm">Search</button>
+        </form>
+    </div>
+
+    <!-- <div id="data-form">
+        <form method="post" style="padding: 3vh;">
+            <label for="date">Enter Date:</label>
+            <input type="date" name="date">
+            <a onclick="go()" class="btn btn-primary btn-sm">Search</a>
+        </form>
+        <script>
+            function go(){
+                const data = document.querySelector('input[name="date"]').value;
+                window.location.href = `/search_attendance_admin/{{course}}/{{sem}}/?date = ${date}`
+            }
+        </script>
+    </div> -->
+
+    <h2 class="text-center mb-4">{{date}} - {{ course_name }} (Sem {{ sem }}, {{course}})</h2>
+
+    {% if attendance %}
+    <div class="table-responsive shadow rounded">
+        <table class="table table-bordered table-striped align-middle text-center">
+            <thead class="table-dark">
+                <tr class="hour-header-row">
+                    <th class="sticky-col">Student</th>
+
+                    <th class="hour-header">
+                        <div class="hour-title">1st Hour</div>
+                        <div class="hour-subject">{{ time_table.first_hour_subject }}</div>
+                        <div class="hour-staff">{{ time_table.first_houre_staff }}</div>
+                    </th>
+
+                    <th class="hour-header">
+                        <div class="hour-title">2nd Hour</div>
+                        <div class="hour-subject">{{ time_table.second_hour_subject }}</div>
+                        <div class="hour-staff">{{ time_table.second_hour_staff }}</div>
+                    </th>
+
+                    <th class="hour-header">
+                        <div class="hour-title">3rd Hour</div>
+                        <div class="hour-subject">{{ time_table.third_hour_subject }}</div>
+                        <div class="hour-staff">{{ time_table.third_hour_staff }}</div>
+                    </th>
+
+                    <th class="hour-header">
+                        <div class="hour-title">4th Hour</div>
+                        <div class="hour-subject">{{ time_table.fourth_hour_subject }}</div>
+                        <div class="hour-staff">{{ time_table.fourth_hour_staff }}</div>
+                    </th>
+
+                    <th class="hour-header">
+                        <div class="hour-title">5th Hour</div>
+                        <div class="hour-subject">{{ time_table.fifth_hour_subject }}</div>
+                        <div class="hour-staff">{{ time_table.fifth_hour_staff }}</div>
+                    </th>
+                </tr>
+
+            </thead>
+            <tbody>
+                {% for att in attendance %}
+                <tr>
+                    <td class="fw-bold" style="position: sticky; left: 0; top: 0; z-index: 1; background-color: #fff;">
+                        {{ att.student.name }}</td>
+
+                    <td>
+                        {% if att.first_hour == "P" %}
+                        ✅ <br><small>{{ att.first_attendance_time }}</small>
+                        {% elif att.first_hour == "A" %}
+                        ❌ <br><small>{{ att.first_attendance_time }}</small>
+                        {% else %}
+                        ⏳
+                        {% endif %}
+                        <br><small class="text-muted">Faculty: {{ att.first_attendance_taken_by }}</small>
+                    </td>
+
+                    <td>
+                        {% if att.second_hour == "P" %}
+                        ✅ <br><small>{{ att.second_attendance_time }}</small>
+                        {% elif att.second_hour == "A" %}
+                        ❌ <br><small>{{ att.second_attendance_time }}</small>
+                        {% else %}
+                        ⏳
+                        {% endif %}
+                        <br><small class="text-muted">Faculty: {{ att.second_attendance_taken_by }}</small>
+                    </td>
+
+                    <td>
+                        {% if att.third_hour == "P" %}
+                        ✅ <br><small>{{ att.third_attendance_time }}</small>
+                        {% elif att.third_hour == "A" %}
+                        ❌ <br><small>{{ att.third_attendance_time }}</small>
+                        {% else %}
+                        ⏳
+                        {% endif %}
+                        <br><small class="text-muted">Faculty: {{ att.third_attendance_taken_by }}</small>
+                    </td>
+
+                    <td>
+                        {% if att.fourth_hour == "P" %}
+                        ✅ <br><small>{{ att.fourth_attendance_time }}</small>
+                        {% elif att.fourth_hour == "A" %}
+                        ❌ <br><small>{{ att.fourth_attendance_time }}</small>
+                        {% else %}
+                        ⏳
+                        {% endif %}
+                        <br><small class="text-muted">Faculty: {{ att.fourth_attendance_taken_by }}</small>
+                    </td>
+
+                    <td>
+                        {% if att.fifth_hour == "P" %}
+                        ✅ <br><small>{{ att.fifth_attendance_time }}</small>
+                        {% elif att.fifth_hour == "A" %}
+                        ❌ <br><small>{{ att.fifth_attendance_time }}</small>
+                        {% else %}
+                        ⏳
+                        {% endif %}
+                        <br><small class="text-muted">Faculty: {{ att.fifth_attendance_taken_by }}</small>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-warning text-center">No attendance records found for {{date}}.</div>
+    {% endif %}
+</div>
+{% endblock %}

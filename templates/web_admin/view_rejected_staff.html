@@ -1,0 +1,101 @@
+{% extends "web_admin/header_footer.html" %}
+
+{% block content %}
+<div class="container py-5">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="text-center mb-4 fw-bold border-bottom pb-2">Rejected Facilities</h2>
+
+    {% if staffs %}
+    
+    <!-- DESKTOP TABLE VIEW -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-bordered table-striped align-middle text-center shadow-sm rounded-4">
+            <thead class="table-danger">
+                <tr>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Position</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for staff in staffs %}
+                <tr>
+                    <td>
+                        {% if staff.profile_photo %}
+                            <img src="{{ staff.profile_photo.url }}" alt="{{ staff.name }}'s photo"
+                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
+                        {% else %}
+                            <i class="bx bx-user-circle" style="font-size: 50px; color: #ccc;"></i>
+                        {% endif %}
+                    </td>
+                    <td>{{ staff.name }}</td>
+                    <td>{{ staff.pho }}</td>
+                    <td>{{ staff.login_info.email }}</td>
+                    <td>{{ staff.dep }}</td>
+                    <td>{{ staff.pos }}</td>
+                    <td>
+                        <span class="badge bg-danger">
+                            {{ staff.login_info.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'verify_staff' staff.id 0 %}" class="btn btn-success btn-sm">
+                            Verify
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MOBILE CARD VIEW -->
+
+    <div class="d-md-none">
+        {% for staff in staffs %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    {% if staff.profile_photo %}
+                        <img src="{{ staff.profile_photo.url }}" alt="Photo"
+                             class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                        <i class="bx bx-user-circle" style="font-size: 50px; color: #ccc;"></i>
+                    {% endif %}
+                    <h5 class="mb-0">{{ staff.name }}</h5>
+                </div>
+                <p class="mb-1"><strong>Phone:</strong> {{ staff.pho }}</p>
+                <p class="mb-1"><strong>Email:</strong> {{ staff.login_info.email }}</p>
+                <p class="mb-1"><strong>Department:</strong> {{ staff.dep }}</p>
+                <p class="mb-1"><strong>Position:</strong> {{ staff.pos }}</p>
+                <p class="mb-3"><strong>Status:</strong>
+                    <span class="badge bg-danger">{{ staff.login_info.get_status_display }}</span>
+                </p>
+                <a href="{% url 'verify_staff' staff.id 0 %}" class="btn btn-success w-100">
+                    Verify
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="alert alert-info text-center mt-4" style="margin-bottom: 17vw;">
+        No rejected staff found.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

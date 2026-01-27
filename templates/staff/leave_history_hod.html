@@ -1,0 +1,176 @@
+{% extends "staff/head_foot.html" %}
+
+{% block content %}
+
+<div class="container py-5" style="margin-top: 5vw;">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="mb-4 text-center fw-bold border-bottom pb-3">Leave Application History</h2>
+
+    {% if leave_requests %}
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-md-6 offset-md-3">
+            <input type="text" id="leaveSearch" class="form-control" placeholder="Search by staff name, leave type, status...">
+        </div>
+    </div>
+
+    <!-- Desktop view (Table style) -->
+    <div class="table-responsive d-none d-md-block rounded-4 shadow-sm overflow-hidden">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>Photo</th>
+                    <th>Staff Name</th>
+                    <th>Leave Type</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Days</th>
+                    <th>Reason</th>
+                    <th>Submitted</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                {% for leave in leave_requests %}
+                {# Add a common class for the script to target #}
+                <tr class="leave-item">
+                    <td>
+                        {% if leave.from_staff.profile_photo %}
+                            <img src="{{ leave.from_staff.profile_photo.url }}" alt="Photo" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                        {% else %}
+                            <i class="bx bx-user-circle" style="font-size: 50px; color: #ccc;"></i>
+                        {% endif %}
+                    </td>
+                    <td>{{ leave.from_staff.name }}</td>
+                    <td>{{ leave.get_leave_type_display }}</td>
+                    <td>{{ leave.start_date }}</td>
+                    <td>{{ leave.end_date }}</td>
+                    <td>{{ leave.num_of_days }}</td>
+                    <td style="max-width: 200px;">{{ leave.reason }}</td>
+                    <td>{{ leave.submitted_on }}</td>
+                    <td>
+                        {% if leave.status == 'P' %}
+                            <span class="badge bg-primary">Pending</span>
+                        {% elif leave.status == 'H' %}
+                            <span class="badge bg-success">HOD Approved</span>
+                        {% elif leave.status == 'HR' %}
+                            <span class="badge bg-danger">HOD Rejected</span>
+                        {% elif leave.status == 'FH' %}
+                            <span class="badge bg-info text-dark">Forwarded</span>
+                        {% elif leave.status == 'A' %}
+                            <span class="badge bg-success">Approved</span>
+                        {% elif leave.status == 'R' %}
+                            <span class="badge bg-danger">Rejected</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Unknown</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr id="noResultsTable" class="d-none">
+                    <td colspan="9" class="text-center text-muted py-4">
+                        <i class="bi bi-search me-2"></i>No applications match your search.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile view (Card style) -->
+    <div class="d-md-none">
+        {% for leave in leave_requests %}
+        {# Use the same common class for the script to target #}
+        <div class="card mb-3 shadow-sm leave-item">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    {% if leave.from_staff.profile_photo %}
+                        <img src="{{ leave.from_staff.profile_photo.url }}" alt="Photo" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                        <i class="bx bx-user-circle" style="font-size: 50px; color: #ccc;"></i>
+                    {% endif %}
+                    <h5 class="mb-0">{{ leave.from_staff.name }}</h5>
+                </div>
+                <p class="mb-1"><strong>Leave Type:</strong> {{ leave.get_leave_type_display }}</p>
+                <p class="mb-1"><strong>From:</strong> {{ leave.start_date }} <strong>To:</strong> {{ leave.end_date }}</p>
+                <p class="mb-1"><strong>Days:</strong> {{ leave.num_of_days }}</p>
+                <p class="mb-1"><strong>Reason:</strong> {{ leave.reason }}</p>
+                <p class="mb-1"><strong>Submitted:</strong> {{ leave.submitted_on }}</p>
+                <p class="mb-0"><strong>Status:</strong>
+                    {% if leave.status == 'P' %}
+                        <span class="badge bg-primary">Pending</span>
+                    {% elif leave.status == 'H' %}
+                        <span class="badge bg-success">HOD Approved</span>
+                    {% elif leave.status == 'HR' %}
+                        <span class="badge bg-danger">HOD Rejected</span>
+                    {% elif leave.status == 'FH' %}
+                        <span class="badge bg-info text-dark">Forwarded</span>
+                    {% elif leave.status == 'A' %}
+                        <span class="badge bg-success">Approved</span>
+                    {% elif leave.status == 'R' %}
+                        <span class="badge bg-danger">Rejected</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Unknown</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+        <div id="noResultsMobile" class="d-none text-center text-muted py-5">
+            <i class="bi bi-search me-2 fs-3"></i>
+            <p>No applications match your search.</p>
+        </div>
+    </div>
+    {% else %}
+        <p class="text-center text-muted py-4">No leave applications found.</p>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Check if the search input exists on the page
+    const searchInput = document.getElementById("leaveSearch");
+    if (!searchInput) return;
+
+    // This common class targets both table rows and mobile cards
+    const leaveItems = document.querySelectorAll(".leave-item");
+    const noResultsTable = document.getElementById("noResultsTable");
+    const noResultsMobile = document.getElementById("noResultsMobile");
+
+    searchInput.addEventListener("input", function () {
+        const query = this.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        leaveItems.forEach(item => {
+            const content = item.textContent.toLowerCase();
+            if (content.includes(query)) {
+                item.classList.remove('d-none');
+                visibleCount++;
+            } else {
+                item.classList.add('d-none');
+            }
+        });
+
+        // If no items are visible, show the 'no results' messages.
+        // The parent divs (d-none d-md-block and d-md-none) will ensure
+        // only the correct message for the screen size is displayed.
+        const showNoResults = visibleCount === 0;
+
+        if (noResultsTable) {
+            noResultsTable.classList.toggle('d-none', !showNoResults);
+        }
+        if (noResultsMobile) {
+            noResultsMobile.classList.toggle('d-none', !showNoResults);
+        }
+    });
+});
+</script>
+
+{% endblock %}

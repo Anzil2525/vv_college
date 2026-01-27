@@ -1,0 +1,65 @@
+{% extends "web_admin/header_footer.html" %}
+
+{% block content %}
+<div class="container py-5">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="text-center mb-4 fw-bold border-bottom pb-2">Courses List</h2>
+
+    {% if course %}
+    <!-- Table for Desktop -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-striped table-bordered text-center align-middle shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Course Name</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in course %}
+                <tr>
+                    <td>{{ i.course }}</td>
+                    <td>
+                        <a href="{% url 'del_course' i.id %}" class="btn btn-danger btn-sm">Remove</a>
+                        <a href="{% url 'edit_course_admin' i.id %}" class="btn btn-warning btn-sm">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Card View for Mobile -->
+    <div class="d-md-none">
+        {% for i in course %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ i.course }}</h5>
+                <a href="{% url 'del_course' i.id %}" class="btn btn-danger btn-sm mt-2">Remove</a>
+                <a href="{% url 'edit_course_admin' i.id %}" class="btn btn-warning btn-sm mt-2">Edit</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="alert alert-info text-center mt-4">
+        No courses found.
+    </div>
+    {% endif %}
+
+    <!-- Optional Footer Section -->
+    <div class="text-center mt-4" style="margin-bottom: 17vh;">
+        <!-- Uncomment if needed -->
+        <!-- <a href="{% url 'view_dep' %}" class="btn btn-primary">Back to Departments</a> -->
+    </div>
+</div>
+{% endblock %}

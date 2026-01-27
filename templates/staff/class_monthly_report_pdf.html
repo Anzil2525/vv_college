@@ -1,0 +1,76 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+    
+    <meta charset="utf-8" />
+    <title>Monthly Attendance Report - {{ course.course }} (Sem {{ sem }})</title>
+     <style>
+        body {
+            font-family: DejaVu Sans, Arial, sans-serif;
+            color: #000;
+        }
+
+        /* General table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 10px;
+            table-layout: fixed;
+        }
+
+        /* table-layout: fixed helps apply widths consistently */
+        th,
+        td {
+            border: 1px solid #333;
+            padding: 4px;
+        }
+
+        th {
+            background: #eee;
+        }
+
+        .daily {
+            font-family: monospace;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+     <h2>Monthly Attendance Report</h2>
+     <p><strong>Course:</strong> {{ course.course }} &nbsp; <strong>Sem:</strong> {{ sem }} &nbsp;
+        <strong>Month:</strong> {{ month_name }} {{ year }}</p>
+
+     <table>
+        <thead>
+             <tr>
+                <th style="width: 10%;">Reg No</th>
+                 <th style="width: 25%;">Student Name</th>
+                 <th style="width: 5%;">Sem</th>
+                 <th style="width: 15%;">Course</th>
+                 <th style="width: 8%;">Days Recorded</th>
+                 <th style="width: 7%;">Total</th>
+                 <th style="width: 10%;">Percentage</th>
+                 <th style="width: 15%;">Signature</th>
+                
+             </thead>
+         <tbody>
+             {% for s in students_stats %}
+             <tr>
+                 <td>{{ s.reg_no }}</td>
+                 <td>{{ s.name }}</td>
+                 <td style="text-align:center">{{ s.sem }}</td>
+                 <td>{{ s.course }}</td>
+                
+                 <td style="text-align:center">{{ s.num_days }}</td>
+                 <td style="text-align:center">{{ s.total }}</td>
+                 <td style="text-align:center">{{ s.percent|floatformat:2 }}%</td>
+                 <td style="text-align:center">.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+         </table>
+
+    <p style="margin-top:10px;"><strong>Generated on:</strong> {{ generated_on|date:"Y-m-d" }}</p>
+</body>
+</html>

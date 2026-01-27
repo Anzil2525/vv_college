@@ -1,0 +1,331 @@
+{% extends "staff/head_foot.html" %} {% load static %} {% block content %}
+
+<style>
+  /* Global Styling */
+  body {
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f5f7fa;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+  }
+
+  .report-wrapper {
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .report-card {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 1000px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  .report-header {
+    background: linear-gradient(135deg, #4a90e2 0%, #0056b3 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+  }
+
+  .report-title {
+    font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+    font-weight: 700;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .report-subtitle {
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    opacity: 0.85;
+    margin-top: 0.5rem;
+    font-weight: 300;
+  }
+
+  /* Student Info */
+  .student-info-section {
+    padding: 2rem;
+    background-color: #fff;
+    border-bottom: 2px dashed #eee;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .info-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .info-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+  }
+
+  .info-value {
+    font-size: 1.05rem;
+    color: #333;
+    font-weight: 500;
+    word-wrap: break-word;
+  }
+
+  /* Marks Section */
+  .marks-section {
+    padding: 2rem;
+    overflow-x: auto;
+  }
+
+  .marks-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+  }
+
+  .marks-table th,
+  .marks-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .marks-table th {
+    background-color: #f1f3f5;
+    color: #495057;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+  }
+
+  .marks-table tr:hover {
+    background-color: #f8f9fa;
+  }
+
+  .exam-tag {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .tag-ct {
+    background-color: #e3f2fd;
+    color: #1565c0;
+  }
+  .tag-me {
+    background-color: #fff3e0;
+    color: #e65100;
+  }
+  .tag-se {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .score-cell {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  /* Footer */
+  .footer-note {
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-align: center;
+    border-top: 1px solid #dee2e6;
+  }
+
+  .btn-print {
+    margin-top: 1rem;
+    display: inline-block;
+    background-color: #4a90e2;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.3s ease;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-print:hover {
+    background-color: #357abd;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6c757d;
+  }
+
+  /* Print Optimization */
+  @media print {
+    body {
+      background-color: #fff;
+    }
+    .report-wrapper {
+      padding: 0;
+      min-height: auto;
+      display: block;
+    }
+    .report-card {
+      box-shadow: none;
+      border: none;
+      max-width: 100%;
+    }
+    .btn-print,
+    .staff-nav,
+    header,
+    footer {
+      display: none !important;
+    }
+  }
+
+  /* Responsive Tweaks */
+  @media (max-width: 768px) {
+    .report-header {
+      padding: 1.5rem;
+    }
+    .student-info-section {
+      padding: 1.5rem;
+    }
+    .marks-section {
+      padding: 1.5rem;
+    }
+    .marks-table th,
+    .marks-table td {
+      padding: 0.8rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .report-title {
+      font-size: 1.5rem;
+    }
+    .report-subtitle {
+      font-size: 0.9rem;
+    }
+    .info-value {
+      font-size: 1rem;
+    }
+    .btn-print {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="report-wrapper" style="margin-top: 80px">
+  <div class="report-card">
+    {% if mark_list %} {% with student=mark_list.0.student %}
+    <div class="report-header">
+      <div class="report-title">Academic Report Card</div>
+      <div class="report-subtitle">Official Transcript of Records</div>
+    </div>
+
+    <div class="student-info-section">
+      <div class="info-group">
+        <span class="info-label">Student Name</span>
+        <span class="info-value">{{ student.name }}</span>
+      </div>
+      <div class="info-group">
+        <span class="info-label">Register Number</span>
+        <span class="info-value">{{ student.reg_no }}</span>
+      </div>
+      <div class="info-group">
+        <span class="info-label">Department</span>
+        <span class="info-value">{{ student.dep.dep }}</span>
+      </div>
+      <div class="info-group">
+        <span class="info-label">Course</span>
+        <span class="info-value">{{ student.course.course }}</span>
+      </div>
+      <div class="info-group">
+        <span class="info-label">Current Sem</span>
+        <span class="info-value">{{ student.sem }}</span>
+      </div>
+    </div>
+
+    <div class="marks-section">
+      <table class="marks-table">
+        <thead>
+          <tr>
+            <th>Exam Date</th>
+            <th>Sem</th>
+            <th>Exam Type</th>
+            <th>Subject</th>
+            <th>Marks Scored</th>
+            <th>Total Marks</th>
+            <th>Percentage</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for mark in mark_list %}
+          <tr>
+            <td>{{ mark.exam.exam_date|date:"M d, Y" }}</td>
+            <td>{{ mark.exam.sem }}</td>
+            <td>
+              <span class="exam-tag tag-{{ mark.exam.exam_type|lower }}">
+                {{ mark.exam.get_exam_type_display }}
+              </span>
+            </td>
+            <td>{{ mark.exam.subject }}</td>
+            <td class="score-cell">{{ mark.marks }}</td>
+            <td>{{ mark.exam.total_mark }}</td>
+            <td>{% widthratio mark.marks mark.exam.total_mark 100 %}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer-note">
+      <p>
+        This report is computer generated and intended for informational
+        purposes.
+      </p>
+      {% with student=mark_list.0.student %}
+      <a
+        href="{% url 'edit_individual_report_card' student.id %}"
+        class="btn-print"
+        >Edit Report Card</a
+      >
+      {% endwith %}
+    </div>
+    {% endwith %} {% else %}
+    <div class="empty-state">
+      <h3>No Academic Records Found</h3>
+      <p>There are no mark entries available for this student yet.</p>
+      <button
+        onclick="history.back()"
+        class="btn-print"
+        style="background-color: #6c757d"
+      >
+        Go Back
+      </button>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

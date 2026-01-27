@@ -1,0 +1,96 @@
+{% extends "staff/head_foot.html" %} {% load static %} {% block content %}
+
+<style>
+  .page-wrapper {
+    margin-top: 90px;
+    padding: 1rem;
+  }
+
+  .content-card {
+    max-width: 900px;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
+  }
+
+  .page-title {
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .action-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.1rem;
+    border-radius: 12px;
+  }
+
+  .sem-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .sem-btn {
+    padding: 14px;
+    font-size: 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+  }
+
+  .empty-state h4 {
+    font-weight: 600;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 576px) {
+    .content-card {
+      padding: 1.5rem 1rem;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+    }
+  }
+</style>
+
+<div class="page-wrapper">
+  <div class="content-card">
+    {% if pos == "HOD" %}
+    <div class="mb-4 text-center">
+      <a
+        href="{% url 'setting_time_table_hod_7d' %}"
+        class="btn btn-warning action-btn"
+      >
+        ➕ Create Time Table
+      </a>
+    </div>
+    {% endif %} {% if sems %}
+    <h1 class="page-title">Select the Semester</h1>
+    <div class="sem-grid">
+      {% for sem in sems %}
+      <a href="{% url 'time_table' sem %}" class="btn btn-primary sem-btn"> {{ sem }} </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div style="font-size: 3rem">📭</div>
+      <h4>No time table created</h4>
+      <p>Please create a time table to view semesters.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

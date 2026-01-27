@@ -1,0 +1,108 @@
+{% extends "web_admin/header_footer.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container py-5" style="margin-top: 5vw;">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="mb-4 text-center fw-bold border-bottom pb-2">Leave Application History</h2>
+
+    {% if leave_requests %}
+    <!-- Desktop Table -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-striped table-hover align-middle shadow-sm rounded-3 overflow-hidden">
+            <thead class="table-dark">
+                <tr>
+                    <th>Staff Name</th>
+                    <th>Leave Type</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Days</th>
+                    <th>Reason</th>
+                    <th>Submitted</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                {% for leave in leave_requests %}
+                <tr>
+                    <td>{{ leave.from_staff.name }}</td>
+                    <td>{{ leave.get_leave_type_display }}</td>
+                    <td>{{ leave.start_date }}</td>
+                    <td>{{ leave.end_date }}</td>
+                    <td>{{ leave.num_of_days }}</td>
+                    <td>{{ leave.reason }}</td>
+                    <td>{{ leave.submitted_on }}</td>
+                    <td>
+                        {% if leave.status == 'P' %}
+                            <span class="badge bg-primary">Pending</span>
+                        {% elif leave.status == 'H' %}
+                            <span class="badge bg-success">HOD Approved</span>
+                        {% elif leave.status == 'HR' %}
+                            <span class="badge bg-danger">HOD Rejected</span>
+                        {% elif leave.status == 'FH' %}
+                            <span class="badge bg-info text-dark">Forwarded</span>
+                        {% elif leave.status == 'A' %}
+                            <span class="badge bg-success">Approved</span>
+                        {% elif leave.status == 'R' %}
+                            <span class="badge bg-danger">Rejected</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Unknown</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    
+    <div class="d-md-none">
+        {% for leave in leave_requests %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ leave.from_staff.name }}</h5>
+                <p class="mb-1"><strong>Leave Type:</strong> {{ leave.get_leave_type_display }}</p>
+                <p class="mb-1"><strong>From:</strong> {{ leave.start_date }} <br><strong>To:</strong> {{ leave.end_date }}</p>
+                <p class="mb-1"><strong>Days:</strong> {{ leave.num_of_days }}</p>
+                <p class="mb-1"><strong>Reason:</strong> {{ leave.reason }}</p>
+                <p class="mb-1"><strong>Submitted:</strong> {{ leave.submitted_on }}</p>
+                <p class="mb-1">
+                    <strong>Status:</strong>
+                    {% if leave.status == 'P' %}
+                        <span class="badge bg-primary">Pending</span>
+                    {% elif leave.status == 'H' %}
+                        <span class="badge bg-success">HOD Approved</span>
+                    {% elif leave.status == 'HR' %}
+                        <span class="badge bg-danger">HOD Rejected</span>
+                    {% elif leave.status == 'FH' %}
+                        <span class="badge bg-info text-dark">Forwarded</span>
+                    {% elif leave.status == 'A' %}
+                        <span class="badge bg-success">Approved</span>
+                    {% elif leave.status == 'R' %}
+                        <span class="badge bg-danger">Rejected</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Unknown</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% else %}
+    <div class="alert alert-info text-center mt-4" style="margin-bottom: 17vh;">
+        No leave applications found.
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
