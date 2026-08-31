@@ -1,0 +1,217 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>V.V College Office - Student Payments</title>
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="{% static 'assets/img/favicon.png' %}">
+    <style>
+        .navbar-brand img { max-height: 48px; }
+        .details-card {
+            max-width: 900px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .fee-table th,
+        .fee-table td {
+            white-space: nowrap;
+        }
+
+        .fee-table tbody tr {
+            cursor: pointer;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .fee-table tbody tr:hover,
+        .fee-table tbody tr:focus-visible {
+            background-color: #e0f2fe !important;
+            box-shadow: inset 4px 0 0 #0284c7;
+            outline: none;
+        }
+
+        .fee-card-list {
+            display: none;
+        }
+
+        .fee-result-card {
+            display: block;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #0284c7;
+            border-radius: 0.65rem;
+            padding: 1rem;
+            color: #334155;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .fee-result-card:hover,
+        .fee-result-card:focus-visible {
+            border-color: #0284c7;
+            box-shadow: 0 8px 18px rgba(2, 132, 199, 0.16);
+            color: #334155;
+            transform: translateY(-2px);
+        }
+
+        .payment-status {
+            display: inline-block;
+            padding: 0.25rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .payment-status.paid { background: #dcfce7; color: #166534; }
+        .payment-status.partial { background: #fef3c7; color: #92400e; }
+        .payment-status.none { background: #e2e8f0; color: #475569; }
+
+        @media (max-width: 991.98px) {
+            .navbar {
+                padding-top: 0.75rem;
+                padding-bottom: 0.75rem;
+            }
+
+            .navbar-brand img {
+                max-width: 150px;
+                height: auto;
+            }
+
+            main.container {
+                padding-top: 1.5rem !important;
+                padding-bottom: 1.5rem !important;
+            }
+
+            .details-card {
+                padding: 1rem !important;
+                border-radius: 0.75rem;
+            }
+
+            .fee-table {
+                display: none;
+            }
+
+            .fee-card-list {
+                display: grid;
+                gap: 0.75rem;
+            }
+
+            .fee-result-card dl {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 0.5rem 1rem;
+                margin: 0;
+            }
+
+            .fee-result-card dt {
+                color: #64748b;
+                font-weight: 600;
+            }
+
+            .fee-result-card dd {
+                margin: 0;
+                overflow-wrap: anywhere;
+                text-align: right;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <header class="bg-white border-bottom shadow-sm">
+        <div class="container">
+            <nav class="navbar navbar-light">
+                <a class="navbar-brand" href="{% url 'student_fee_management' %}">
+                    <img src="{% static 'assets/img/logo.png' %}" alt="V.V Logo">
+                </a>
+                <div class="ms-auto d-flex align-items-center gap-2">
+                    <span class="d-none d-sm-inline text-muted small">{{ office_staff.name }}</span>
+                    <a href="{% url 'fee_payment_management' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container py-4 py-sm-5 flex-grow-1 d-flex justify-content-center">
+        <section class="details-card p-4 p-sm-5 w-100">
+            <a href="{% url 'fee_payment_management' %}" class="btn btn-outline-primary btn-sm mb-4">
+                <i class="bi bi-arrow-left me-1"></i> Back to Search
+            </a>
+            <h1 class="h3 fw-bold mb-1">{{ student.name }}</h1>
+            <p class="text-muted mb-4">Student payment details</p>
+            <div class="row g-3">
+                <div class="col-12 col-sm-6"><strong>Registration No</strong><br>{{ student.reg_no }}</div>
+                <div class="col-12 col-sm-6"><strong>Phone</strong><br>{{ student.pho }}</div>
+                <div class="col-12 col-sm-6"><strong>Admission Year</strong><br>{{ student.year_of_admision }}</div>
+                <div class="col-12 col-sm-6"><strong>Semester</strong><br>{{ student.sem }}</div>
+                <div class="col-12 col-sm-6"><strong>Department</strong><br>{{ student.dep }}</div>
+                <div class="col-12 col-sm-6"><strong>Course</strong><br>{{ student.course }}</div>
+            </div>
+            <div class="mt-4">
+                <h2 class="h5 fw-bold mb-3">Semester-wise Assigned Fees</h2>
+                {% if assigned_fees %}
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle fee-table mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Semester</th>
+                                <th>Assigned Amount</th>
+                                <th>Due Date</th>
+                                <th>Payment Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fee in assigned_fees %}
+                            <tr class="fee-row" tabindex="0" role="link" data-fee-url="{% url 'student_fee_payment_details' fee.id %}">
+                                <td>Semester {{ fee.semester }}</td>
+                                <td class="fw-semibold text-success">{{ fee.total_amount }}</td>
+                                <td>{{ fee.due_date|date:'d M Y' }}</td>
+                                <td>
+                                    <span class="payment-status {% if fee.payment_status == 'Paid' %}paid{% elif fee.payment_status == 'Partially Paid' %}partial{% else %}none{% endif %}">
+                                        {{ fee.payment_status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="fee-card-list">
+                    {% for fee in assigned_fees %}
+                    <a href="{% url 'student_fee_payment_details' fee.id %}" class="fee-result-card">
+                        <h3 class="h6 fw-bold mb-3">Semester {{ fee.semester }}</h3>
+                        <dl class="small">
+                            <dt>Assigned Amount</dt><dd class="fw-semibold text-success">{{ fee.total_amount }}</dd>
+                            <dt>Due Date</dt><dd>{{ fee.due_date|date:'d M Y' }}</dd>
+                            <dt>Payment Status</dt>
+                            <dd><span class="payment-status {% if fee.payment_status == 'Paid' %}paid{% elif fee.payment_status == 'Partially Paid' %}partial{% else %}none{% endif %}">{{ fee.payment_status }}</span></dd>
+                        </dl>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-0">No fees have been assigned to this student.</div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+    <script>
+        document.querySelectorAll('.fee-table tbody tr[data-fee-url]').forEach((row) => {
+            const openFeeSearch = () => window.location.href = row.dataset.feeUrl;
+            row.addEventListener('click', openFeeSearch);
+            row.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openFeeSearch();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

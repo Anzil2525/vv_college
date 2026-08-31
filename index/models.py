@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+import datetime
 
 # Create your models here.
 
@@ -26,6 +27,7 @@ class LoginTable(models.Model):
     user = models.CharField(max_length=10)
     status = models.CharField(max_length=2, choices=CHOICE, default="P")
     rejection_reason = models.TextField(null=True, blank=True)
+    registered_on = models.DateField(default=datetime.date.today, null=True, blank=True)
 
     def __str__(self):
         return self.email
@@ -91,6 +93,17 @@ class StudentReg(models.Model):
         return self.name
 
 
+class TimeTableSet(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    sem = models.IntegerField()
+    name = models.CharField(max_length=100)
+    is_selected = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.course} - {self.sem} - {self.name}"
+
 class TimeTable(models.Model):
     CHOICE = [
         ("MO", "Monday"),
@@ -101,7 +114,15 @@ class TimeTable(models.Model):
         ("SA", "Saturday"),
         ("SU", "Sunday")
     ]
-    
+
+    timetable_set = models.ForeignKey(
+        TimeTableSet,
+        on_delete=models.CASCADE,
+        related_name='timetables',
+        null=True,
+        blank=True,
+    )
+
     first_hour_subject = models.CharField(max_length=50)
     first_houre_staff = models.CharField(max_length=50)
 
@@ -118,12 +139,10 @@ class TimeTable(models.Model):
     fifth_hour_staff = models.CharField(max_length=50)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True)
-    sem = models.IntegerField(null=True, blank=True)
-    day = models.CharField(max_length=2, choices=CHOICE, default='M')
+    day = models.CharField(max_length=2, choices=CHOICE, default='MO')
 
     def __str__(self):
-        return f"{self.course} - {self.sem} - {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+        return f"{self.timetable_set} - {self.get_day_display()}"
     
 class Attendance(models.Model):
     CHOICE = [
@@ -223,3 +242,72 @@ class MarkList(models.Model):
     
     def __str__(self):
         return f"{self.student} - {self.exam}"
+    
+
+class OfficeFacultyRegistration(models.Model):
+    POSITIONS = [
+        ('OH', 'Office Head'),
+        ('BS', 'Billing Staff'),
+        ('OS', 'Other Staff')
+    ]
+
+    name = models.CharField(max_length=50)
+    position = models.CharField(max_length=20, choices=POSITIONS)
+    phone = models.CharField(max_length=15)
+    login_info = models.ForeignKey(LoginTable, on_delete=models.CASCADE)
+
+    def __str__ (self):
+        return(self.name)
+
+
+class FeeStructure(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    semester = models.IntegerField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    due_date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.course} - Semester {self.semester}"
+
+
+class StudentFee(models.Model):
+    student = models.ForeignKey(StudentReg, on_delete=models.CASCADE)
+    fee_structure = models.ForeignKey(FeeStructure, on_delete=models.CASCADE)
+    semester = models.IntegerField()
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    due_date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        OfficeFacultyRegistration,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='student_fees_created',
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        OfficeFacultyRegistration,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='student_fees_updated',
+    )
+
+
+class FeePayment(models.Model):
+    student_fee = models.ForeignKey(StudentFee, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_date = models.DateField()
+    entered_at = models.DateTimeField(auto_now_add=True)
+    entered_by = models.ForeignKey(
+        OfficeFacultyRegistration,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='fee_payments_entered',
+    )
+    payment_method = models.CharField(max_length=20)
+    reference_number = models.CharField(max_length=100, null=True, blank=True)
+    remarks = models.TextField(null=True, blank=True)

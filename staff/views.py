@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 from io import BytesIO
+from django.db import transaction
 from django.db.models import Min, Sum
 import datetime
 from django.utils.dateparse import parse_date
@@ -50,8 +51,30 @@ def new_students(request):
 @staff_required
 def varify_students(request, id, boo):
     student = StudentReg.objects.get(id=id)
-    student.login_info.status = "V"
-    student.login_info.save()
+    with transaction.atomic():
+        student.login_info.status = "V"
+        student.login_info.save()
+
+        fee_structure = FeeStructure.objects.filter(
+            course=student.course,
+            semester=student.sem,
+        ).order_by('-updated_at', '-id').first()
+        if fee_structure:
+            StudentFee.objects.get_or_create(
+                student=student,
+                fee_structure=fee_structure,
+                defaults={
+                    'semester': student.sem,
+                    'total_amount': fee_structure.amount,
+                    'due_date': fee_structure.due_date,
+                },
+            )
+        else:
+            messages.warning(
+                request,
+                "Student verified, but no fee structure is configured for the student's course and semester.",
+            )
+
     messages.success(request, "Successfully Verified.")
     id = request.session.get("staff_login_id")
     log_ins = get_object_or_404(LoginTable, id=id)
@@ -150,16 +173,25 @@ def take_attendance(request, sem, course):
 
     if request.method == "POST":
         time_table = (
-            TimeTable.objects.filter(course=course_obj, sem=sem, day=day)
+            TimeTable.objects.filter(timetable_set__course=course_obj, timetable_set__sem=sem, day=day)
             .order_by("-created_at")
             .first()
         )
 
         for student in students:
             instance, _ = Attendance.objects.get_or_create(student=student, date=today)
-            form = AttendanceForm(
-                request.POST, prefix=str(student.id), instance=instance
-            )
+            
+            # Manually extract data from POST request with custom field names
+            prefix = str(student.id)
+            form_data = {
+                'first_hour': request.POST.get(f'{prefix}-first_hour'),
+                'second_hour': request.POST.get(f'{prefix}-second_hour'),
+                'third_hour': request.POST.get(f'{prefix}-third_hour'),
+                'fourth_hour': request.POST.get(f'{prefix}-fourth_hour'),
+                'fifth_hour': request.POST.get(f'{prefix}-fifth_hour'),
+            }
+            
+            form = AttendanceForm(form_data, instance=instance)
             if form.is_valid():
                 ins = form.save(commit=False)
                 total = 0
@@ -222,7 +254,7 @@ def take_attendance(request, sem, course):
             instance = Attendance.objects.get(student=student, date=today)
         except Attendance.DoesNotExist:
             instance = None
-        form = AttendanceForm(prefix=str(student.id), instance=instance)
+        form = AttendanceForm(instance=instance)
         attendance_data.append((student, form))
 
     return render(
@@ -1061,7 +1093,7 @@ def change_password_staff(request, id):
     return render(request, "staff/change_password_staff.html")
 
 
-def setting_time_table_hod_7d(request):
+def create_time_table(request, course_id=None):
     id = request.session.get("staff_login_id")
     if not id:
         return redirect("login")
@@ -1072,32 +1104,39 @@ def setting_time_table_hod_7d(request):
     dep = staff_ins.dep
     courses = Course.objects.filter(dep=dep)
 
+    selected_course = None
+    if course_id:
+        selected_course = get_object_or_404(Course, id=course_id)
+
     if request.method == "POST":
-        form = TimeTableForm(request.POST)
+        form = TimeTableSetForm(request.POST)
         if form.is_valid():
             form_ins = form.save(commit=False)
-            course = request.POST.get("Course")
-
-            course_ins = Course.objects.get(id=course)
-            form_ins.course = course_ins
+            if selected_course:
+                form_ins.course = selected_course
+            else:
+                course_id = request.POST.get("course")
+                course_ins = Course.objects.get(id=course_id)
+                form_ins.course = course_ins
             form_ins.save()
 
-            messages.success(request, "Time Table saved successfully ✅")
-            return redirect("staff_home")  # redirect to same page or another
+            messages.success(request, "Time Table Set saved successfully ✅")
+            # Redirect to the time table page for the specific course and semester
+            return redirect("time_table", course_id=form_ins.course.id, sem=form_ins.sem)
         else:
             messages.error(request, "Please correct the errors below ❌")
 
-    form = TimeTableForm()
+    form = TimeTableSetForm()
 
     return render(
         request,
-        "staff/setting_time_table_hod_7d.html",
-        {"timeTableForm": form, "courses": courses},
+        "staff/create_time_table.html",
+        {"timeTableForm": form, "courses": courses, "selected_course": selected_course},
     )
 
 
 @staff_required
-def select_sem_for_timetable(request):
+def select_course_for_timetable(request):
     id = request.session.get("staff_login_id")
     if not id:
         return redirect("login")
@@ -1107,8 +1146,30 @@ def select_sem_for_timetable(request):
 
     pos = staff_ins.pos.pos
 
+    courses = Course.objects.filter(dep=staff_ins.dep)
+
+    return render(
+        request,
+        "staff/select_course_for_timetable.html",
+        {"pos": pos, "courses": courses},
+    )
+
+
+@staff_required
+def select_sem_for_timetable(request, course_id):
+    id = request.session.get("staff_login_id")
+    if not id:
+        return redirect("login")
+
+    log_ins = get_object_or_404(LoginTable, id=id)
+    staff_ins = get_object_or_404(StaffReg, login_info=log_ins)
+
+    pos = staff_ins.pos.pos
+
+    course = get_object_or_404(Course, id=course_id)
+
     all_time_table_sem = (
-        TimeTable.objects.filter(course__dep=staff_ins.dep)
+        TimeTableSet.objects.filter(course=course)
         .values_list("sem", flat=True)
         .distinct()
     )
@@ -1116,12 +1177,12 @@ def select_sem_for_timetable(request):
     return render(
         request,
         "staff/select_sem_for_timetable.html",
-        {"pos": pos, "sems": all_time_table_sem},
+        {"pos": pos, "sems": all_time_table_sem, "course": course},
     )
 
 
 @staff_required
-def time_table(request, sem):
+def time_table(request, course_id, sem):
 
     id = request.session.get("staff_login_id")
     if not id:
@@ -1132,16 +1193,74 @@ def time_table(request, sem):
 
     pos = staff_ins.pos.pos
 
-    # Fetch all, ordered by creation time (oldest to newest)
+    course = get_object_or_404(Course, id=course_id)
+
+
+    # Otherwise, show all TimeTableSets for this course and semester
+    if request.method == "POST":
+        form = TimeTableSetNameForm(request.POST)
+        if form.is_valid():
+            form_ins = form.save(commit=False)
+            form_ins.course = course
+            form_ins.sem = sem
+            form_ins.save()
+
+            messages.success(request, "Time Table Set created successfully ✅")
+            return redirect("time_table", course_id=course.id, sem=sem)
+        else:
+            messages.error(request, "Please correct the errors below ❌")
+
+    form = TimeTableSetNameForm()
+
+    timetable_sets = TimeTableSet.objects.filter(
+        course=course, sem=sem
+    ).order_by("-created_at")
+
+    return render(
+        request, "staff/time_table.html",
+        {"pos": pos, "timetable_sets": timetable_sets, "course": course, "sem": sem, "form": form}
+    )
+
+
+@staff_required
+def view_time_table(request, course_id, sem, timetable_set_id):
+    id = request.session.get("staff_login_id")
+    if not id:
+        return redirect("login")
+
+    log_ins = get_object_or_404(LoginTable, id=id)
+    staff_ins = get_object_or_404(StaffReg, login_info=log_ins)
+
+    pos = staff_ins.pos.pos
+
+    course = get_object_or_404(Course, id=course_id)
+    timetable_set = get_object_or_404(TimeTableSet, id=timetable_set_id)
+
+    # Handle adding new timetable entries
+    if request.method == "POST":
+        form = TimeTableForm(request.POST)
+        if form.is_valid():
+            form_ins = form.save(commit=False)
+            form_ins.timetable_set = timetable_set
+            form_ins.save()
+
+            messages.success(request, "Time table entry added successfully ✅")
+            return redirect("view_time_table", course_id=course.id, sem=sem, timetable_set_id=timetable_set.id)
+        else:
+            messages.error(request, "Please correct the errors below ❌")
+    else:
+        form = TimeTableForm()
+
+    # Fetch all timetable entries for this set
     all_time_tables = TimeTable.objects.filter(
-        course__dep=staff_ins.dep, sem=sem
+        timetable_set=timetable_set
     ).order_by("created_at")
 
-    # Keep only the latest for each (course, sem)
+    # Keep only the latest for each day
     latest_map = {}
     for tt in all_time_tables:
-        if tt.course_id and tt.sem and tt.day:
-            latest_map[(tt.course_id, tt.sem, tt.day)] = tt
+        if tt.day:
+            latest_map[tt.day] = tt
 
     days_order = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"]
     time_tables = sorted(
@@ -1150,8 +1269,57 @@ def time_table(request, sem):
     )
 
     return render(
-        request, "staff/time_table.html", {"pos": pos, "time_tables": time_tables}
+        request, "staff/view_time_table.html",
+        {"pos": pos, "time_tables": time_tables, "course": course, "sem": sem, "timetable_set": timetable_set, "form": form}
     )
+
+
+@staff_required
+def select_timetable_set(request, course_id, sem, timetable_set_id):
+    id = request.session.get("staff_login_id")
+    if not id:
+        return redirect("login")
+
+    log_ins = get_object_or_404(LoginTable, id=id)
+    staff_ins = get_object_or_404(StaffReg, login_info=log_ins)
+    if staff_ins.pos.pos != "HOD":
+        messages.error(request, "Only HOD can select a timetable set.")
+        return redirect("time_table", course_id=course_id, sem=sem)
+
+    if request.method == "POST":
+        with transaction.atomic():
+            # Deselect all sets for this course + sem
+            TimeTableSet.objects.filter(
+                course_id=course_id, sem=sem
+            ).update(is_selected=False)
+            # Select the chosen one
+            tts = get_object_or_404(TimeTableSet, id=timetable_set_id)
+            tts.is_selected = True
+            tts.save()
+            messages.success(request, f'\u201c{tts.name}\u201d is now the active timetable \u2705')
+
+    return redirect("time_table", course_id=course_id, sem=sem)
+
+
+@staff_required
+def delete_timetable_set(request, course_id, sem, timetable_set_id):
+    id = request.session.get("staff_login_id")
+    if not id:
+        return redirect("login")
+
+    log_ins = get_object_or_404(LoginTable, id=id)
+    staff_ins = get_object_or_404(StaffReg, login_info=log_ins)
+    if staff_ins.pos.pos != "HOD":
+        messages.error(request, "Only HOD can delete a timetable set.")
+        return redirect("time_table", course_id=course_id, sem=sem)
+
+    if request.method == "POST":
+        tts = get_object_or_404(TimeTableSet, id=timetable_set_id)
+        name = tts.name
+        tts.delete()
+        messages.success(request, f'"{name}" has been deleted.')
+
+    return redirect("time_table", course_id=course_id, sem=sem)
 
 
 @staff_required

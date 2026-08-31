@@ -1,0 +1,223 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>V.V College Office - Semester Payment</title>
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="{% static 'assets/img/favicon.png' %}">
+    <style>
+        .navbar-brand img { max-height: 48px; }
+        .payment-panel {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .summary-card {
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #0284c7;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            background: #ffffff;
+        }
+
+        .history-table th,
+        .history-table td {
+            white-space: nowrap;
+        }
+
+        .history-card-list {
+            display: none;
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar {
+                padding-top: 0.75rem;
+                padding-bottom: 0.75rem;
+            }
+
+            .navbar-brand img {
+                max-width: 150px;
+                height: auto;
+            }
+
+            main.container {
+                padding-top: 1.5rem !important;
+                padding-bottom: 1.5rem !important;
+            }
+
+            .payment-panel.p-4 {
+                padding: 1rem !important;
+                border-radius: 0.75rem;
+            }
+
+            .history-table {
+                display: none;
+            }
+
+            .history-card-list {
+                display: grid;
+                gap: 0.75rem;
+            }
+
+            .history-card {
+                border: 1px solid #e2e8f0;
+                border-left: 4px solid #16a34a;
+                border-radius: 0.65rem;
+                padding: 1rem;
+                background: #ffffff;
+            }
+
+            .history-card dl {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 0.5rem 1rem;
+                margin: 0;
+            }
+
+            .history-card dt {
+                color: #64748b;
+                font-weight: 600;
+            }
+
+            .history-card dd {
+                margin: 0;
+                overflow-wrap: anywhere;
+                text-align: right;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <header class="bg-white border-bottom shadow-sm">
+        <div class="container">
+            <nav class="navbar navbar-light">
+                <a class="navbar-brand" href="{% url 'student_fee_management' %}">
+                    <img src="{% static 'assets/img/logo.png' %}" alt="V.V Logo">
+                </a>
+                <div class="ms-auto d-flex align-items-center gap-2">
+                    <span class="d-none d-sm-inline text-muted small">{{ office_staff.name }}</span>
+                    <a href="{% url 'fee_payment_management' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container py-4 py-sm-5 flex-grow-1">
+        <a href="{% url 'student_payment_details' student.id %}" class="btn btn-outline-primary btn-sm mb-4">
+            <i class="bi bi-arrow-left me-1"></i> Back to Semester Fees
+        </a>
+
+        <div class="mb-4">
+            <h1 class="h3 fw-bold mb-1">Semester {{ student_fee.semester }} Payment</h1>
+            <p class="text-muted mb-0">{{ student.name }} - {{ student_fee.fee_structure.course }}</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        
+        <section class="row g-3 mb-4">
+            <div class="col-12 col-md-4"><div class="summary-card h-100"><div class="text-muted small">Total Payable</div><div class="fs-4 fw-bold">{{ total_payable }}</div></div></div>
+            <div class="col-12 col-md-4"><div class="summary-card h-100" style="border-left-color: #16a34a;"><div class="text-muted small">Total Paid</div><div class="fs-4 fw-bold text-success">{{ total_paid }}</div></div></div>
+            <div class="col-12 col-md-4"><div class="summary-card h-100" style="border-left-color: #f59e0b;"><div class="text-muted small">Remaining Balance</div><div class="fs-4 fw-bold text-warning">{{ remaining_amount }}</div></div></div>
+        </section>
+
+        <section class="payment-panel p-4 mb-4">
+            <h2 class="h5 fw-bold mb-3"><i class="bi bi-plus-circle text-success me-2"></i>Add Payment</h2>
+            {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <label for="id_amount" class="form-label fw-semibold">Payment Amount</label>
+                        {{ form.amount }}
+                        {{ form.amount.errors }}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="id_payment_date" class="form-label fw-semibold">Payment Date</label>
+                        {{ form.payment_date }}
+                        {{ form.payment_date.errors }}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="id_payment_method" class="form-label fw-semibold">Payment Method</label>
+                        {{ form.payment_method }}
+                        {{ form.payment_method.errors }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label for="id_reference_number" class="form-label fw-semibold">Reference Number</label>
+                        {{ form.reference_number }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label for="id_remarks" class="form-label fw-semibold">Remarks</label>
+                        {{ form.remarks }}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success mt-4">
+                    <i class="bi bi-check-circle me-1"></i> Save Payment
+                </button>
+            </form>
+        </section>
+
+        <section class="payment-panel p-4">
+            <h2 class="h5 fw-bold mb-3">Payment History</h2>
+            {% if payments %}
+            <div class="table-responsive">
+                <table class="table table-striped align-middle history-table mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Payment Date</th>
+                            <th>Amount</th>
+                            <th>Payment Method</th>
+                            <th>Reference Number</th>
+                            <th>Remarks</th>
+                            <th>Entered By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr>
+                            <td>{{ payment.payment_date|date:'d M Y' }}</td>
+                            <td class="fw-semibold text-success">{{ payment.amount }}</td>
+                            <td>{{ payment.payment_method }}</td>
+                            <td>{{ payment.reference_number|default:'-' }}</td>
+                            <td>{{ payment.remarks|default:'-' }}</td>
+                            <td>{{ payment.entered_by|default:'-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="history-card-list">
+                {% for payment in payments %}
+                <article class="history-card">
+                    <h3 class="h6 fw-bold mb-3">{{ payment.payment_date|date:'d M Y' }}</h3>
+                    <dl class="small">
+                        <dt>Amount</dt><dd class="fw-semibold text-success">{{ payment.amount }}</dd>
+                        <dt>Method</dt><dd>{{ payment.payment_method }}</dd>
+                        <dt>Reference</dt><dd>{{ payment.reference_number|default:'-' }}</dd>
+                        <dt>Remarks</dt><dd>{{ payment.remarks|default:'-' }}</dd>
+                        <dt>Entered By</dt><dd>{{ payment.entered_by|default:'-' }}</dd>
+                    </dl>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info mb-0">No payments recorded for this semester.</div>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

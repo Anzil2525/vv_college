@@ -1,0 +1,102 @@
+{% extends "staff/head_foot.html" %} {% load static %} {% block content %}
+
+<style>
+  .page-wrapper {
+    margin-top: 90px;
+    padding: 1rem;
+  }
+
+  .content-card {
+    max-width: 900px;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
+  }
+
+  .page-title {
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .course-card {
+    background: linear-gradient(145deg, #f5f8ff, #e0e8ff);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid #d2dfff;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: #1a237e;
+  }
+
+  .course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    background: linear-gradient(145deg, #e9efff, #d3deff);
+  }
+
+  .course-card h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+  }
+
+  .empty-state h4 {
+    font-weight: 600;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 576px) {
+    .content-card {
+      padding: 1.5rem 1rem;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+    }
+
+    .course-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="page-wrapper">
+  <div class="content-card">
+    <h1 class="page-title">Select Course</h1>
+    {% if courses %}
+    <div class="course-grid">
+      {% for course in courses %}
+      <a href="{% url 'select_sem_for_timetable' course.id %}" class="course-card">
+        <h3>{{ course.course }}</h3>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div style="font-size: 3rem">📭</div>
+      <h4>No courses available</h4>
+      <p>Please contact the administrator to add courses.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

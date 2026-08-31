@@ -13,109 +13,1306 @@
         margin-bottom: 2rem;
     }
 
-    .table-scroll-wrapper {
-        overflow-x: auto;
-        width: 100%;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
+
+    /* ==============================
+       HOUR NAVIGATION
+    ============================== */
+
+    .hour-nav {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
     }
 
-    table {
-        min-width: 900px; /* force scroll on small screens */
+    .hour-nav button {
+        padding: 8px 16px;
+        border: 1px solid #dee2e6;
+        background: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+
+        transition:
+            background-color 0.1s ease,
+            border-color 0.1s ease;
+    }
+
+    .hour-nav button:hover {
+        background: #f8f9fa;
+        border-color: #0d6efd;
+    }
+
+    .hour-nav button:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
+
+    /* ==============================
+       ATTENDANCE LEGEND
+    ============================== */
+
+    .attendance-legend {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+    }
+
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+    }
+
+    .legend-item i {
+        font-size: 18px;
+    }
+
+    .legend-present {
+        color: #28a745;
+    }
+
+    .legend-absent {
+        color: #dc3545;
+    }
+
+    .legend-other {
+        color: #ffc107;
+    }
+
+
+    /* ==============================
+       TABLE
+    ============================== */
+
+    .table-scroll-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: visible;
+
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+
+        -webkit-overflow-scrolling: touch;
+
+        position: relative;
+    }
+
+    .table-scroll-wrapper table {
+        width: max-content;
+        min-width: 100%;
+        margin-bottom: 0;
+
         border-collapse: separate;
         border-spacing: 0;
     }
 
-    table th,
-    table td {
+    .table-scroll-wrapper table th,
+    .table-scroll-wrapper table td {
         vertical-align: middle;
         text-align: center;
         white-space: nowrap;
+
         background: #fff;
+
         z-index: 1;
     }
 
-    table th:first-child,
-    table td:first-child {
+
+    /* ==============================
+       STICKY STUDENT COLUMN
+    ============================== */
+
+    .table-scroll-wrapper table th:first-child,
+    .table-scroll-wrapper table td:first-child {
         position: sticky;
         left: 0;
+
+        min-width: 180px;
+        width: auto;
+        max-width: none;
+
+        overflow: visible;
+        text-overflow: clip;
+        white-space: nowrap;
+
         background-color: #f8f9fa;
-        z-index: 2;
+
+        z-index: 3;
+
         text-align: left;
     }
 
-    .table thead th:first-child {
-        z-index: 3; /* ensure it's above the others */
+
+    /* ==============================
+       STICKY HEADER
+    ============================== */
+
+    .table-scroll-wrapper .table thead th {
+        position: sticky;
+        top: 0;
+
+        background-color: #f8f9fa;
+
+        z-index: 2;
     }
+
+    .table-scroll-wrapper .table thead th:first-child {
+        z-index: 4;
+    }
+
+
+    /* ==============================
+       HOUR COLUMN SIZE
+    ============================== */
+
+    .table-scroll-wrapper table th:not(:first-child),
+    .table-scroll-wrapper table td:not(:first-child) {
+        min-width: 165px;
+    }
+
+
+    /* ==============================
+       ATTENDANCE OPTIONS
+    ============================== */
+
+    .attendance-options {
+        display: flex;
+        gap: 8px;
+
+        align-items: center;
+        justify-content: center;
+
+        padding: 8px;
+    }
+
+
+    /*
+       Large click/touch target
+    */
+    .attendance-option {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 42px;
+        height: 42px;
+
+        margin: 0;
+        padding: 0;
+
+        cursor: pointer;
+
+        border-radius: 50%;
+        border: 2px solid transparent;
+
+        /*
+           Very fast transition.
+
+           Selection now feels almost immediate.
+        */
+        transition:
+            background-color 0.07s ease,
+            border-color 0.07s ease;
+    }
+
+
+    /*
+       Hide actual radio control
+    */
+    .attendance-option input {
+        display: none;
+    }
+
+
+    /*
+       Normal / unselected icon
+    */
+    .attendance-option i {
+        font-size: 23px !important;
+
+        opacity: 0.52;
+
+        /*
+           Only opacity animates.
+
+           No scaling animation.
+        */
+        transition: opacity 0.07s ease;
+    }
+
+
+    /*
+       Hover feedback
+    */
+    .attendance-option:hover {
+        background-color: rgba(0, 0, 0, 0.035);
+    }
+
+    .attendance-option:hover i {
+        opacity: 0.8;
+    }
+
+
+    /*
+       Selected attendance.
+
+       No transform / scale animation.
+       It becomes fully visible immediately.
+    */
+    .attendance-option input:checked + i {
+        opacity: 1;
+        transform: none;
+    }
+
+
+    /* ==============================
+       SELECTED PRESENT
+    ============================== */
+
+    .attendance-option.option-present:has(input:checked) {
+        background-color: rgba(40, 167, 69, 0.12);
+
+        border-color:
+            rgba(40, 167, 69, 0.30);
+    }
+
+
+    /* ==============================
+       SELECTED ABSENT
+    ============================== */
+
+    .attendance-option.option-absent:has(input:checked) {
+        background-color: rgba(220, 53, 69, 0.12);
+
+        border-color:
+            rgba(220, 53, 69, 0.30);
+    }
+
+
+    /* ==============================
+       SELECTED LEAVE / OTHER
+    ============================== */
+
+    .attendance-option.option-other:has(input:checked) {
+        background-color: rgba(255, 193, 7, 0.14);
+
+        border-color:
+            rgba(255, 193, 7, 0.34);
+    }
+
+
+    /* ==============================
+       SAVE BUTTON
+    ============================== */
 
     .btn-group-mobile {
         display: flex;
         gap: 12px;
+
         flex-wrap: wrap;
+
         margin-top: 1.5rem;
     }
 
+
+    /* ==============================
+       TABLET / MOBILE
+    ============================== */
+
     @media (max-width: 768px) {
+
+        .attendance-wrapper {
+            padding-top: 90px;
+        }
+
+
+        .hour-nav {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 8px;
+        }
+
+
+        .hour-nav button {
+            width: 100%;
+
+            padding: 8px 5px;
+
+            font-size: 0.85rem;
+        }
+
+
+        .attendance-legend {
+            gap: 14px;
+
+            font-size: 0.85rem;
+        }
+
+
         .btn-group-mobile {
             flex-direction: column;
         }
+
 
         .btn-group-mobile .btn {
             width: 100%;
         }
 
-        table {
+
+        .table-scroll-wrapper table {
             font-size: 0.85rem;
         }
+
+
+        /*
+           Keep full student name.
+        */
+        .table-scroll-wrapper table th:first-child,
+        .table-scroll-wrapper table td:first-child {
+
+            min-width: 160px;
+
+            width: auto;
+
+            max-width: none;
+
+            overflow: visible;
+
+            text-overflow: clip;
+
+            white-space: nowrap;
+        }
+
+
+        .table-scroll-wrapper table th:not(:first-child),
+        .table-scroll-wrapper table td:not(:first-child) {
+
+            min-width: 155px;
+        }
+
+
+        /*
+           Maintain easy touch target.
+        */
+        .attendance-option {
+
+            width: 40px;
+
+            height: 40px;
+        }
+
+
+        .attendance-option i {
+
+            font-size: 22px !important;
+        }
+
+
+        .attendance-options {
+
+            gap: 6px;
+        }
     }
+
+
+    /* ==============================
+       SMALL MOBILE
+    ============================== */
+
+    @media (max-width: 480px) {
+
+        .hour-nav {
+
+            grid-template-columns:
+                repeat(2, 1fr);
+        }
+
+
+        .hour-nav button:last-child {
+
+            grid-column: span 2;
+        }
+
+
+        /*
+           Full names remain visible.
+        */
+        .table-scroll-wrapper table th:first-child,
+        .table-scroll-wrapper table td:first-child {
+
+            min-width: 150px;
+
+            width: auto;
+
+            max-width: none;
+
+            overflow: visible;
+
+            text-overflow: clip;
+
+            white-space: nowrap;
+        }
+
+
+        .table-scroll-wrapper table th:not(:first-child),
+        .table-scroll-wrapper table td:not(:first-child) {
+
+            min-width: 150px;
+        }
+
+
+        .attendance-option {
+
+            width: 40px;
+
+            height: 40px;
+        }
+
+
+        .attendance-option i {
+
+            font-size: 22px !important;
+        }
+    }
+
 </style>
 
+
 <div class="container attendance-wrapper">
+
+
     {% if messages %}
+
         <div style="margin-bottom: 1rem;">
+
             {% for message in messages %}
-                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+
+                <div
+                    class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}"
+                >
+
                     {{ message }}
+
                 </div>
+
             {% endfor %}
+
         </div>
+
     {% endif %}
-    <h2>Take Attendance - {{ today }}</h2>
+
+
+
+    <h2>
+        Take Attendance - {{ today }}
+    </h2>
+
+
+
+    <!-- ==============================
+         HOUR NAVIGATION
+    ============================== -->
+
+    <div class="hour-nav">
+
+        <button
+            type="button"
+            onclick="scrollToColumn(1)"
+        >
+            1st Hour
+        </button>
+
+
+        <button
+            type="button"
+            onclick="scrollToColumn(2)"
+        >
+            2nd Hour
+        </button>
+
+
+        <button
+            type="button"
+            onclick="scrollToColumn(3)"
+        >
+            3rd Hour
+        </button>
+
+
+        <button
+            type="button"
+            onclick="scrollToColumn(4)"
+        >
+            4th Hour
+        </button>
+
+
+        <button
+            type="button"
+            onclick="scrollToColumn(5)"
+        >
+            5th Hour
+        </button>
+
+    </div>
+
+
+
+    <!-- ==============================
+         ATTENDANCE LEGEND
+    ============================== -->
+
+    <div class="attendance-legend">
+
+
+        <span class="legend-item legend-present">
+
+            <i class="bi bi-check-circle-fill"></i>
+
+            Present
+
+        </span>
+
+
+        <span class="legend-item legend-absent">
+
+            <i class="bi bi-x-circle-fill"></i>
+
+            Absent
+
+        </span>
+
+
+        <span class="legend-item legend-other">
+
+            <i class="bi bi-dash-circle-fill"></i>
+
+            Leave
+
+        </span>
+
+
+    </div>
+
+
 
     <form method="post">
+
         {% csrf_token %}
-        <div class="table-scroll-wrapper">
-            <table class="table table-bordered table-striped align-middle">
+
+
+
+        <div
+            class="table-scroll-wrapper"
+            id="attendanceTableScroll"
+        >
+
+
+            <table
+                class="table table-bordered table-striped align-middle"
+                id="attendanceTable"
+            >
+
+
                 <thead class="table-light">
+
+
                     <tr>
-                        <th>Student</th>
-                        <th>1st Hour</th>
-                        <th>2nd Hour</th>
-                        <th>3rd Hour</th>
-                        <th>4th Hour</th>
-                        <th>5th Hour</th>
+
+                        <th>
+                            Student
+                        </th>
+
+
+                        <th data-hour-column="1">
+                            1st Hour
+                        </th>
+
+
+                        <th data-hour-column="2">
+                            2nd Hour
+                        </th>
+
+
+                        <th data-hour-column="3">
+                            3rd Hour
+                        </th>
+
+
+                        <th data-hour-column="4">
+                            4th Hour
+                        </th>
+
+
+                        <th data-hour-column="5">
+                            5th Hour
+                        </th>
+
                     </tr>
+
+
                 </thead>
+
+
+
                 <tbody>
+
+
                     {% for student, form in attendance_data %}
+
+
                     <tr>
-                        <td>{{ student.name }}</td>
-                        <td>{{ form.first_hour }}</td>
-                        <td>{{ form.second_hour }}</td>
-                        <td>{{ form.third_hour }}</td>
-                        <td>{{ form.fourth_hour }}</td>
-                        <td>{{ form.fifth_hour }}</td>
+
+
+                        <!-- =========================
+                             STUDENT
+                        ========================== -->
+
+                        <td>
+                            {{ student.name }}
+                        </td>
+
+
+
+                        <!-- =========================
+                             FIRST HOUR
+                        ========================== -->
+
+                        <td>
+
+
+                            <div class="attendance-options">
+
+
+                                {% for choice_value, choice_label in form.first_hour.field.choices %}
+
+
+                                    <label
+
+                                        class="
+                                            attendance-option
+
+                                            {% if choice_value == 'P' %}
+
+                                                option-present
+
+                                            {% elif choice_value == 'A' %}
+
+                                                option-absent
+
+                                            {% else %}
+
+                                                option-other
+
+                                            {% endif %}
+                                        "
+
+                                        title="{{ choice_label }}"
+                                    >
+
+
+                                        <input
+
+                                            type="radio"
+
+                                            name="{{ student.id }}-first_hour"
+
+                                            value="{{ choice_value }}"
+
+                                            {% if form.first_hour.value == choice_value %}
+                                                checked
+                                            {% endif %}
+                                        >
+
+
+                                        {% if choice_value == 'P' %}
+
+
+                                            <i
+                                                class="bi bi-check-circle-fill"
+                                                style="color: #28a745;"
+                                            ></i>
+
+
+                                        {% elif choice_value == 'A' %}
+
+
+                                            <i
+                                                class="bi bi-x-circle-fill"
+                                                style="color: #dc3545;"
+                                            ></i>
+
+
+                                        {% else %}
+
+
+                                            <i
+                                                class="bi bi-dash-circle-fill"
+                                                style="color: #ffc107;"
+                                            ></i>
+
+
+                                        {% endif %}
+
+
+                                    </label>
+
+
+                                {% endfor %}
+
+
+                            </div>
+
+
+                        </td>
+
+
+
+                        <!-- =========================
+                             SECOND HOUR
+                        ========================== -->
+
+                        <td>
+
+
+                            <div class="attendance-options">
+
+
+                                {% for choice_value, choice_label in form.second_hour.field.choices %}
+
+
+                                    <label
+
+                                        class="
+                                            attendance-option
+
+                                            {% if choice_value == 'P' %}
+
+                                                option-present
+
+                                            {% elif choice_value == 'A' %}
+
+                                                option-absent
+
+                                            {% else %}
+
+                                                option-other
+
+                                            {% endif %}
+                                        "
+
+                                        title="{{ choice_label }}"
+                                    >
+
+
+                                        <input
+
+                                            type="radio"
+
+                                            name="{{ student.id }}-second_hour"
+
+                                            value="{{ choice_value }}"
+
+                                            {% if form.second_hour.value == choice_value %}
+                                                checked
+                                            {% endif %}
+                                        >
+
+
+                                        {% if choice_value == 'P' %}
+
+
+                                            <i
+                                                class="bi bi-check-circle-fill"
+                                                style="color: #28a745;"
+                                            ></i>
+
+
+                                        {% elif choice_value == 'A' %}
+
+
+                                            <i
+                                                class="bi bi-x-circle-fill"
+                                                style="color: #dc3545;"
+                                            ></i>
+
+
+                                        {% else %}
+
+
+                                            <i
+                                                class="bi bi-dash-circle-fill"
+                                                style="color: #ffc107;"
+                                            ></i>
+
+
+                                        {% endif %}
+
+
+                                    </label>
+
+
+                                {% endfor %}
+
+
+                            </div>
+
+
+                        </td>
+
+
+
+                        <!-- =========================
+                             THIRD HOUR
+                        ========================== -->
+
+                        <td>
+
+
+                            <div class="attendance-options">
+
+
+                                {% for choice_value, choice_label in form.third_hour.field.choices %}
+
+
+                                    <label
+
+                                        class="
+                                            attendance-option
+
+                                            {% if choice_value == 'P' %}
+
+                                                option-present
+
+                                            {% elif choice_value == 'A' %}
+
+                                                option-absent
+
+                                            {% else %}
+
+                                                option-other
+
+                                            {% endif %}
+                                        "
+
+                                        title="{{ choice_label }}"
+                                    >
+
+
+                                        <input
+
+                                            type="radio"
+
+                                            name="{{ student.id }}-third_hour"
+
+                                            value="{{ choice_value }}"
+
+                                            {% if form.third_hour.value == choice_value %}
+                                                checked
+                                            {% endif %}
+                                        >
+
+
+                                        {% if choice_value == 'P' %}
+
+
+                                            <i
+                                                class="bi bi-check-circle-fill"
+                                                style="color: #28a745;"
+                                            ></i>
+
+
+                                        {% elif choice_value == 'A' %}
+
+
+                                            <i
+                                                class="bi bi-x-circle-fill"
+                                                style="color: #dc3545;"
+                                            ></i>
+
+
+                                        {% else %}
+
+
+                                            <i
+                                                class="bi bi-dash-circle-fill"
+                                                style="color: #ffc107;"
+                                            ></i>
+
+
+                                        {% endif %}
+
+
+                                    </label>
+
+
+                                {% endfor %}
+
+
+                            </div>
+
+
+                        </td>
+
+
+
+                        <!-- =========================
+                             FOURTH HOUR
+                        ========================== -->
+
+                        <td>
+
+
+                            <div class="attendance-options">
+
+
+                                {% for choice_value, choice_label in form.fourth_hour.field.choices %}
+
+
+                                    <label
+
+                                        class="
+                                            attendance-option
+
+                                            {% if choice_value == 'P' %}
+
+                                                option-present
+
+                                            {% elif choice_value == 'A' %}
+
+                                                option-absent
+
+                                            {% else %}
+
+                                                option-other
+
+                                            {% endif %}
+                                        "
+
+                                        title="{{ choice_label }}"
+                                    >
+
+
+                                        <input
+
+                                            type="radio"
+
+                                            name="{{ student.id }}-fourth_hour"
+
+                                            value="{{ choice_value }}"
+
+                                            {% if form.fourth_hour.value == choice_value %}
+                                                checked
+                                            {% endif %}
+                                        >
+
+
+                                        {% if choice_value == 'P' %}
+
+
+                                            <i
+                                                class="bi bi-check-circle-fill"
+                                                style="color: #28a745;"
+                                            ></i>
+
+
+                                        {% elif choice_value == 'A' %}
+
+
+                                            <i
+                                                class="bi bi-x-circle-fill"
+                                                style="color: #dc3545;"
+                                            ></i>
+
+
+                                        {% else %}
+
+
+                                            <i
+                                                class="bi bi-dash-circle-fill"
+                                                style="color: #ffc107;"
+                                            ></i>
+
+
+                                        {% endif %}
+
+
+                                    </label>
+
+
+                                {% endfor %}
+
+
+                            </div>
+
+
+                        </td>
+
+
+
+                        <!-- =========================
+                             FIFTH HOUR
+                        ========================== -->
+
+                        <td>
+
+
+                            <div class="attendance-options">
+
+
+                                {% for choice_value, choice_label in form.fifth_hour.field.choices %}
+
+
+                                    <label
+
+                                        class="
+                                            attendance-option
+
+                                            {% if choice_value == 'P' %}
+
+                                                option-present
+
+                                            {% elif choice_value == 'A' %}
+
+                                                option-absent
+
+                                            {% else %}
+
+                                                option-other
+
+                                            {% endif %}
+                                        "
+
+                                        title="{{ choice_label }}"
+                                    >
+
+
+                                        <input
+
+                                            type="radio"
+
+                                            name="{{ student.id }}-fifth_hour"
+
+                                            value="{{ choice_value }}"
+
+                                            {% if form.fifth_hour.value == choice_value %}
+                                                checked
+                                            {% endif %}
+                                        >
+
+
+                                        {% if choice_value == 'P' %}
+
+
+                                            <i
+                                                class="bi bi-check-circle-fill"
+                                                style="color: #28a745;"
+                                            ></i>
+
+
+                                        {% elif choice_value == 'A' %}
+
+
+                                            <i
+                                                class="bi bi-x-circle-fill"
+                                                style="color: #dc3545;"
+                                            ></i>
+
+
+                                        {% else %}
+
+
+                                            <i
+                                                class="bi bi-dash-circle-fill"
+                                                style="color: #ffc107;"
+                                            ></i>
+
+
+                                        {% endif %}
+
+
+                                    </label>
+
+
+                                {% endfor %}
+
+
+                            </div>
+
+
+                        </td>
+
+
                     </tr>
+
+
                     {% endfor %}
+
+
                 </tbody>
+
+
             </table>
+
+
         </div>
 
+
+
+        <!-- ==============================
+             SAVE ATTENDANCE
+        ============================== -->
+
         <div class="btn-group-mobile">
-            <button type="submit" class="btn btn-primary">Save Attendance</button>
-            <!-- <a href="#" class="btn btn-warning">Inform Guardian</a> -->
+
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Save Attendance
+            </button>
+
+
         </div>
+
+
     </form>
+
+
 </div>
+
+
+
+<script>
+
+    function scrollToColumn(hour) {
+
+        const wrapper =
+            document.getElementById(
+                'attendanceTableScroll'
+            );
+
+
+        const table =
+            document.getElementById(
+                'attendanceTable'
+            );
+
+
+        if (!wrapper || !table) {
+
+            return;
+        }
+
+
+        /*
+         * Find the requested hour column.
+         */
+        const targetColumn =
+            table.querySelector(
+                'thead th[data-hour-column="' +
+                hour +
+                '"]'
+            );
+
+
+        /*
+         * Sticky Student column.
+         */
+        const studentColumn =
+            table.querySelector(
+                'thead th:first-child'
+            );
+
+
+        if (!targetColumn || !studentColumn) {
+
+            return;
+        }
+
+
+        /*
+         * Get actual Student column width.
+
+         * Student column can change width
+         * depending on the longest name
+         * and current device.
+         */
+        const stickyColumnWidth =
+            studentColumn
+                .getBoundingClientRect()
+                .width;
+
+
+        /*
+         * Position selected hour immediately
+         * beside the sticky Student column.
+         */
+        let targetScrollLeft =
+            targetColumn.offsetLeft -
+            stickyColumnWidth;
+
+
+        /*
+         * Prevent negative scroll.
+         */
+        targetScrollLeft =
+            Math.max(
+                0,
+                targetScrollLeft
+            );
+
+
+        /*
+         * Maximum horizontal scroll.
+         */
+        const maxScrollLeft =
+            Math.max(
+                0,
+
+                wrapper.scrollWidth -
+                wrapper.clientWidth
+            );
+
+
+        /*
+         * Prevent scrolling beyond
+         * the end of the table.
+         */
+        targetScrollLeft =
+            Math.min(
+                targetScrollLeft,
+                maxScrollLeft
+            );
+
+
+        /*
+         * Smooth table navigation.
+         *
+         * This does not affect the speed
+         * of Present / Absent selection.
+         */
+        wrapper.scrollTo({
+
+            left: targetScrollLeft,
+
+            behavior: 'smooth'
+
+        });
+
+    }
+
+</script>
+
 
 {% endblock %}

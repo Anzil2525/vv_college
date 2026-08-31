@@ -11395,7 +11395,7 @@ SP Image Box CSS
   padding: 10px;
 }
 
-.card {
+.ea-image-box .card {
   max-width: 48%;
   -webkit-box-flex: 0;
       -ms-flex: 0 0 50%;
@@ -11403,7 +11403,7 @@ SP Image Box CSS
   display: inline-block;
 }
 
-.card.mr-3 {
+.ea-image-box .card.mr-3 {
   margin-right: 20px;
 }
 

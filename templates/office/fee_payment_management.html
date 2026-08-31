@@ -1,0 +1,326 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>V.V College Office - Manage Fee Payments</title>
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="{% static 'assets/img/favicon.png' %}">
+    <style>
+        html, body {
+            min-height: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            width: 100%;
+        }
+
+        .navbar-brand img { max-height: 48px; }
+        .payment-panel {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table-responsive table {
+            min-width: 900px;
+        }
+
+        .student-row {
+            cursor: pointer;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .student-row:hover,
+        .student-row:focus-visible {
+            background-color: #e0f2fe !important;
+            box-shadow: inset 4px 0 0 #0284c7;
+            outline: none;
+        }
+
+        .student-card-list {
+            display: none;
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar {
+                padding-top: 0.75rem;
+                padding-bottom: 0.75rem;
+            }
+
+            .navbar-brand img {
+                max-width: 150px;
+                height: auto;
+            }
+
+            main.container {
+                padding-top: 1.5rem !important;
+                padding-bottom: 1.5rem !important;
+            }
+
+            .payment-panel.p-4 {
+                padding: 1rem !important;
+                border-radius: 0.75rem;
+            }
+
+            h1.h3 {
+                font-size: 1.4rem;
+            }
+
+            .d-flex.gap-2.mt-4 {
+                flex-direction: column;
+            }
+
+            .d-flex.gap-2.mt-4 .btn {
+                width: 100%;
+            }
+
+            .desktop-results-table {
+                display: none;
+            }
+
+            .student-card-list {
+                display: grid;
+                gap: 0.75rem;
+            }
+
+            .student-result-card {
+                border: 1px solid #e2e8f0;
+                border-left: 4px solid #0284c7;
+                border-radius: 0.65rem;
+                padding: 1rem;
+                background: #ffffff;
+                color: #334155;
+                text-decoration: none;
+                transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            }
+
+            .student-result-card:hover,
+            .student-result-card:focus-visible {
+                border-color: #0284c7;
+                box-shadow: 0 8px 18px rgba(2, 132, 199, 0.16);
+                color: #334155;
+                transform: translateY(-2px);
+            }
+
+            .student-result-card dl {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+                gap: 0.5rem 1rem;
+                margin: 0;
+            }
+
+            .student-result-card dt {
+                color: #64748b;
+                font-weight: 600;
+            }
+
+            .student-result-card dd {
+                margin: 0;
+                overflow-wrap: anywhere;
+                text-align: right;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <header class="bg-white border-bottom shadow-sm">
+        <div class="container">
+            <nav class="navbar navbar-light">
+                <a class="navbar-brand" href="{% url 'student_fee_management' %}">
+                    <img src="{% static 'assets/img/logo.png' %}" alt="V.V Logo">
+                </a>
+                <div class="ms-auto d-flex align-items-center gap-2">
+                    <span class="d-none d-sm-inline text-muted small">{{ office_staff.name }}</span>
+                    <a href="{% url 'student_fee_management' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container py-4 py-sm-5 flex-grow-1">
+        <div class="mb-4">
+            <h1 class="h3 fw-bold mb-1">Manage Fee Payments</h1>
+            <p class="text-muted mb-0">Search for a student using one or more details.</p>
+        </div>
+
+        <section class="payment-panel p-4 mb-4">
+            <form method="get">
+                <div class="row g-3">
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <label for="id_name" class="form-label fw-semibold">Student Name</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-2">
+                        <label for="id_semester" class="form-label fw-semibold">Semester</label>
+                        {{ form.semester }}
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label for="id_year_of_admision" class="form-label fw-semibold">Admission Year</label>
+                        {{ form.year_of_admision }}
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label for="id_reg_no" class="form-label fw-semibold">Registration No</label>
+                        {{ form.reg_no }}
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <label for="id_department" class="form-label fw-semibold">Department</label>
+                        {{ form.department }}
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <label for="id_course" class="form-label fw-semibold">Course</label>
+                        <select id="id_course" name="course" class="form-select">
+                            <option value="">All courses</option>
+                            {% for course in course_options %}
+                            <option value="{{ course.id }}" data-department="{{ course.dep_id }}" {% if form.data.course == course.id|stringformat:'s' %}selected{% endif %}>
+                                {{ course.course }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <label for="id_phone" class="form-label fw-semibold">Phone Number</label>
+                        {{ form.phone }}
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-1"></i> Search Students
+                    </button>
+                    <a href="{% url 'fee_payment_management' %}" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </section>
+
+        {% if has_search %}
+        <section class="payment-panel p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 fw-bold mb-0">Search Results</h2>
+                <span class="text-muted small">{{ students|length }} student{{ students|length|pluralize }}</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0 desktop-results-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Reg No</th>
+                            <th>Student</th>
+                            <th>Phone</th>
+                            <th>Admission Year</th>
+                            <th>Department</th>
+                            <th>Course</th>
+                            <th>Semester</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr class="student-row" tabindex="0" role="link" data-student-url="{% url 'student_payment_details' student.id %}">
+                            <td>{{ student.reg_no }}</td>
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.pho }}</td>
+                            <td>{{ student.year_of_admision }}</td>
+                            <td>{{ student.dep }}</td>
+                            <td>{{ student.course }}</td>
+                            <td>{{ student.sem }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="7" class="text-center text-muted py-4">No matching students found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="student-card-list">
+                    {% for student in students %}
+                    <a href="{% url 'student_payment_details' student.id %}" class="student-result-card d-block">
+                        <h3 class="h6 fw-bold mb-3">{{ student.name }}</h3>
+                        <dl class="small">
+                            <dt>Registration No</dt><dd>{{ student.reg_no }}</dd>
+                            <dt>Phone</dt><dd>{{ student.pho }}</dd>
+                            <dt>Admission Year</dt><dd>{{ student.year_of_admision }}</dd>
+                            <dt>Department</dt><dd>{{ student.dep }}</dd>
+                            <dt>Course</dt><dd>{{ student.course }}</dd>
+                            <dt>Semester</dt><dd>{{ student.sem }}</dd>
+                        </dl>
+                    </a>
+                    {% empty %}
+                    <div class="text-center text-muted py-4">No matching students found.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+    <script>
+        const departmentSelect = document.getElementById('id_department');
+        const courseSelect = document.getElementById('id_course');
+        const allCourseOptions = Array.from(courseSelect.options).map((option) => ({
+            value: option.value,
+            label: option.text,
+            department: option.dataset.department
+        }));
+
+        function filterCourses(departmentId, selectedCourse) {
+            courseSelect.replaceChildren();
+            allCourseOptions.forEach((course) => {
+                if (!course.value || !departmentId || course.department === departmentId) {
+                    const option = new Option(course.label, course.value);
+                    option.dataset.department = course.department;
+                    option.selected = course.value === selectedCourse;
+                    courseSelect.add(option);
+                }
+            });
+        }
+
+        Array.from(courseSelect.options).forEach((option) => {
+            const course = allCourseOptions.find((item) => item.value === option.value);
+            if (course) {
+                option.dataset.department = course.department;
+            }
+        });
+
+        departmentSelect.addEventListener('change', () => {
+            filterCourses(departmentSelect.value, '');
+        });
+
+        courseSelect.addEventListener('change', () => {
+            const selected = allCourseOptions.find((course) => course.value === courseSelect.value);
+            if (selected && selected.department) {
+                departmentSelect.value = selected.department;
+                filterCourses(selected.department, selected.value);
+            }
+        });
+
+        const initialCourse = allCourseOptions.find((course) => course.value === courseSelect.value);
+        if (initialCourse && initialCourse.department) {
+            departmentSelect.value = initialCourse.department;
+        }
+        filterCourses(departmentSelect.value, initialCourse ? initialCourse.value : '');
+
+        document.querySelectorAll('.student-row').forEach((row) => {
+            const openStudentPage = () => window.location.href = row.dataset.studentUrl;
+            row.addEventListener('click', openStudentPage);
+            row.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openStudentPage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

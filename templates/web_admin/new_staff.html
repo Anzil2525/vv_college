@@ -13,7 +13,7 @@
     {% endif %}
     <h2 class="text-center mb-4 fw-bold border-bottom pb-2">Faculty Verification Queue</h2>
 
-    {% if staffs %}
+    {% if staffs or office %}
     
     <!-- DESKTOP TABLE VIEW -->
     <div class="table-responsive d-none d-md-block">
@@ -53,6 +53,24 @@
                     </td>
                 </tr>
                 {% endfor %}
+                {% for off in office %}
+                <tr>
+                    <td>
+                        <i class="bx bx-user-circle" style="font-size: 50px; color: #ccc;"></i>
+                    </td>
+                    <td>{{ off.name }}</td>
+                    <td>office</td>
+                    <td>{{ off.get_position_display }}</td>
+                    <td>{{ off.login_info.email }}</td>
+                    <td>{{ off.phone }}</td>
+                    <td>
+                        <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+                            <a href="{% url 'verify_office' off.id 1 %}" class="btn btn-success btn-sm">Verify</a>
+                            <a href="{% url 'reject_office' off.id %}" class="btn btn-danger btn-sm" onclick="return resone(this.href)">Reject</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
@@ -79,6 +97,24 @@
                 <div class="d-flex flex-column gap-2">
                     <a href="{% url 'verify_staff' staff.id 1 %}" class="btn btn-success">Verify</a>
                     <a href="{% url 'reject_staff' staff.id %}" class="btn btn-danger" onclick="return resone(this.href)">Reject</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% for off in office %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bx bx-user-circle" style="font-size: 50px; color: #ccc;"></i>
+                    <h5 class="mb-0">{{ off.name }}</h5>
+                </div>
+                <p class="mb-1"><strong>Department:</strong> office</p>
+                <p class="mb-1"><strong>Position:</strong> {{ off.get_position_display }}</p>
+                <p class="mb-1"><strong>Email:</strong> {{ off.login_info.email }}</p>
+                <p class="mb-3"><strong>Phone:</strong> {{ off.phone }}</p>
+                <div class="d-flex flex-column gap-2">
+                    <a href="{% url 'verify_office' off.id 1 %}" class="btn btn-success">Verify</a>
+                    <a href="{% url 'reject_office' off.id %}" class="btn btn-danger" onclick="return resone(this.href)">Reject</a>
                 </div>
             </div>
         </div>

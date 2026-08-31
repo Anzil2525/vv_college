@@ -1,0 +1,625 @@
+{% extends "staff/head_foot.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Bootstrap 5 CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="timetable-page animate-fade-in">
+    <div class="timetable-wrapper">
+
+        <!-- Page Header -->
+        <div class="page-header-card">
+            <div class="page-label-white">
+                <i class="bi bi-calendar3"></i>
+                <span>Timetable Management</span>
+            </div>
+            <h1 class="page-title-white">{{ timetable_set.name }}</h1>
+            <p class="page-desc-white">
+                {{ timetable_set.course.course }} – Semester {{ timetable_set.sem }}
+            </p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="bi {% if 'error' in message.tags %}bi-exclamation-triangle-fill{% else %}bi-check-circle-fill{% endif %} me-2"></i>
+                    <div>{{ message }}</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- HOD: Add Timetable Entry -->
+        {% if pos == "HOD" %}
+        <div class="create-section-card shadow-sm border-0 bg-white">
+            <div class="create-section-header">
+                <div>
+                    <h2 class="create-section-title">
+                        <i class="bi bi-plus-circle-fill text-primary me-2"></i> Add Timetable Entry
+                    </h2>
+                    <p class="create-section-description">
+                        Add a new timetable entry for a specific day.
+                    </p>
+                </div>
+                <div class="create-icon">
+                    <i class="bi bi-calendar-plus" style="font-size: 1.4rem;"></i>
+                </div>
+            </div>
+
+            <form method="POST" novalidate>
+                {% csrf_token %}
+
+                <!-- Day — full-width own row -->
+                <div class="row g-3 mb-3">
+                    <div class="col-12">
+                        <label class="form-label" for="{{ form.day.id_for_label }}">
+                            <i class="bi bi-calendar-day me-1 text-primary"></i> {{ form.day.label }}
+                        </label>
+                        {{ form.day }}
+                        {% if form.day.errors %}
+                        <div class="field-error">
+                            <i class="bi bi-exclamation-circle-fill me-1"></i> {{ form.day.errors|striptags }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Hour fields — subject + staff in pairs -->
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.first_hour_subject.id_for_label }}">{{ form.first_hour_subject.label }}</label>
+                        {{ form.first_hour_subject }}
+                        {% if form.first_hour_subject.errors %}<div class="field-error"><i class="bi bi-exclamation-circle-fill me-1"></i>{{ form.first_hour_subject.errors|striptags }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.first_houre_staff.id_for_label }}">{{ form.first_houre_staff.label }}</label>
+                        {{ form.first_houre_staff }}
+                        {% if form.first_houre_staff.errors %}<div class="field-error"><i class="bi bi-exclamation-circle-fill me-1"></i>{{ form.first_houre_staff.errors|striptags }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.second_hour_subject.id_for_label }}">{{ form.second_hour_subject.label }}</label>
+                        {{ form.second_hour_subject }}
+                        {% if form.second_hour_subject.errors %}<div class="field-error"><i class="bi bi-exclamation-circle-fill me-1"></i>{{ form.second_hour_subject.errors|striptags }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.second_hour_staff.id_for_label }}">{{ form.second_hour_staff.label }}</label>
+                        {{ form.second_hour_staff }}
+                        {% if form.second_hour_staff.errors %}<div class="field-error"><i class="bi bi-exclamation-circle-fill me-1"></i>{{ form.second_hour_staff.errors|striptags }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.third_hour_subject.id_for_label }}">{{ form.third_hour_subject.label }}</label>
+                        {{ form.third_hour_subject }}
+                        {% if form.third_hour_subject.errors %}<div class="field-error"><i class="bi bi-exclamation-circle-fill me-1"></i>{{ form.third_hour_subject.errors|striptags }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.third_hour_staff.id_for_label }}">{{ form.third_hour_staff.label }}</label>
+                        {{ form.third_hour_staff }}
+                        {% if form.third_hour_staff.errors %}<div class="field-error"><i class="bi bi-exclamation-circle-fill me-1"></i>{{ form.third_hour_staff.errors|striptags }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.fourth_hour_subject.id_for_label }}">{{ form.fourth_hour_subject.label }}</label>
+                        {{ form.fourth_hour_subject }}
+                        {% if form.fourth_hour_subject.errors %}<div class="field-error"><i class="bi bi-exclamation-circle-fill me-1"></i>{{ form.fourth_hour_subject.errors|striptags }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.fourth_hour_staff.id_for_label }}">{{ form.fourth_hour_staff.label }}</label>
+                        {{ form.fourth_hour_staff }}
+                        {% if form.fourth_hour_staff.errors %}<div class="field-error"><i class="bi bi-exclamation-circle-fill me-1"></i>{{ form.fourth_hour_staff.errors|striptags }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.fifth_hour_subject.id_for_label }}">{{ form.fifth_hour_subject.label }}</label>
+                        {{ form.fifth_hour_subject }}
+                        {% if form.fifth_hour_subject.errors %}<div class="field-error"><i class="bi bi-exclamation-circle-fill me-1"></i>{{ form.fifth_hour_subject.errors|striptags }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.fifth_hour_staff.id_for_label }}">{{ form.fifth_hour_staff.label }}</label>
+                        {{ form.fifth_hour_staff }}
+                        {% if form.fifth_hour_staff.errors %}<div class="field-error"><i class="bi bi-exclamation-circle-fill me-1"></i>{{ form.fifth_hour_staff.errors|striptags }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-action mt-4">
+                    <button type="submit" class="primary-btn">
+                        <i class="bi bi-plus-lg me-1"></i> Add Entry
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Timetable Entries -->
+        {% if time_tables %}
+        <div class="list-header-section d-flex justify-content-between align-items-center mb-4">
+            <h2 class="list-title">
+                <i class="bi bi-grid-3x3-gap-fill text-muted me-2"></i> Timetable Entries
+            </h2>
+            <span class="set-count-badge">
+                {{ time_tables|length }} Days
+            </span>
+        </div>
+
+        <div class="timetable-grid">
+            {% for tt in time_tables %}
+            <div class="timetable-card shadow-sm border-0 bg-white">
+
+                <!-- Day Header Row -->
+                <div class="day-header-row">
+                    <div class="day-icon">
+                        <i class="bi bi-calendar-week"></i>
+                    </div>
+                    <h3 class="day-name">
+                        {% if tt.day == 'MO' %}Monday
+                        {% elif tt.day == 'TU' %}Tuesday
+                        {% elif tt.day == 'WE' %}Wednesday
+                        {% elif tt.day == 'TH' %}Thursday
+                        {% elif tt.day == 'FR' %}Friday
+                        {% elif tt.day == 'SA' %}Saturday
+                        {% elif tt.day == 'SU' %}Sunday
+                        {% else %}{{ tt.day }}{% endif %}
+                    </h3>
+                </div>
+
+                <div class="card-divider"></div>
+
+                <!-- Hours Table -->
+                <table class="timetable-table">
+                    <thead>
+                        <tr>
+                            <th>Hour</th>
+                            <th>Subject</th>
+                            <th>Staff</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1st Hour</td>
+                            <td class="subject">{{ tt.first_hour_subject }}</td>
+                            <td class="staff">{{ tt.first_houre_staff }}</td>
+                        </tr>
+                        <tr>
+                            <td>2nd Hour</td>
+                            <td class="subject">{{ tt.second_hour_subject }}</td>
+                            <td class="staff">{{ tt.second_hour_staff }}</td>
+                        </tr>
+                        <tr>
+                            <td>3rd Hour</td>
+                            <td class="subject">{{ tt.third_hour_subject }}</td>
+                            <td class="staff">{{ tt.third_hour_staff }}</td>
+                        </tr>
+                        <tr>
+                            <td>4th Hour</td>
+                            <td class="subject">{{ tt.fourth_hour_subject }}</td>
+                            <td class="staff">{{ tt.fourth_hour_staff }}</td>
+                        </tr>
+                        <tr>
+                            <td>5th Hour</td>
+                            <td class="subject">{{ tt.fifth_hour_subject }}</td>
+                            <td class="staff">{{ tt.fifth_hour_staff }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-state-card shadow-sm border-0 bg-white text-center">
+            <div class="empty-icon-circle">
+                <i class="bi bi-calendar-x"></i>
+            </div>
+            <h3 class="empty-state-title">No Timetable Entries Available</h3>
+            <p class="empty-state-desc">
+                There are currently no timetable entries configured for this timetable set.
+                {% if pos == "HOD" %}
+                    Use the form above to add your first timetable entry.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Back Button -->
+        <div class="mt-4">
+            <a href="{% url 'time_table' course.id sem %}" class="btn-secondary">
+                <i class="bi bi-arrow-left me-2"></i> Back to Time Table Sets
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* Premium Visual Variables & Overrides */
+    :root {
+        --page-bg: #f8fafc;
+        --card-bg: #ffffff;
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+        --border-color: #f1f5f9;
+        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+        --primary-hover-gradient: linear-gradient(135deg, #4f46e5 0%, #6d28d9 100%);
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .timetable-page {
+        min-height: 100vh;
+        background: var(--page-bg);
+        padding: 110px 24px 60px;
+    }
+
+    .timetable-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Gradient Page Header */
+    .page-header-card {
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 3rem 2.5rem;
+        box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.25), 0 8px 10px -6px rgba(168, 85, 247, 0.25);
+        margin-bottom: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .page-header-card::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 380px;
+        height: 380px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    .page-label-white {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 100px;
+        padding: 6px 14px;
+        margin-bottom: 1rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #ffffff;
+    }
+    .page-title-white {
+        font-size: 2.2rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin: 0;
+    }
+    .page-desc-white {
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-top: 0.5rem;
+        max-width: 600px;
+        line-height: 1.5;
+    }
+
+    /* HOD Form Card Redesign */
+    .create-section-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 2.25rem;
+        margin-bottom: 2.5rem;
+        border: 1px solid #f1f5f9 !important;
+    }
+    .create-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 1.75rem;
+    }
+    .create-section-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    .create-section-description {
+        margin: 4px 0 0;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+    .create-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: #f5f3ff;
+        color: #7c3aed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* Styled Input Form controls */
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 8px;
+    }
+    .create-section-card input, .create-section-card select {
+        width: 100%;
+        height: 48px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        padding: 0 16px;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        background: #fff;
+        outline: none;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+        transition: all 0.25s ease;
+    }
+    .create-section-card input:focus, .create-section-card select:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+    }
+    .field-error {
+        margin-top: 8px;
+        font-size: 0.8rem;
+        color: #ef4444;
+        font-weight: 500;
+    }
+
+    /* Button Styling */
+    .primary-btn {
+        border: none;
+        outline: none;
+        background: var(--primary-gradient);
+        color: #fff !important;
+        min-height: 46px;
+        padding: 0 24px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .primary-btn:hover {
+        background: var(--primary-hover-gradient);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+    }
+    .primary-btn:active {
+        transform: translateY(0);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: #fff;
+        padding: 12px 22px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+        background: #5a6268;
+        color: #fff;
+    }
+
+    /* Timetables list header styling */
+    .list-title {
+        font-size: 1.25rem;
+        font-weight: 750;
+        color: var(--text-primary);
+    }
+    .set-count-badge {
+        display: inline-flex;
+        align-items: center;
+        background: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #dbeafe;
+        padding: 5px 12px;
+        border-radius: 100px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    /* Grid layout overrides */
+    .timetable-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+    /* Cards Redesign */
+    .timetable-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 1.75rem;
+        border: 1px solid #f1f5f9;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .timetable-card:hover {
+        transform: translateY(-4px);
+        border-color: #e2e8f0;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
+    }
+    /* Day header — full-width separate row */
+    .day-header-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        width: 100%;
+        padding: 0.5rem 0;
+    }
+    .day-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 100%);
+        color: #7c3aed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.2rem;
+        box-shadow: 0 2px 6px rgba(124, 58, 237, 0.12);
+    }
+    .day-name {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 800;
+        letter-spacing: -0.3px;
+        color: var(--text-primary);
+        flex: 1;
+    }
+
+    .card-divider {
+        height: 1px;
+        background: #f1f5f9;
+        margin: 1.5rem 0;
+    }
+
+    /* Timetable Table Styling */
+    .timetable-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+    .timetable-table th,
+    .timetable-table td {
+        border: 1px solid #e2e8f0;
+        padding: 10px;
+        text-align: center;
+        font-size: 0.875rem;
+    }
+    .timetable-table th {
+        background-color: #f8fafc;
+        font-weight: 600;
+        color: #475569;
+    }
+    .timetable-table td {
+        color: #334155;
+    }
+    .subject {
+        font-weight: 500;
+        color: #1e293b;
+    }
+    .staff {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    /* Empty State Styling */
+    .empty-state-card {
+        background: var(--card-bg);
+        border-radius: 24px;
+        padding: 5rem 2rem;
+        max-width: 600px;
+        margin: 3rem auto 0;
+        border: 1px solid #f1f5f9;
+    }
+    .empty-icon-circle {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: #f8fafc;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        margin: 0 auto 1.5rem;
+        animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+    .empty-state-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    .empty-state-desc {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin: 0 auto;
+        max-width: 440px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+        .timetable-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+    }
+    @media (max-width: 768px) {
+        .timetable-page {
+            padding: 95px 16px 40px;
+        }
+        .page-header-card {
+            padding: 2.25rem 1.75rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+        .page-title-white {
+            font-size: 1.8rem;
+        }
+        .create-section-card {
+            padding: 1.75rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+    }
+    @media (max-width: 480px) {
+        .page-title-white {
+            font-size: 1.6rem;
+        }
+        .page-desc-white {
+            font-size: 0.85rem;
+        }
+        .day-header-row {
+            gap: 10px;
+            padding: 0.25rem 0;
+        }
+        .day-icon {
+            width: 38px;
+            height: 38px;
+        }
+        .day-name {
+            font-size: 1.05rem;
+        }
+        .timetable-card {
+            padding: 1.25rem;
+        }
+    }
+</style>
+
+{% endblock %}

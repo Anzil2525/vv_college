@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from index.models import StudentReg, LoginTable, Attendance, MarkList, TimeTable
+from index.models import StudentReg, LoginTable, Attendance, MarkList, TimeTable, TimeTableSet, StudentFee, FeePayment
+from django.db.models import Sum
 from datetime import date, timedelta
 import calendar
 
@@ -182,26 +183,100 @@ def time_table_student(request):
 
     log_ins = get_object_or_404(LoginTable, id=id)
     student_ins = get_object_or_404(StudentReg, login_info=log_ins)
-    
+
     sem = student_ins.sem
+    course = student_ins.course
 
-    # Fetch all, ordered by creation time (oldest to newest)
-    all_time_tables = TimeTable.objects.filter(
-        course=student_ins.course, sem=sem
-    ).order_by("created_at")
+    # Get the single selected timetable set for this student's course + sem
+    selected_set = TimeTableSet.objects.filter(
+        course=course, sem=sem, is_selected=True
+    ).first()
 
-    # Keep only the latest for each (course, sem)
-    latest_map = {}
-    for tt in all_time_tables:
-        if tt.course_id and tt.sem and tt.day:
-            latest_map[(tt.course_id, tt.sem, tt.day)] = tt
+    time_tables = []
+    if selected_set:
+        all_entries = TimeTable.objects.filter(
+            timetable_set=selected_set
+        ).order_by("created_at")
 
-    days_order = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"]
-    time_tables = sorted(
-        latest_map.values(),
-        key=lambda x: days_order.index(x.day) if x.day in days_order else 999,
-    )
+        # Keep only the latest entry per day
+        latest_map = {}
+        for tt in all_entries:
+            if tt.day:
+                latest_map[tt.day] = tt
+
+        days_order = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"]
+        time_tables = sorted(
+            latest_map.values(),
+            key=lambda x: days_order.index(x.day) if x.day in days_order else 999,
+        )
 
     return render(
-        request, "student/time_table_student.html", { "time_tables": time_tables}
+        request, "student/time_table_student.html",
+        {
+            "time_tables": time_tables,
+            "selected_set": selected_set,
+            "student": student_ins,
+        }
     )
+
+
+@student_required
+def student_fee_overview(request):
+    login_id = request.session.get('student_login_id')
+    login_ins = get_object_or_404(LoginTable, id=login_id)
+    student = get_object_or_404(StudentReg, login_info=login_ins)
+    
+    # Get all assigned fees for this student
+    student_fees = StudentFee.objects.filter(
+        student=student
+    ).select_related('fee_structure__course').order_by('semester', 'id')
+    
+    # Calculate payment status for each fee
+    for fee in student_fees:
+        payments = FeePayment.objects.filter(student_fee=fee)
+        total_paid = payments.aggregate(total=Sum('amount'))['total'] or 0
+        fee.total_paid = total_paid
+        fee.remaining_amount = fee.total_amount - total_paid
+        
+        if total_paid <= 0:
+            fee.payment_status = 'No Payment'
+        elif total_paid >= fee.total_amount:
+            fee.payment_status = 'Paid'
+        else:
+            fee.payment_status = 'Partially Paid'
+    
+    return render(request, 'student/student_fee_overview.html', {
+        'student': student,
+        'student_fees': student_fees,
+    })
+
+
+@student_required
+def student_fee_transactions(request, student_fee_id):
+    login_id = request.session.get('student_login_id')
+    login_ins = get_object_or_404(LoginTable, id=login_id)
+    student = get_object_or_404(StudentReg, login_info=login_ins)
+    
+    # Get the specific fee and verify it belongs to this student
+    student_fee = get_object_or_404(
+        StudentFee.objects.select_related('fee_structure__course'),
+        id=student_fee_id,
+        student=student
+    )
+    
+    # Get all payments for this fee
+    payments = FeePayment.objects.filter(
+        student_fee=student_fee
+    ).order_by('-payment_date', '-entered_at', '-id')
+    
+    total_paid = payments.aggregate(total=Sum('amount'))['total'] or 0
+    remaining_amount = student_fee.total_amount - total_paid
+    
+    return render(request, 'student/student_fee_transactions.html', {
+        'student': student,
+        'student_fee': student_fee,
+        'payments': payments,
+        'total_payable': student_fee.total_amount,
+        'total_paid': total_paid,
+        'remaining_amount': remaining_amount,
+    })

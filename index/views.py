@@ -51,6 +51,12 @@ def index(request):
                 request.session['guardian_login_email'] = login_ins.email
                 request.session['type'] = 'guardian'
                 return redirect('guardian_home')
+
+            elif login_ins.user == "office" and login_ins.status == "V":
+                request.session['office_login_id'] = login_ins.id
+                request.session['type'] = 'office'
+                return redirect('office_home')
+
             else:
                 messages.error(request, 'Admin verification pending')
 
@@ -251,6 +257,12 @@ def login(request):
                         request.session['auto_login_id'] = str(login_ins.auto_login_id)
                         request.session['type'] = 'staff'
                         return redirect('staff_home')
+
+                    elif login_ins.user == "office" and login_ins.status == "V":
+                        request.session['office_login_id'] = login_ins.id
+                        request.session['auto_login_id'] = str(login_ins.auto_login_id)
+                        request.session['type'] = 'office'
+                        return redirect('office_home')
                     
                     elif login_ins.user == "staff" and login_ins.status == "R":
                         reason_msg = f" Reason: {login_ins.rejection_reason}" if login_ins.rejection_reason else ""
@@ -322,3 +334,33 @@ def guardian_reg(request):
         form = GuardianVerificationRegistration()
 
     return render(request, 'index/guardian_reg.html', {'form': form})
+
+
+def office_faculty_registration(request):
+    if request.method == 'POST':
+        login_form = LoginTableForm(request.POST)
+        office_faculty_registration_form = OfficeFacultyRegistrationForm(request.POST)
+
+        email = request.POST.get('email')
+        if LoginTable.objects.filter(email = email).exists():
+            messages.error(request, "It appears that an account with this email address already exists.")
+
+        elif login_form.is_valid() and office_faculty_registration_form.is_valid():
+            login_ins = login_form.save(commit = False)
+            login_ins.user = "office"
+            login_ins.save()
+
+            office_ins = office_faculty_registration_form.save(commit=False)
+            office_ins.login_info = login_ins
+            office_ins.save()
+
+            messages.success(request, 'Successfully Registered.')
+            return redirect("login")
+    else: 
+        login_form = LoginTableForm()
+        office_faculty_registration_form = OfficeFacultyRegistrationForm()
+
+    return render(request, 'index/office_faculty_registration.html', {
+        'office_faculty_registration_form': office_faculty_registration_form,
+        'login_form': login_form
+    })

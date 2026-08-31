@@ -7,5 +7,7 @@ urlpatterns = [
     path('attendance_details_guad_stu/details/<int:student_id>/<str:date>/', views.attendance_details_guad_stu, name='attendance_details_guad_stu'),
     path('change_password_student/<int:student_id>/', views.change_password_student, name='change_password_student'),
     path('view_report_card_student/<int:reg_id>/', views.view_report_card_student, name='view_report_card_student'),
-    path('time_table_student/', views.time_table_student, name='time_table_student')
+    path('time_table_student/', views.time_table_student, name='time_table_student'),
+    path('student_fee_overview/', views.student_fee_overview, name='student_fee_overview'),
+    path('student_fee_transactions/<int:student_fee_id>/', views.student_fee_transactions, name='student_fee_transactions'),
 ]

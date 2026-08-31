@@ -31,6 +31,12 @@ class StaffEditReg(forms.ModelForm):
     class Meta:
         model = StaffReg
         exclude = ['login_info', 'pos']
+
+
+class OfficeFacultyRegistrationForm(forms.ModelForm):
+    class Meta:
+        model = OfficeFacultyRegistration
+        exclude = ['login_info']
         
 
 class GuadinRegForm(forms.ModelForm):
@@ -59,23 +65,38 @@ class GuardianVerificationRegistration(forms.Form):
     password = forms.CharField(max_length=20)
 
 
+class TimeTableSetForm(forms.ModelForm):
+    class Meta:
+        model = TimeTableSet
+        fields = ['sem', 'name']
+        widgets = {
+            'sem': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 8}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+
+class TimeTableSetNameForm(forms.ModelForm):
+    class Meta:
+        model = TimeTableSet
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter timetable set name'}),
+        }
+
+
 class TimeTableForm(forms.ModelForm): 
     class Meta: 
         model = TimeTable 
         fields = [ 
-            'sem', 'day', 'first_hour_subject', 'first_houre_staff', 
+            'day', 'first_hour_subject', 'first_houre_staff', 
             'second_hour_subject', 'second_hour_staff', 'third_hour_subject', 
             'third_hour_staff', 'fourth_hour_subject', 'fourth_hour_staff', 
             'fifth_hour_subject', 'fifth_hour_staff'
 
         ] 
         widgets = { 
-            'course': forms.Select(
-                attrs={'class': 'form-select'}), 
             'day': forms.Select(
                 attrs={'class': 'form-select'}), 
-            'sem': forms.NumberInput(
-                attrs={'class': 'form-control', 'min': 1, 'max': 8}), 
             'first_hour_subject': forms.TextInput(
                 attrs={'class': 'form-control'}), 
             'first_houre_staff': forms.TextInput(

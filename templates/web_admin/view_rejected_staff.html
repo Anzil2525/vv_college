@@ -13,7 +13,7 @@
     {% endif %}
     <h2 class="text-center mb-4 fw-bold border-bottom pb-2">Rejected Facilities</h2>
 
-    {% if staffs %}
+    {% if staffs or office %}
     
     <!-- DESKTOP TABLE VIEW -->
     <div class="table-responsive d-none d-md-block">
@@ -58,6 +58,28 @@
                     </td>
                 </tr>
                 {% endfor %}
+                {% for off in office %}
+                <tr>
+                    <td>
+                        <i class="bx bx-user-circle" style="font-size: 50px; color: #ccc;"></i>
+                    </td>
+                    <td>{{ off.name }}</td>
+                    <td>{{ off.phone }}</td>
+                    <td>{{ off.login_info.email }}</td>
+                    <td>office</td>
+                    <td>{{ off.get_position_display }}</td>
+                    <td>
+                        <span class="badge bg-danger">
+                            {{ off.login_info.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'verify_office' off.id 0 %}" class="btn btn-success btn-sm">
+                            Verify
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
@@ -85,6 +107,26 @@
                     <span class="badge bg-danger">{{ staff.login_info.get_status_display }}</span>
                 </p>
                 <a href="{% url 'verify_staff' staff.id 0 %}" class="btn btn-success w-100">
+                    Verify
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+        {% for off in office %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bx bx-user-circle" style="font-size: 50px; color: #ccc;"></i>
+                    <h5 class="mb-0">{{ off.name }}</h5>
+                </div>
+                <p class="mb-1"><strong>Phone:</strong> {{ off.phone }}</p>
+                <p class="mb-1"><strong>Email:</strong> {{ off.login_info.email }}</p>
+                <p class="mb-1"><strong>Department:</strong> office</p>
+                <p class="mb-1"><strong>Position:</strong> {{ off.get_position_display }}</p>
+                <p class="mb-3"><strong>Status:</strong>
+                    <span class="badge bg-danger">{{ off.login_info.get_status_display }}</span>
+                </p>
+                <a href="{% url 'verify_office' off.id 0 %}" class="btn btn-success w-100">
                     Verify
                 </a>
             </div>

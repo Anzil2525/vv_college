@@ -1,0 +1,71 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>V.V College Office - Edit Student Fee</title>
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        .navbar-brand img { max-height: 48px; }
+        .fee-card {
+            max-width: 620px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <header class="bg-white border-bottom shadow-sm">
+        <div class="container">
+            <nav class="navbar navbar-light">
+                <a class="navbar-brand" href="{% url 'student_fee_management' %}">
+                    <img src="{% static 'assets/img/logo.png' %}" alt="V.V Logo">
+                </a>
+                <div class="ms-auto d-flex align-items-center gap-2">
+                    <span class="d-none d-sm-inline text-muted small">{{ office_staff.name }}</span>
+                    <a href="{% url 'student_fee_management' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container py-4 py-sm-5 flex-grow-1 d-flex justify-content-center">
+        <section class="fee-card p-4 p-sm-5 w-100">
+            <a href="{% url 'individual_student_fee_students' semester course.id %}" class="btn btn-outline-primary btn-sm mb-4">
+                <i class="bi bi-arrow-left me-1"></i> Back to Students
+            </a>
+            <h1 class="h3 fw-bold mb-1">Set Individual Student Fee</h1>
+            <p class="text-muted mb-4">{{ student.name }} ({{ student.reg_no }}) - {{ course.course }}, Semester {{ semester }}</p>
+
+            <div class="alert alert-info small">
+                Course fee structure: <strong>{{ fee_structure.amount }}</strong>, due {{ fee_structure.due_date|date:'d M Y' }}.
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                <div class="mb-3">
+                    <label for="id_total_amount" class="form-label fw-semibold">Payable Amount</label>
+                    {{ form.total_amount }}
+                    {{ form.total_amount.errors }}
+                </div>
+                <div class="mb-4">
+                    <label for="id_due_date" class="form-label fw-semibold">Due Date</label>
+                    {{ form.due_date }}
+                    {{ form.due_date.errors }}
+                </div>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save me-1"></i> Save Individual Fee
+                </button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

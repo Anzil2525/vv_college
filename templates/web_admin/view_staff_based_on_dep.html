@@ -13,8 +13,6 @@
     {% endif %}
     <h2 class="mb-4 text-center fw-bold border-bottom pb-2">Departments</h2>
 
-    {% if dep %}
-
     <!-- Desktop Table -->
     <div class="table-responsive d-none d-md-block">
         <table class="table table-bordered table-hover align-middle text-center shadow-sm rounded-4">
@@ -37,6 +35,15 @@
                     </td>
                 </tr>
                 {% endfor %}
+                <tr class="table-light">
+                    <td>{% if dep %}{{ dep|length|add:1 }}{% else %}1{% endif %}</td>
+                    <td><i class="bx bx-building-house text-primary me-1"></i> OFFICE</td>
+                    <td>
+                        <a href="{% url 'view_office_staff' %}" class="btn btn-sm btn-primary rounded-pill">
+                            View
+                        </a>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -56,12 +63,16 @@
             </div>
         </div>
         {% endfor %}
+        <div class="col-12 col-sm-6 col-md-4">
+            <div class="card h-100 shadow-sm text-center border-primary" style="min-height: 140px;">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <h5 class="card-title fw-bold"><i class="bx bx-building-house text-primary me-1"></i> DEPARTMENT OF OFFICE</h5>
+                    <a href="{% url 'view_office_staff' %}" class="btn btn-primary mt-auto rounded-pill">
+                        View Staff
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    {% else %}
-    <div class="alert alert-info text-center mt-4" style="margin-bottom: 20vh;">
-        No departments found.
-    </div>
-    {% endif %}
 </div>
 {% endblock %}

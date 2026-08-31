@@ -1,0 +1,1017 @@
+{% extends "web_admin/header_footer.html" %}
+
+{% block content %}
+<style>
+    /* Centered Layout & Container */
+    .content-container {
+        max-width: 1140px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .card {
+        max-width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+    }
+
+    /* Cards Styling */
+    .stat-card {
+        border-radius: 0.75rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .main-card {
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Calendar Styles */
+    .calendar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.4rem;
+    }
+
+    .calendar-day-head {
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #64748b;
+        text-transform: uppercase;
+        padding: 0.5rem 0;
+        background: #f8fafc;
+        border-radius: 0.35rem;
+    }
+
+    .calendar-day-head.sunday-head {
+        color: #ef4444;
+        font-weight: 800;
+        background: #fef2f2;
+    }
+
+    .calendar-day-cell {
+        aspect-ratio: 1 / 1;
+        border-radius: 0.6rem;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        transition: all 0.2s ease;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #334155;
+        cursor: pointer;
+        padding: 2px;
+    }
+
+    .calendar-day-cell:hover:not(.empty-day) {
+        transform: scale(1.05);
+        z-index: 10;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        border-color: #cbd5e1;
+    }
+
+    .calendar-day-cell.empty-day {
+        background: transparent;
+        border-color: transparent;
+        cursor: default;
+    }
+
+    .calendar-day-cell.today {
+        border: 2px solid #0284c7 !important;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+        font-weight: 800;
+    }
+
+    /* Off-day Stylings */
+    .calendar-day-cell.sunday:not(.present) {
+        background: #f8fafc;
+        border-color: #f1f5f9;
+        color: #94a3b8;
+    }
+
+    .calendar-day-cell.second-sat:not(.present) {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+        color: #94a3b8;
+    }
+
+    .calendar-day-cell.college-holiday:not(.present) {
+        background: #f3e8ff !important;
+        border-color: #d8b4fe !important;
+        color: #7e22ce !important;
+    }
+
+    /* Attendance States */
+    .calendar-day-cell.present {
+        background: #dcfce7 !important;
+        border-color: #86efac !important;
+        color: #15803d !important;
+    }
+
+    .calendar-day-cell.absent {
+        background: #fee2e2 !important;
+        border-color: #fca5a5 !important;
+        color: #991b1b !important;
+    }
+
+    .calendar-day-cell.leave {
+        background: #fef3c7 !important;
+        border-color: #fde68a !important;
+        color: #b45309 !important;
+    }
+
+    .status-pill-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        margin-top: 2px;
+    }
+    .present .status-pill-dot { background-color: #16a34a; }
+    .absent .status-pill-dot { background-color: #dc2626; }
+    .leave .status-pill-dot { background-color: #d97706; }
+    .college-holiday:not(.present) .status-pill-dot { background-color: #9333ea; }
+    .second-sat:not(.present) .status-pill-dot { background-color: #94a3b8; }
+
+    .sub-tag {
+        font-size: 0.65rem;
+        line-height: 1;
+        margin-top: 1px;
+        font-weight: 700;
+        text-align: center;
+        max-width: 90%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+        .calendar-header {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .calendar-grid {
+            gap: 0.2rem;
+        }
+
+        .calendar-day-head {
+            font-size: 0.7rem;
+            padding: 0.3rem 0;
+        }
+
+        .calendar-day-cell {
+            font-size: 0.8rem;
+            border-radius: 0.35rem;
+        }
+
+        .status-pill-dot {
+            width: 4px;
+            height: 4px;
+        }
+
+        .sub-tag {
+            display: none;
+        }
+    }
+</style>
+
+<div class="content-container py-3 py-sm-4">
+    
+    <!-- Messages Notifications -->
+    {% if messages %}
+        <div style="margin-bottom: 1.25rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show shadow-sm">
+                    <i class="bx {% if 'error' in message.tags %}bx-error-circle{% else %}bx-check-circle{% endif %} me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Top Action Bar -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4 pb-3 border-bottom">
+        <div>
+            <h2 class="fw-bold mb-1 fs-3 text-dark">
+                <i class="bx bx-calendar-check text-primary me-2"></i>Attendance Log - {{ staff.name }}
+            </h2>
+            <p class="text-muted mb-0 small">Manage, review, and adjust office staff attendance and holidays</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#manageCollegeHolidaysModal">
+                <i class="bx bx-calendar-star me-1"></i> Manage Holidays ({{ holidays_list|length }})
+            </button>
+            <a href="{% url 'view_office_staff' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bx bx-arrow-back me-1"></i> Back to Staff List
+            </a>
+        </div>
+    </div>
+
+    <!-- Staff Profile Card -->
+    <div class="card main-card mb-4 bg-white">
+        <div class="card-body p-3 p-sm-4">
+            <div class="row align-items-center">
+                <div class="col-auto text-center mb-2 mb-md-0">
+                    <div class="d-inline-flex p-3 rounded-circle bg-light border">
+                        <i class="bx bx-user" style="font-size: 40px; color: #0284c7;"></i>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                        <h4 class="fw-bold mb-0 text-dark fs-4">{{ staff.name }}</h4>
+                        <span class="badge bg-info text-dark">{{ staff.get_position_display }}</span>
+                        <span class="badge bg-dark">DEPARTMENT OF OFFICE</span>
+                    </div>
+                    <div class="row text-muted small mt-2 g-2">
+                        <div class="col-12 col-sm-4">
+                            <i class="bx bx-envelope text-primary me-1"></i> {{ staff.login_info.email }}
+                        </div>
+                        <div class="col-12 col-sm-4">
+                            <i class="bx bx-phone text-success me-1"></i> {{ staff.phone }}
+                        </div>
+                        <div class="col-12 col-sm-4">
+                            <i class="bx bx-calendar-check text-muted me-1"></i> Registered: {{ registered_on_str }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Stats Cards Row (Dynamic for Selected Month) -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card stat-card text-center p-3 h-100">
+                <div class="text-muted small fw-semibold text-uppercase mb-1">
+                    Accountable Days (<span id="stat-month-name">Month</span>)
+                </div>
+                <div class="fs-3 fw-bold text-dark" id="stat-accountable-days">0</div>
+                <span class="text-muted" style="font-size: 0.75rem;" id="stat-accountable-sub">Working days tracked</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card stat-card text-center p-3 h-100">
+                <div class="text-muted small fw-semibold text-uppercase mb-1">Days Present</div>
+                <div class="fs-3 fw-bold text-success" id="stat-present-days">0</div>
+                <span class="text-success" style="font-size: 0.75rem;">Attended in month</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card stat-card text-center p-3 h-100">
+                <div class="text-muted small fw-semibold text-uppercase mb-1">Days Absent</div>
+                <div class="fs-3 fw-bold text-danger" id="stat-absent-days">0</div>
+                <span class="text-danger" style="font-size: 0.75rem;">Auto-calculated</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card stat-card text-center p-3 h-100">
+                <div class="text-muted small fw-semibold text-uppercase mb-1">Attendance Rate</div>
+                <div class="fs-3 fw-bold text-primary" id="stat-att-rate">0.0%</div>
+                <span class="text-primary" style="font-size: 0.75rem;" id="stat-rate-sub">Monthly percentage</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Calendar Card -->
+    <div class="card main-card p-3 p-sm-4 mb-4">
+        <div class="calendar-header">
+            <div class="text-center text-sm-start">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bx bx-calendar text-primary me-2"></i>Attendance & Holiday Calendar
+                </h5>
+                <span class="small text-muted">Click any date to modify attendance or manage College Holidays</span>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2">
+                <button id="btn-prev-month" class="btn btn-outline-secondary btn-sm rounded-circle" title="Previous Month">
+                    <i class="bx bx-chevron-left"></i>
+                </button>
+                <span id="calendar-month-year" class="fw-bold text-dark px-3 py-1 bg-light rounded border text-center" style="min-width: 160px;">
+                    -- 2026
+                </span>
+                <button id="btn-next-month" class="btn btn-outline-secondary btn-sm rounded-circle" title="Next Month">
+                    <i class="bx bx-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="d-flex align-items-center justify-content-center justify-content-sm-start gap-2 gap-sm-3 mb-3 p-2 bg-light rounded-3 border small flex-wrap">
+            <div class="d-flex align-items-center gap-1">
+                <span class="badge bg-success rounded-circle p-1"> </span>
+                <span class="text-secondary fw-semibold">Present</span>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <span class="badge bg-danger rounded-circle p-1"> </span>
+                <span class="text-secondary fw-semibold">Absent</span>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <span class="badge bg-warning rounded-circle p-1"> </span>
+                <span class="text-secondary fw-semibold">Leave</span>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <span class="badge rounded-circle p-1" style="background-color: #9333ea;"> </span>
+                <span class="text-secondary fw-semibold">College Holiday</span>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <span class="badge bg-secondary rounded-circle p-1" style="opacity: 0.5;"> </span>
+                <span class="text-secondary fw-semibold">Sunday / 2nd Sat</span>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <span class="border border-2 border-primary rounded-circle p-1"> </span>
+                <span class="text-secondary fw-semibold">Today</span>
+            </div>
+        </div>
+
+        <!-- Calendar Grid Headings -->
+        <div class="calendar-grid">
+            <div class="calendar-day-head sunday-head">Sun</div>
+            <div class="calendar-day-head">Mon</div>
+            <div class="calendar-day-head">Tue</div>
+            <div class="calendar-day-head">Wed</div>
+            <div class="calendar-day-head">Thu</div>
+            <div class="calendar-day-head">Fri</div>
+            <div class="calendar-day-head">Sat</div>
+        </div>
+        
+        <!-- Days Grid -->
+        <div id="calendar-days-container" class="calendar-grid mt-1">
+            <!-- Days rendered dynamically via JavaScript -->
+        </div>
+    </div>
+
+    <!-- Attendance Records List Table -->
+    <div class="card main-card p-3 p-sm-4 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bx bx-list-ul text-primary me-2"></i>Attendance Log History - <span id="table-month-name">Current Month</span>
+                </h5>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" id="btn-toggle-all-records" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="toggleShowAllRecords()">
+                    Show All Months
+                </button>
+                <span class="badge bg-light text-dark border" id="table-count-badge">{{ records|length }} Entries</span>
+            </div>
+        </div>
+
+        {% if records %}
+        <div class="table-responsive d-none d-md-block">
+            <table class="table table-bordered table-hover align-middle text-center mb-0" id="attendance-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Day</th>
+                        <th>Status</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Working Hours</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in records %}
+                    <tr class="attendance-table-row" data-month-prefix="{{ item.date|date:'Y-m' }}">
+                        <td class="fw-bold">{{ item.date|date:"d M Y" }}</td>
+                        <td>{{ item.day_name }}</td>
+                        <td>
+                            {% if item.status == 'P' %}
+                                <span class="badge bg-success px-2 py-1">Present</span>
+                            {% elif item.status == 'A' %}
+                                <span class="badge bg-danger px-2 py-1">Absent</span>
+                            {% elif item.status == 'L' %}
+                                <span class="badge bg-warning text-dark px-2 py-1">Leave</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.marked_at_display %}
+                                {{ item.marked_at_display }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.checked_out_at_display %}
+                                {{ item.checked_out_at_display }}
+                            {% elif item.status == 'P' %}
+                                <span class="text-warning small fw-semibold">Pending Check-out</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.duration %}
+                                <span class="badge bg-light text-dark border">{{ item.duration }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex justify-content-center gap-1">
+                                <button type="button" class="btn btn-primary btn-sm px-2" onclick="openDateModal('{{ item.date_str }}')">
+                                    <i class="bx bx-edit"></i> Edit
+                                </button>
+                                {% if item.att_id %}
+                                <a href="{% url 'delete_office_staff_attendance' staff.id item.att_id %}" class="btn btn-outline-danger btn-sm px-2" onclick="return confirm('Delete attendance record for {{ item.date|date:"d M Y" }}?')">
+                                    <i class="bx bx-trash"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="no-month-records-alert" class="alert alert-light text-center border py-4 my-2" style="display: none;">
+            <i class="bx bx-info-circle text-muted fs-4 d-block mb-1"></i>
+            No attendance entries logged for this month.
+        </div>
+
+        <!-- Mobile Card View for Records -->
+        <div class="row d-md-none g-2" id="attendance-mobile-cards">
+            {% for item in records %}
+            <div class="col-12 attendance-mobile-card" data-month-prefix="{{ item.date|date:'Y-m' }}">
+                <div class="card p-3 border-start border-4 {% if item.status == 'P' %}border-success{% elif item.status == 'A' %}border-danger{% else %}border-warning{% endif %}">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong>{{ item.date|date:"d M Y" }} ({{ item.day_name|slice:":3" }})</strong>
+                        {% if item.status == 'P' %}
+                            <span class="badge bg-success">Present</span>
+                        {% elif item.status == 'A' %}
+                            <span class="badge bg-danger">Absent</span>
+                        {% elif item.status == 'L' %}
+                            <span class="badge bg-warning text-dark">Leave</span>
+                        {% endif %}
+                    </div>
+                    {% if item.status == 'P' %}
+                    <div class="small text-muted mb-2">
+                        In: {{ item.marked_at_display|default:"-" }} | Out: {{ item.checked_out_at_display|default:"Pending" }}
+                        {% if item.duration %}| Duration: {{ item.duration }}{% endif %}
+                    </div>
+                    {% endif %}
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary btn-sm w-100" onclick="openDateModal('{{ item.date_str }}')">
+                            Edit Record
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="alert alert-info text-center py-4 mb-0">
+            <i class="bx bx-info-circle fs-4 d-block mb-2"></i>
+            No attendance records found yet. Click any date on the calendar above to mark attendance.
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Modal 1: Date Action Modal (Staff Attendance & Set Date as College Holiday) -->
+<div class="modal fade" id="dateActionModal" tabindex="-1" aria-labelledby="dateActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow border-0 rounded-4">
+            
+            <div class="modal-header bg-primary text-white rounded-top-4">
+                <h5 class="modal-title fw-bold" id="dateActionModalLabel">
+                    <i class="bx bx-calendar me-2"></i>Manage Date: <span id="modal_selected_date_label">--</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <!-- Nav Tabs -->
+                <ul class="nav nav-pills nav-fill mb-3" id="pills-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold btn-sm" id="tab-attendance-btn" data-bs-toggle="pill" data-bs-target="#tab-attendance" type="button" role="tab">
+                            <i class="bx bx-user-check me-1"></i> Staff Attendance
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold btn-sm" id="tab-holiday-btn" data-bs-toggle="pill" data-bs-target="#tab-holiday" type="button" role="tab">
+                            <i class="bx bx-calendar-star me-1"></i> College Holiday
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="pills-tabContent">
+                    <!-- Tab 1: Staff Attendance -->
+                    <div class="tab-pane fade show active" id="tab-attendance" role="tabpanel">
+                        <form method="POST" action="{% url 'update_office_staff_attendance' staff.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="date" id="modal_att_date">
+
+                            <div class="mb-3">
+                                <label for="modal_att_status" class="form-label fw-bold small">Attendance Status</label>
+                                <select name="status" id="modal_att_status" class="form-select" required>
+                                    <option value="P">Present</option>
+                                    <option value="A">Absent</option>
+                                    <option value="L">Leave</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3" id="att_time_container">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <label for="modal_check_in" class="form-label fw-bold small">Check-in Time</label>
+                                        <input type="time" name="check_in_time" id="modal_check_in" class="form-control">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="modal_check_out" class="form-label fw-bold small">Check-out Time</label>
+                                        <input type="time" name="check_out_time" id="modal_check_out" class="form-control">
+                                    </div>
+                                </div>
+                                <small class="text-muted mt-1 d-block">Defaults to 09:00 AM in / 05:00 PM out if left empty.</small>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-4">
+                                <button type="button" id="btn-delete-attendance-entry" class="btn btn-outline-danger btn-sm" style="display: none;">
+                                    <i class="bx bx-trash me-1"></i> Reset Entry
+                                </button>
+                                <div class="ms-auto">
+                                    <button type="button" class="btn btn-light btn-sm me-1" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary btn-sm fw-bold px-3">Save Attendance</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Tab 2: College Holiday -->
+                    <div class="tab-pane fade" id="tab-holiday" role="tabpanel">
+                        <div id="existing-holiday-view" class="p-3 bg-light rounded-3 border mb-3" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-primary">College Holiday Active</span>
+                                <a id="btn-delete-current-holiday" href="#" class="btn btn-danger btn-sm" onclick="return confirm('Remove this holiday from the calendar?')">
+                                    <i class="bx bx-trash me-1"></i> Delete Holiday
+                                </a>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-1" id="existing-holiday-name">--</h5>
+                            <p class="text-muted small mb-0" id="existing-holiday-desc"></p>
+                        </div>
+
+                        <form method="POST" action="{% url 'add_holiday' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="date" id="modal_holiday_date">
+                            <input type="hidden" name="staff_id" value="{{ staff.id }}">
+
+                            <div class="mb-3">
+                                <label for="modal_holiday_name" class="form-label fw-bold small">Holiday Name / Reason</label>
+                                <input type="text" name="name" id="modal_holiday_name" class="form-control" placeholder="e.g. Independence Day, Diwali, Annual Sports Day" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="modal_holiday_description" class="form-label fw-bold small">Description (Optional)</label>
+                                <textarea name="description" id="modal_holiday_description" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2 mt-4">
+                                <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-success btn-sm fw-bold px-3" id="btn-submit-holiday">
+                                    <i class="bx bx-save me-1"></i> Save College Holiday
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 2: Manage All College Holidays -->
+<div class="modal fade" id="manageCollegeHolidaysModal" tabindex="-1" aria-labelledby="manageCollegeHolidaysModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow border-0 rounded-4">
+            
+            <div class="modal-header bg-dark text-white rounded-top-4">
+                <h5 class="modal-title fw-bold" id="manageCollegeHolidaysModalLabel">
+                    <i class="bx bx-calendar-star me-2 text-warning"></i>College Holidays Calendar
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                
+                <!-- Quick Add Holiday Form -->
+                <div class="p-3 bg-light rounded-3 border mb-4">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bx bx-plus-circle text-primary me-1"></i> Add New College Holiday</h6>
+                    <form method="POST" action="{% url 'add_holiday' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="staff_id" value="{{ staff.id }}">
+                        
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Holiday Date</label>
+                                <input type="date" name="date" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Holiday Name</label>
+                                <input type="text" name="name" class="form-control form-control-sm" placeholder="e.g. Gandhi Jayanti" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Description (Optional)</label>
+                                <input type="text" name="description" class="form-control form-control-sm" placeholder="Optional description">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">
+                                    <i class="bx bx-plus me-1"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Existing Holidays List Table -->
+                <h6 class="fw-bold text-dark mb-2">Existing Holidays ({{ holidays_list|length }})</h6>
+                {% if holidays_list %}
+                <div class="table-responsive" style="max-height: 320px; overflow-y: auto;">
+                    <table class="table table-bordered table-striped align-middle text-center small mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Day</th>
+                                <th>Holiday Name</th>
+                                <th>Description</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hol in holidays_list %}
+                            <tr>
+                                <td class="fw-bold">{{ hol.date|date:"d M Y" }}</td>
+                                <td>{{ hol.date|date:"l" }}</td>
+                                <td class="text-start fw-bold text-primary">{{ hol.name }}</td>
+                                <td class="text-start text-muted">{{ hol.description|default:"-" }}</td>
+                                <td>
+                                    <a href="{% url 'delete_holiday' hol.id %}?staff_id={{ staff.id }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete holiday {{ hol.name }} on {{ hol.date|date:"d M Y" }}?')">
+                                        <i class="bx bx-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-light text-center border py-3 text-muted">
+                    No College Holidays added yet. Add holidays using the form above to prevent staff from being marked absent on those days.
+                </div>
+                {% endif %}
+
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript Logic -->
+<script>
+    const ATTENDANCE_DATA = {{ attendance_dict_json|safe }};
+    const HOLIDAYS_DATA = {{ holidays_dict_json|safe }};
+    const REGISTERED_ON_STR = "{{ registered_on_str }}";
+    const STAFF_ID = {{ staff.id }};
+    
+    let currentCalendarDate = new Date();
+    let dateActionModalInstance = null;
+    let isShowingAllRecords = false;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        dateActionModalInstance = new bootstrap.Modal(document.getElementById('dateActionModal'));
+
+        renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+
+        document.getElementById("modal_att_status").addEventListener("change", toggleTimeInputs);
+
+        document.getElementById("btn-prev-month").addEventListener("click", () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+        });
+
+        document.getElementById("btn-next-month").addEventListener("click", () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+        });
+
+        document.getElementById("btn-delete-attendance-entry").addEventListener("click", () => {
+            const dateStr = document.getElementById("modal_att_date").value;
+            const rec = ATTENDANCE_DATA[dateStr];
+            if (confirm(`Reset attendance record for ${dateStr}?`)) {
+                if (rec && rec.id) {
+                    window.location.href = `/delete_office_staff_attendance/${STAFF_ID}/${rec.id}/`;
+                } else {
+                    window.location.href = `/delete_office_staff_attendance/${STAFF_ID}/?date=${dateStr}`;
+                }
+            }
+        });
+    });
+
+    function toggleShowAllRecords() {
+        isShowingAllRecords = !isShowingAllRecords;
+        const btn = document.getElementById("btn-toggle-all-records");
+        if (isShowingAllRecords) {
+            btn.textContent = "Show Selected Month";
+            btn.classList.replace("btn-outline-secondary", "btn-primary");
+        } else {
+            btn.textContent = "Show All Months";
+            btn.classList.replace("btn-primary", "btn-outline-secondary");
+        }
+        updateRecordsTable(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+    }
+
+    function updateRecordsTable(year, month) {
+        const monthNames = ["January", "February", "March", "April", "May", "June", 
+                            "July", "August", "September", "October", "November", "December"];
+        const monthName = monthNames[month];
+        const currentPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+        
+        const rows = document.querySelectorAll(".attendance-table-row");
+        const mobileCards = document.querySelectorAll(".attendance-mobile-card");
+        const alertEl = document.getElementById("no-month-records-alert");
+        const titleEl = document.getElementById("table-month-name");
+        const badgeEl = document.getElementById("table-count-badge");
+
+        let visibleCount = 0;
+
+        if (isShowingAllRecords) {
+            if (titleEl) titleEl.textContent = "All Months";
+            rows.forEach(r => { r.style.display = ""; visibleCount++; });
+            mobileCards.forEach(c => { c.style.display = ""; });
+        } else {
+            if (titleEl) titleEl.textContent = `${monthName} ${year}`;
+            rows.forEach(r => {
+                if (r.getAttribute("data-month-prefix") === currentPrefix) {
+                    r.style.display = "";
+                    visibleCount++;
+                } else {
+                    r.style.display = "none";
+                }
+            });
+            mobileCards.forEach(c => {
+                if (c.getAttribute("data-month-prefix") === currentPrefix) {
+                    c.style.display = "";
+                } else {
+                    c.style.display = "none";
+                }
+            });
+        }
+
+        if (badgeEl) badgeEl.textContent = `${visibleCount} Entries`;
+        if (alertEl) {
+            alertEl.style.display = (visibleCount === 0) ? "block" : "none";
+        }
+    }
+
+    function toggleTimeInputs() {
+        const status = document.getElementById("modal_att_status").value;
+        const timeContainer = document.getElementById("att_time_container");
+        if (status === 'P') {
+            timeContainer.style.display = 'block';
+        } else {
+            timeContainer.style.display = 'none';
+        }
+    }
+
+    function isSecondSaturday(dateObj) {
+        // Saturday is getDay() === 6. Second Saturday is between day 8 and 14
+        if (dateObj.getDay() === 6) {
+            const day = dateObj.getDate();
+            return day >= 8 && day <= 14;
+        }
+        return false;
+    }
+
+    function renderCalendar(year, month) {
+        const container = document.getElementById("calendar-days-container");
+        const monthYearTitle = document.getElementById("calendar-month-year");
+        container.innerHTML = "";
+
+        const monthNames = ["January", "February", "March", "April", "May", "June", 
+                            "July", "August", "September", "October", "November", "December"];
+        
+        const monthName = monthNames[month];
+        monthYearTitle.textContent = `${monthName} ${year}`;
+
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+        const todayObj = new Date();
+        const todayMidnight = new Date(todayObj.getFullYear(), todayObj.getMonth(), todayObj.getDate());
+
+        // Parse registration date
+        const regParts = REGISTERED_ON_STR.split('-');
+        const regDate = new Date(parseInt(regParts[0]), parseInt(regParts[1]) - 1, parseInt(regParts[2]));
+
+        let monthlyPresent = 0;
+        let monthlyAbsent = 0;
+        let monthlyLeave = 0;
+
+        // Render Empty leading cells
+        for (let i = 0; i < firstDayIndex; i++) {
+            const emptyCell = document.createElement("div");
+            emptyCell.className = "calendar-day-cell empty-day";
+            container.appendChild(emptyCell);
+        }
+
+        // Render Day Cells
+        for (let day = 1; day <= totalDaysInMonth; day++) {
+            const dayCell = document.createElement("div");
+            dayCell.className = "calendar-day-cell";
+
+            const dayNumberSpan = document.createElement("span");
+            dayNumberSpan.textContent = day;
+            dayCell.appendChild(dayNumberSpan);
+
+            const cellDate = new Date(year, month, day);
+            const isSunday = cellDate.getDay() === 0;
+            const isSecSat = isSecondSaturday(cellDate);
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const isHoliday = !!HOLIDAYS_DATA[dateStr];
+
+            if (day === todayObj.getDate() && month === todayObj.getMonth() && year === todayObj.getFullYear()) {
+                dayCell.classList.add("today");
+            }
+
+            if (isSunday) {
+                dayCell.classList.add("sunday");
+                dayCell.title = "Sunday (Weekly Off)";
+            } else if (isSecSat) {
+                dayCell.classList.add("second-sat");
+                dayCell.title = "Second Saturday (Holiday)";
+                const tag = document.createElement("span");
+                tag.className = "sub-tag text-muted";
+                tag.textContent = "2nd Sat";
+                dayCell.appendChild(tag);
+            } else if (isHoliday) {
+                dayCell.classList.add("college-holiday");
+                const hol = HOLIDAYS_DATA[dateStr];
+                dayCell.title = `College Holiday: ${hol.name}`;
+                const tag = document.createElement("span");
+                tag.className = "sub-tag text-primary";
+                tag.textContent = hol.name;
+                dayCell.appendChild(tag);
+            }
+
+            if (ATTENDANCE_DATA[dateStr]) {
+                const record = ATTENDANCE_DATA[dateStr];
+                
+                if (record.status === 'P') {
+                    monthlyPresent++;
+                    dayCell.classList.add("present");
+                    const dot = document.createElement("div");
+                    dot.className = "status-pill-dot";
+                    dayCell.appendChild(dot);
+                    
+                    let titleStr = `Present (In: ${record.marked_at_display || '-'}`;
+                    if (record.checked_out_at_display) {
+                        titleStr += ` | Out: ${record.checked_out_at_display}`;
+                    }
+                    titleStr += `)`;
+                    dayCell.title = titleStr;
+                } else if (record.status === 'L') {
+                    monthlyLeave++;
+                    dayCell.classList.add("leave");
+                    const dot = document.createElement("div");
+                    dot.className = "status-pill-dot";
+                    dayCell.appendChild(dot);
+                    dayCell.title = `Leave (Approved)`;
+                } else if (record.status === 'A') {
+                    monthlyAbsent++;
+                    dayCell.classList.add("absent");
+                    const dot = document.createElement("div");
+                    dot.className = "status-pill-dot";
+                    dayCell.appendChild(dot);
+                    dayCell.title = `Absent (No attendance recorded)`;
+                }
+            } else {
+                // If past working day (non-Sunday, non-2nd Sat, non-Holiday) elapsed since registration
+                if (cellDate >= regDate && cellDate < todayMidnight && !isSunday && !isSecSat && !isHoliday) {
+                    monthlyAbsent++;
+                    dayCell.classList.add("absent");
+                    const dot = document.createElement("div");
+                    dot.className = "status-pill-dot";
+                    dayCell.appendChild(dot);
+                    dayCell.title = `Absent (No attendance recorded)`;
+                }
+            }
+
+            // Click listener
+            dayCell.addEventListener("click", () => {
+                openDateModal(dateStr);
+            });
+
+            container.appendChild(dayCell);
+        }
+
+        // Calculate dynamic monthly stats
+        const monthlyTotal = monthlyPresent + monthlyAbsent + monthlyLeave;
+        const monthlyRate = monthlyTotal > 0 ? ((monthlyPresent / monthlyTotal) * 100).toFixed(1) : "0.0";
+
+        // Update the 4 stats cards dynamically
+        const statMonthName = document.getElementById("stat-month-name");
+        const statAccountable = document.getElementById("stat-accountable-days");
+        const statPresent = document.getElementById("stat-present-days");
+        const statAbsent = document.getElementById("stat-absent-days");
+        const statRate = document.getElementById("stat-att-rate");
+        const statAccountableSub = document.getElementById("stat-accountable-sub");
+        const statRateSub = document.getElementById("stat-rate-sub");
+
+        if (statMonthName) statMonthName.textContent = monthName;
+        if (statAccountable) statAccountable.textContent = monthlyTotal;
+        if (statPresent) statPresent.textContent = monthlyPresent;
+        if (statAbsent) statAbsent.textContent = monthlyAbsent;
+        if (statRate) statRate.textContent = `${monthlyRate}%`;
+        if (statAccountableSub) statAccountableSub.textContent = `Working days in ${monthName}`;
+        if (statRateSub) statRateSub.textContent = `${monthName} rate`;
+
+        // Update records table for selected month
+        updateRecordsTable(year, month);
+    }
+
+    function openDateModal(dateStr) {
+        document.getElementById("modal_selected_date_label").textContent = dateStr;
+        document.getElementById("modal_att_date").value = dateStr;
+        document.getElementById("modal_holiday_date").value = dateStr;
+        
+        const deleteAttBtn = document.getElementById("btn-delete-attendance-entry");
+        const existingHolidayView = document.getElementById("existing-holiday-view");
+        const holidayNameInput = document.getElementById("modal_holiday_name");
+        const holidayDescInput = document.getElementById("modal_holiday_description");
+        const deleteHolidayLink = document.getElementById("btn-delete-current-holiday");
+        const holidaySubmitBtn = document.getElementById("btn-submit-holiday");
+
+        // Populate Attendance Tab
+        if (ATTENDANCE_DATA[dateStr]) {
+            const rec = ATTENDANCE_DATA[dateStr];
+            document.getElementById("modal_att_status").value = rec.status;
+            document.getElementById("modal_check_in").value = (rec.status === 'P') ? (rec.marked_at_time || "") : "";
+            document.getElementById("modal_check_out").value = (rec.status === 'P') ? (rec.checked_out_at_time || "") : "";
+            deleteAttBtn.style.display = rec.id ? "inline-block" : "none";
+        } else {
+            document.getElementById("modal_att_status").value = "P";
+            document.getElementById("modal_check_in").value = "09:00";
+            document.getElementById("modal_check_out").value = "17:00";
+            deleteAttBtn.style.display = "none";
+        }
+        toggleTimeInputs();
+
+        // Populate Holiday Tab
+        if (HOLIDAYS_DATA[dateStr]) {
+            const hol = HOLIDAYS_DATA[dateStr];
+            existingHolidayView.style.display = "block";
+            document.getElementById("existing-holiday-name").textContent = hol.name;
+            document.getElementById("existing-holiday-desc").textContent = hol.description || "No description provided.";
+            deleteHolidayLink.href = `/delete_holiday/${hol.id}/?staff_id=${STAFF_ID}`;
+            holidayNameInput.value = hol.name;
+            holidayDescInput.value = hol.description || "";
+            holidaySubmitBtn.innerHTML = `<i class="bx bx-save me-1"></i> Update College Holiday`;
+        } else {
+            existingHolidayView.style.display = "none";
+            holidayNameInput.value = "";
+            holidayDescInput.value = "";
+            holidaySubmitBtn.innerHTML = `<i class="bx bx-save me-1"></i> Set as College Holiday`;
+        }
+
+        // Show default tab
+        const attTabBtn = document.getElementById("tab-attendance-btn");
+        const bootstrapTab = new bootstrap.Tab(attTabBtn);
+        bootstrapTab.show();
+
+        dateActionModalInstance.show();
+    }
+</script>
+{% endblock %}

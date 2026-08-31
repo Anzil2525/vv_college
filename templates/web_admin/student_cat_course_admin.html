@@ -35,7 +35,7 @@
                         </a>
                         <a href="{% url 'change_sem' sem course.id %}"
                            class="btn btn-sm btn-warning"
-                           onclick="return confirm('Are you sure you want to promote the students to the next semester? This action cannot be undone.');">
+                           onclick="return confirm('This will promote the students to the next semester and assign the course fee structure amount and due date to them. Please make sure the course fee structure and due date are correct before continuing. This action cannot be undone.');">
                             Change Sem
                         </a>
                     </td>
@@ -60,7 +60,7 @@
                 </a>
                 <a href="{% url 'change_sem' sem course.id %}"
                            class="btn btn-primary w-100 mt-2"
-                           onclick="return confirm('Are you sure you want to promote the students to the next semester? This action cannot be undone.');">
+                           onclick="return confirm('This will promote the students to the next semester and assign the course fee structure amount and due date to them. Please make sure the course fee structure and due date are correct before continuing. This action cannot be undone.');">
                             Change Sem
                         </a>
                 <a href="{% url 'view_course_attendance' course sem %}" class="btn btn-primary w-100 mt-2">

@@ -42,12 +42,17 @@
       {% csrf_token %}
       <div class="row g-3">
 
-        <label for="Course">Course</label>
-        <select name="Course" id="Course">
-          {% for course in courses %}
-            <option value="{{ course.id }}">{{ course.course }}</option>
-          {% endfor %}
-        </select>
+        <div class="col-md-6">
+          <label for="course" class="form-label">Course</label>
+          <select name="course" id="course" class="form-select" {% if selected_course %}disabled{% endif %}>
+            {% for course in courses %}
+              <option value="{{ course.id }}" {% if selected_course and course.id == selected_course.id %}selected{% endif %}>{{ course.course }}</option>
+            {% endfor %}
+          </select>
+          {% if selected_course %}
+            <input type="hidden" name="course" value="{{ selected_course.id }}">
+          {% endif %}
+        </div>
         
         {% for field in timeTableForm %}
           <div class="col-md-6">
@@ -60,7 +65,7 @@
         {% endfor %}
       </div>
       <div class="mt-4 d-grid">
-        <button type="submit" class="btn btn-primary btn-lg">Save Time Table</button>
+        <button type="submit" class="btn btn-primary btn-lg">Save Time Table Set</button>
       </div>
     </form>
   </div>

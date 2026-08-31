@@ -1,11 +1,22 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from index.models import *
+from .models import Holiday
+from .attendance_utils import (
+    compute_office_staff_attendance,
+    get_holidays_dict,
+    is_second_saturday,
+    is_sunday,
+)
+from office.models import OfficeAttendance, OfficeLeaveApplication
 from .forms import *
+from django.db import transaction
 from django.db.models import Min, ProtectedError
-from datetime import date, timedelta
+from datetime import datetime, date, time, timedelta
+from django.utils import timezone
 from django.utils.dateparse import parse_date
 import calendar
+import json
 
 # Create your views here.
 
@@ -25,13 +36,15 @@ def admin_home(request):
 @admin_required
 def new_staff(request):
     staffs = StaffReg.objects.filter(login_info__status = "P")
-    return render(request, 'web_admin/new_staff.html', {'staffs':staffs})
+    office = OfficeFacultyRegistration.objects.filter(login_info__status = "P")
+    return render(request, 'web_admin/new_staff.html', {'staffs': staffs, 'office': office})
 
 
 @admin_required
 def view_rejected_staff(request):
     staffs = StaffReg.objects.filter(login_info__status = "R")
-    return render(request, 'web_admin/view_rejected_staff.html', {'staffs':staffs})
+    office = OfficeFacultyRegistration.objects.filter(login_info__status = "R")
+    return render(request, 'web_admin/view_rejected_staff.html', {'staffs': staffs, 'office': office})
 
 
 @admin_required
@@ -47,12 +60,35 @@ def verify_staff(request, id, boo):
 
 
 @admin_required
+def verify_office(request, id, boo):
+    office = get_object_or_404(OfficeFacultyRegistration, id = id)
+    office.login_info.status = "V"
+    office.login_info.save()
+    messages.success(request, 'Successfully Verified.')
+    if boo == 1:
+        return redirect('new_staff')
+    else:
+        return redirect('view_rejected_staff')
+
+
+@admin_required
 def reject_staff(request, id):
     reason = request.GET.get('reason', 'No reason provided.')
     staff = get_object_or_404(StaffReg, id = id)
     staff.login_info.status = "R"
     staff.login_info.rejection_reason = reason
     staff.login_info.save()
+    messages.error(request, 'Successfully Rejected.')
+    return redirect('new_staff')
+
+
+@admin_required
+def reject_office(request, id):
+    reason = request.GET.get('reason', 'No reason provided.')
+    office = get_object_or_404(OfficeFacultyRegistration, id = id)
+    office.login_info.status = "R"
+    office.login_info.rejection_reason = reason
+    office.login_info.save()
     messages.error(request, 'Successfully Rejected.')
     return redirect('new_staff')
 
@@ -181,6 +217,188 @@ def view_staff_based_on_dep(request):
 
 
 @admin_required
+def view_office_staff(request):
+    staffs = OfficeFacultyRegistration.objects.filter(login_info__status="V")
+    return render(request, 'web_admin/view_office_staff.html', {'staffs': staffs})
+
+
+@admin_required
+def view_office_staff_attendance(request, id):
+    staff = get_object_or_404(OfficeFacultyRegistration, id=id)
+    summary = compute_office_staff_attendance(staff)
+    holidays_dict = get_holidays_dict()
+    holidays_list = Holiday.objects.all().order_by('date')
+    
+    return render(request, 'web_admin/view_office_staff_attendance.html', {
+        'staff': staff,
+        'records': summary['records'],
+        'attendance_dict_json': json.dumps(summary['attendance_dict']),
+        'holidays_dict_json': json.dumps(holidays_dict),
+        'holidays_list': holidays_list,
+        'registered_on_str': summary['registered_on'].strftime("%Y-%m-%d"),
+        'total_days': summary['total_days'],
+        'present_days': summary['present_days'],
+        'absent_days': summary['absent_days'],
+        'leave_days': summary['leave_days'],
+        'att_percentage': summary['att_percentage'],
+    })
+
+
+@admin_required
+def update_office_staff_attendance(request, id):
+    staff = get_object_or_404(OfficeFacultyRegistration, id=id)
+    if request.method == 'POST':
+        date_str = request.POST.get('date')
+        status = request.POST.get('status', 'P')
+        check_in_str = request.POST.get('check_in_time')
+        check_out_str = request.POST.get('check_out_time')
+        
+        if not date_str:
+            messages.error(request, "Date is required.")
+            return redirect('view_office_staff_attendance', id=id)
+            
+        try:
+            parsed_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            messages.error(request, "Invalid date format.")
+            return redirect('view_office_staff_attendance', id=id)
+            
+        tz = timezone.get_current_timezone()
+        
+        marked_at = None
+        checked_out_at = None
+
+        if status == 'P':
+            if check_in_str:
+                try:
+                    t_in = datetime.strptime(check_in_str, "%H:%M").time()
+                    marked_at = timezone.make_aware(datetime.combine(parsed_date, t_in), tz)
+                except ValueError:
+                    pass
+            else:
+                t_in = time(9, 0)
+                marked_at = timezone.make_aware(datetime.combine(parsed_date, t_in), tz)
+                    
+            if check_out_str:
+                try:
+                    t_out = datetime.strptime(check_out_str, "%H:%M").time()
+                    checked_out_at = timezone.make_aware(datetime.combine(parsed_date, t_out), tz)
+                except ValueError:
+                    pass
+            else:
+                t_out = time(17, 0)
+                checked_out_at = timezone.make_aware(datetime.combine(parsed_date, t_out), tz)
+                
+        attendance, created = OfficeAttendance.objects.get_or_create(
+            office_staff=staff,
+            date=parsed_date,
+            defaults={'status': status, 'marked_at': marked_at, 'checked_out_at': checked_out_at}
+        )
+        
+        if not created:
+            attendance.status = status
+            attendance.marked_at = marked_at
+            attendance.checked_out_at = checked_out_at
+            attendance.save()
+            
+        action_word = "added" if created else "updated"
+        messages.success(request, f"Attendance for {parsed_date.strftime('%d %b %Y')} successfully {action_word}.")
+        
+    return redirect('view_office_staff_attendance', id=id)
+
+
+@admin_required
+def delete_office_staff_attendance(request, id, att_id=None):
+    staff = get_object_or_404(OfficeFacultyRegistration, id=id)
+    date_str = request.GET.get('date') or request.POST.get('date')
+    
+    if att_id:
+        att = get_object_or_404(OfficeAttendance, id=att_id, office_staff=staff)
+        date_display = att.date.strftime('%d %b %Y')
+        att.delete()
+        messages.success(request, f"Attendance record for {date_display} deleted successfully.")
+    elif date_str:
+        try:
+            parsed_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+            OfficeAttendance.objects.filter(office_staff=staff, date=parsed_date).delete()
+            messages.success(request, f"Attendance record for {parsed_date.strftime('%d %b %Y')} reset successfully.")
+        except ValueError:
+            messages.error(request, "Invalid date.")
+            
+    return redirect('view_office_staff_attendance', id=id)
+
+
+@admin_required
+def add_holiday(request):
+    if request.method == 'POST':
+        date_str = request.POST.get('date')
+        name = (request.POST.get('name') or '').strip()
+        description = (request.POST.get('description') or '').strip()
+        staff_id = request.POST.get('staff_id')
+        redirect_to = request.POST.get('next')
+        
+        if not date_str or not name:
+            messages.error(request, "Date and Holiday Name are required.")
+        else:
+            try:
+                parsed_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                holiday, created = Holiday.objects.update_or_create(
+                    date=parsed_date,
+                    defaults={'name': name, 'description': description}
+                )
+                action = "added" if created else "updated"
+                messages.success(request, f"College Holiday '{name}' on {parsed_date.strftime('%d %b %Y')} {action} successfully.")
+            except Exception as e:
+                messages.error(request, f"Error saving holiday: {str(e)}")
+                
+        if staff_id:
+            return redirect('view_office_staff_attendance', id=staff_id)
+        if redirect_to:
+            return redirect(redirect_to)
+        return redirect('admin_home')
+    return redirect('admin_home')
+
+
+@admin_required
+def delete_holiday(request, id):
+    holiday = get_object_or_404(Holiday, id=id)
+    name = holiday.name
+    date_display = holiday.date.strftime('%d %b %Y')
+    staff_id = request.GET.get('staff_id') or request.POST.get('staff_id')
+    redirect_to = request.GET.get('next') or request.POST.get('next')
+    
+    holiday.delete()
+    messages.success(request, f"College Holiday '{name}' on {date_display} removed successfully.")
+    
+    if staff_id:
+        return redirect('view_office_staff_attendance', id=staff_id)
+    if redirect_to:
+        return redirect(redirect_to)
+    return redirect('admin_home')
+
+
+@admin_required
+def reset_password_of_office_staff(request, id):
+    staff = get_object_or_404(OfficeFacultyRegistration, id=id)
+    staff.login_info.password = staff.phone
+    staff.login_info.save()
+    messages.success(request, f"Successfully reset password for {staff.name}.")
+    return redirect('view_office_staff')
+
+
+@admin_required
+def delete_office_staff(request, id):
+    try:
+        staff = get_object_or_404(OfficeFacultyRegistration, id=id)
+        login_info = staff.login_info
+        login_info.delete()
+        messages.success(request, 'Successfully Deleted Office Staff Member.')
+    except Exception as e:
+        messages.error(request, 'Error deleting staff member.')
+    return redirect('view_office_staff')
+
+
+@admin_required
 def student_cat_admin(request):
     sem = StudentReg.objects.filter(login_info__status = "V").values(
         'sem'
@@ -300,8 +518,12 @@ def pass_out_admin(request, sem):
 @admin_required
 def view_leave_application_admin(request):
     leaves = LeaveApplication.objects.filter(status__in=['H','FH'])
+    office_leaves = OfficeLeaveApplication.objects.filter(status='P')
 
-    return render(request, 'web_admin/view_leave_application_admin.html', {'leaves':leaves})
+    return render(request, 'web_admin/view_leave_application_admin.html', {
+        'leaves': leaves,
+        'office_leaves': office_leaves
+    })
 
 
 @admin_required
@@ -323,6 +545,40 @@ def admin_leave_rejected(request, id):
 
 
 @admin_required
+def admin_verify_office_leave(request, id):
+    leave = get_object_or_404(OfficeLeaveApplication, id=id)
+    leave.status = "A"
+    leave.save()
+
+    # Automatically mark attendance as Leave ('L') for the date range
+    curr = leave.start_date
+    while curr <= leave.end_date:
+        att, created = OfficeAttendance.objects.update_or_create(
+            office_staff=leave.office_staff,
+            date=curr,
+            defaults={'status': 'L', 'marked_at': None, 'checked_out_at': None}
+        )
+        if not created:
+            att.status = 'L'
+            att.marked_at = None
+            att.checked_out_at = None
+            att.save()
+        curr += timedelta(days=1)
+
+    messages.success(request, f'Office Leave Request for {leave.office_staff.name} Verified & Attendance updated.')
+    return redirect('view_leave_application_admin')
+
+
+@admin_required
+def admin_reject_office_leave(request, id):
+    leave = get_object_or_404(OfficeLeaveApplication, id=id)
+    leave.status = "R"
+    leave.save()
+    messages.error(request, f'Office Leave Request for {leave.office_staff.name} Rejected.')
+    return redirect('view_leave_application_admin')
+
+
+@admin_required
 def view_leave_admin(request, id):
     staff = StaffReg.objects.get(id = id)
     leave_requests = LeaveApplication.objects.filter(from_staff = staff)
@@ -332,13 +588,39 @@ def view_leave_admin(request, id):
 # currently we are editing this function...
 @admin_required
 def change_sem(request, sem, course):
-    students = StudentReg.objects.filter(sem = sem, course = course, login_info__status = "V")
-    for student in students:
-        student.sem += 1 
-        student.save()
+    course_instance = get_object_or_404(Course, id=course)
+    students = StudentReg.objects.filter(
+        sem=sem,
+        course=course_instance,
+        login_info__status="V",
+    )
+    next_semester = sem + 1
+    fee_structure = FeeStructure.objects.filter(
+        course=course_instance,
+        semester=next_semester,
+    ).order_by('-updated_at', '-id').first()
 
-    messages.success(request, 'Successfully Changed sem.')
-    return redirect(student_cat_admin)
+    with transaction.atomic():
+        for student in students:
+            student.sem = next_semester
+            student.save(update_fields=['sem'])
+
+            if fee_structure:
+                StudentFee.objects.update_or_create(
+                    student=student,
+                    fee_structure=fee_structure,
+                    defaults={
+                        'semester': next_semester,
+                        'total_amount': fee_structure.amount,
+                        'due_date': fee_structure.due_date,
+                    },
+                )
+
+    if fee_structure:
+        messages.success(request, 'Semester changed and course fee assigned to students.')
+    else:
+        messages.warning(request, 'Semester changed, but no fee structure is configured for the new semester.')
+    return redirect('student_cat_admin')
 
 
 @admin_required

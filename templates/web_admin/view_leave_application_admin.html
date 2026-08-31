@@ -8,8 +8,9 @@
     {% if messages %}
         <div style="margin-bottom: 1rem;">
             {% for message in messages %}
-                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show">
                     {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             {% endfor %}
         </div>
@@ -17,7 +18,7 @@
 
     <h2 class="text-center mb-4 fw-bold">Leave Applications</h2>
 
-    {% if leaves %}
+    {% if leaves or office_leaves %}
     <!-- Search Input -->
     <div class="row justify-content-center mb-4">
         <div class="col-md-8 col-lg-6">
@@ -25,6 +26,91 @@
         </div>
     </div>
 
+        <!-- Office Staff Leave Applications -->
+        {% for leave in office_leaves %}
+            <div class="card shadow-sm mb-4 w-100 px-3 py-3 leave-entry border-start border-4 border-info">
+                <div class="card-body">
+                    <div class="d-flex align-items-start mb-4">
+                        <div style="width: 70px; height: 70px; background: #e0f2fe; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #0284c7; margin-right: 15px;">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <div>
+                            <div class="mb-1">
+                                <small class="text-muted">From</small><br>
+                                <strong class="text-dark fs-5">{{ leave.office_staff.name }}</strong>
+                            </div>
+                            <div>
+                                <small class="text-muted">Leave Type</small><br>
+                                <strong class="text-dark">{{ leave.get_leave_type_display }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <small class="text-muted">Department</small>
+                            <p class="fw-semibold text-dark mb-2">DEPARTMENT OF OFFICE</p>
+                        </div>
+
+                        <div class="col-md-4">
+                            <small class="text-muted">Position</small>
+                            <p class="fw-semibold text-dark mb-2">{{ leave.office_staff.get_position_display }}</p>
+                        </div>
+
+                        <div class="col-md-4">
+                            <small class="text-muted">Start Date</small>
+                            <p class="fw-semibold text-dark mb-2">{{ leave.start_date }}</p>
+                        </div>
+
+                        <div class="col-md-4">
+                            <small class="text-muted">End Date</small>
+                            <p class="fw-semibold text-dark mb-2">{{ leave.end_date }}</p>
+                        </div>
+
+                        <div class="col-md-4">
+                            <small class="text-muted">Submitted On</small>
+                            <p class="fw-semibold text-dark mb-2">{{ leave.submitted_on }}</p>
+                        </div>
+
+                        <div class="col-md-4">
+                            <small class="text-muted">No. of Days</small>
+                            <p class="fw-semibold text-dark mb-2">
+                                {{ leave.num_of_days|floatformat:"-1" }}
+                                {% if leave.day_type == 'half' %}
+                                    <span class="badge bg-info text-dark ms-1">Half Day</span>
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <div class="col-md-12">
+                            <small class="text-muted">Reason</small>
+                            <div class="border rounded bg-light p-2 mb-2 text-dark">
+                                {{ leave.reason }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <small class="text-muted">Status</small><br>
+                            <span class="badge 
+                                {% if leave.status == 'P' %}bg-warning text-dark
+                                {% elif leave.status == 'A' %}bg-success
+                                {% elif leave.status == 'R' %}bg-danger
+                                {% endif %}
+                                ">
+                                {{ leave.get_status_display }}
+                            </span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'admin_verify_office_leave' leave.id %}" class="btn btn-sm btn-primary">Verify</a>
+                            <a href="{% url 'admin_reject_office_leave' leave.id %}" class="btn btn-sm btn-danger">Reject</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+        <!-- Faculty Leave Applications -->
         {% for leave in leaves %}
             <div class="card shadow-sm mb-4 w-100 px-3 py-3 leave-entry">
                 <div class="card-body">
@@ -40,7 +126,7 @@
                         <div>
                             <div class="mb-1">
                                 <small class="text-muted">From</small><br>
-                                <strong class="text-dark">{{ leave.from_staff.name }}</strong>
+                                <strong class="text-dark fs-5">{{ leave.from_staff.name }}</strong>
                             </div>
                             <div>
                                 <small class="text-muted">Leave Type</small><br>

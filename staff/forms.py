@@ -7,7 +7,7 @@ class AttendanceForm(forms.ModelForm):
         model = Attendance
         fields = ['first_hour', 'second_hour', 'third_hour', 'fourth_hour', 'fifth_hour']
         widgets = {
-            field: forms.Select(choices=Attendance.CHOICE, attrs={'class': 'form-select'})
+            field: forms.RadioSelect(choices=Attendance.CHOICE, attrs={'class': 'form-check-input'})
             for field in fields
         }
 

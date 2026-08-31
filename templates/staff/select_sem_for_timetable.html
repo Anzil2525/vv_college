@@ -70,7 +70,7 @@
     {% if pos == "HOD" %}
     <div class="mb-4 text-center">
       <a
-        href="{% url 'setting_time_table_hod_7d' %}"
+        href="{% url 'create_time_table' course.id %}"
         class="btn btn-warning action-btn"
       >
         ➕ Create Time Table
@@ -80,7 +80,7 @@
     <h1 class="page-title">Select the Semester</h1>
     <div class="sem-grid">
       {% for sem in sems %}
-      <a href="{% url 'time_table' sem %}" class="btn btn-primary sem-btn"> {{ sem }} </a>
+      <a href="{% url 'time_table' course.id sem %}" class="btn btn-primary sem-btn"> {{ sem }} </a>
       {% endfor %}
     </div>
     {% else %}
