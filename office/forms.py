@@ -1,17 +1,18 @@
 from django import forms
 from decimal import Decimal
 from django.utils import timezone
-from index.models import Course, DepTable, FeePayment, FeeStructure, StudentFee
+from index.models import Course, DepTable, FeePayment, FeeStructure, StudentFee, StudentReg
 from .models import OfficeLeaveApplication
 
 
 class FeeStructureForm(forms.ModelForm):
     class Meta:
         model = FeeStructure
-        fields = ['semester', 'amount', 'due_date']
+        fields = ['semester', 'merit_amount', 'management_amount', 'due_date']
         widgets = {
             'semester': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-            'amount': forms.NumberInput(attrs={'class': 'form-control', 'min': 0, 'step': '0.01'}),
+            'merit_amount': forms.NumberInput(attrs={'class': 'form-control', 'min': 0, 'step': '0.01'}),
+            'management_amount': forms.NumberInput(attrs={'class': 'form-control', 'min': 0, 'step': '0.01'}),
             'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
 
@@ -23,6 +24,15 @@ class StudentFeeForm(forms.ModelForm):
         widgets = {
             'total_amount': forms.NumberInput(attrs={'class': 'form-control', 'min': 0, 'step': '0.01'}),
             'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+
+
+class StudentSeatTypeForm(forms.ModelForm):
+    class Meta:
+        model = StudentReg
+        fields = ['seat_type']
+        widgets = {
+            'seat_type': forms.Select(attrs={'class': 'form-select'}),
         }
 
 

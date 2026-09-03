@@ -120,7 +120,8 @@
                             {% for fee in course.feestructure_set.all %}
                             <div class="d-flex justify-content-between align-items-center mt-2 small">
                                 <span class="text-muted">Semester {{ fee.semester }} - Due {{ fee.due_date|date:"d M Y" }}</span>
-                                <span class="fw-bold text-success">{{ fee.amount }}</span>
+                                <span class="fw-bold text-success">Merit: {{ fee.merit_amount }}</span>
+                                <span class="fw-bold text-primary">Management: {{ fee.management_amount|default:'Not set' }}</span>
                             </div>
                             {% empty %}
                             <div class="text-muted small">No fee amount configured.</div>

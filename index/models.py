@@ -77,6 +77,11 @@ class GuadinReg(models.Model):
     
 
 class StudentReg(models.Model):
+    SEAT_TYPE_CHOICES = [
+        ('MG', 'Management Seat'),
+        ('MS', 'Merit Seat'),
+    ]
+
     name = models.CharField(max_length=50)
     reg_no = models.IntegerField()
     sem = models.IntegerField()
@@ -84,6 +89,7 @@ class StudentReg(models.Model):
     pho = models.CharField(max_length=15)
     address = models.TextField(null=True)
     blood_type = models.CharField(max_length=10, null=True)
+    seat_type = models.CharField(max_length=2, choices=SEAT_TYPE_CHOICES, null=True, blank=True)
     parent_1 = models.ForeignKey(GuadinReg, on_delete=models.SET_NULL, null=True, blank=True, related_name="parent_1")
     dep = models.ForeignKey(DepTable, on_delete=models.SET_NULL, null=True)
     course = models.ForeignKey(Course, on_delete=models.PROTECT, null=True)
@@ -263,7 +269,8 @@ class OfficeFacultyRegistration(models.Model):
 class FeeStructure(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     semester = models.IntegerField()
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    merit_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    management_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     due_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
