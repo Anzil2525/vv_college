@@ -8,82 +8,545 @@
     <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    
     <style>
-        .navbar-brand img { max-height: 48px; }
+        :root {
+            --page-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --primary-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            --hero-gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+        }
+
+        body {
+            background-color: var(--page-bg);
+            color: var(--text-primary);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            min-height: 100vh;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Modern Header & Navbar */
+        .app-navbar {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        }
+        .navbar-brand img { max-height: 44px; }
+        
+        .btn-back-pill {
+            background: #f1f5f9;
+            color: #334155 !important;
+            border: 1px solid #e2e8f0;
+            transition: all 0.25s ease;
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        .btn-back-pill:hover {
+            background: #e2e8f0;
+            transform: translateX(-3px);
+        }
+
+        /* Hero Banner Card */
+        .hero-banner-card {
+            background: var(--hero-gradient);
+            color: white;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.25), 0 8px 10px -6px rgba(124, 58, 237, 0.25);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-banner-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .btn-back-white {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #ffffff !important;
+            transition: all 0.25s ease;
+            font-weight: 500;
+            padding: 0.4rem 1rem;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            margin-bottom: 1.25rem;
+            font-size: 0.85rem;
+        }
+        .btn-back-white:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(-3px);
+        }
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .meta-pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 100px;
+            padding: 4px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Bulk Action Card */
+        .action-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+            margin-bottom: 2rem;
+        }
+        .btn-assign-fee {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white !important;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+            transition: all 0.25s ease;
+        }
+        .btn-assign-fee:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(16, 185, 129, 0.35);
+        }
+
+        /* Desktop Separate Row Table Layout */
+        .custom-table-container {
+            overflow-x: auto;
+        }
+        .student-table {
+            width: 100%;
+            border-spacing: 0 10px;
+            border-collapse: separate;
+        }
+        .student-table thead th {
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 20px;
+        }
+        .student-row td {
+            padding: 18px 20px;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+            background: #ffffff;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+        .student-row td:first-child {
+            border-left: 1px solid var(--border-color);
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+        }
+        .student-row td:last-child {
+            border-right: 1px solid var(--border-color);
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        .student-row:hover td {
+            background-color: #f8fafc !important;
+            border-color: #cbd5e1;
+        }
+        .student-row:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Typography & Badges */
+        .reg-no-code {
+            font-family: "Courier New", monospace;
+            font-weight: 700;
+            color: #334155;
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        .student-name-text {
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .amount-assigned {
+            font-weight: 700;
+            color: #059669;
+            font-size: 1.05rem;
+        }
+        .amount-unassigned {
+            color: #94a3b8;
+            font-weight: 500;
+            font-style: italic;
+        }
+        
+        .badge-seat {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .seat-management {
+            background-color: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+        .seat-merit {
+            background-color: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+        .seat-unassigned {
+            background-color: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Action Buttons inside Table */
+        .btn-action-edit {
+            background: #eff6ff;
+            color: #2563eb !important;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-action-edit:hover {
+            background: #2563eb;
+            color: #ffffff !important;
+        }
+        
+        .btn-action-seat {
+            background: #fffbeb;
+            color: #d97706 !important;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-action-seat:hover {
+            background: #d97706;
+            color: #ffffff !important;
+        }
+
+        /* Mobile Card View */
+        .mobile-student-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+            padding: 20px;
+            margin-bottom: 14px;
+        }
+        .mobile-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 0.75rem;
+        }
+        .mobile-detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+        }
+        .mobile-detail-row:last-child {
+            margin-bottom: 0;
+        }
+        .mobile-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Responsive View Switcher */
+        @media (max-width: 768px) {
+            .desktop-table-view {
+                display: none !important;
+            }
+            .hero-banner-card {
+                padding: 2rem 1.5rem;
+                border-radius: 16px;
+            }
+            .hero-title {
+                font-size: 1.6rem;
+            }
+        }
+        @media (min-width: 769px) {
+            .mobile-cards-view {
+                display: none !important;
+            }
+        }
+
+        /* Empty State */
+        .empty-card {
+            background: #ffffff;
+            border: 1px dashed #cbd5e1;
+            border-radius: 20px;
+            padding: 4rem 2rem;
+            text-align: center;
+            max-width: 550px;
+            margin: 2rem auto;
+        }
+        .empty-icon {
+            font-size: 3.5rem;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
-<body class="bg-light">
-    <header class="bg-white border-bottom shadow-sm">
+<body>
+    <!-- App Navbar -->
+    <header class="app-navbar py-2">
         <div class="container">
-            <nav class="navbar navbar-light">
+            <nav class="navbar navbar-expand">
                 <a class="navbar-brand" href="{% url 'student_fee_management' %}">
                     <img src="{% static 'assets/img/logo.png' %}" alt="V.V Logo">
                 </a>
-                <div class="ms-auto d-flex align-items-center gap-2">
-                    <span class="d-none d-sm-inline text-muted small">{{ office_staff.name }}</span>
-                    <a href="{% url 'student_fee_management' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
-                        <i class="bi bi-arrow-left me-1"></i> Back
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <span class="d-none d-sm-inline text-secondary small fw-semibold">
+                        <i class="bi bi-person-circle me-1"></i> {{ office_staff.name }}
+                    </span>
+                    <a href="{% url 'student_fee_management' %}" class="btn-back-pill">
+                        <i class="bi bi-house me-1"></i> Fee Center
                     </a>
                 </div>
             </nav>
         </div>
     </header>
-    <main class="container py-5">
-        <a href="{% url 'individual_student_fee_courses' semester course.dep_id %}" class="btn btn-outline-primary btn-sm mb-4"><i class="bi bi-arrow-left me-1"></i> Back to Courses</a>
-        <h1 class="h3 fw-bold mb-1">Students</h1>
-        <p class="text-muted mb-4">{{ course.course }} - Semester {{ semester }}</p>
+
+    <main class="container py-4 animate-fade-in">
+        <!-- Hero Banner -->
+        <div class="hero-banner-card">
+            <a href="{% url 'individual_student_fee_courses' semester course.dep_id %}" class="btn-back-white">
+                <i class="bi bi-arrow-left me-2"></i> Back to Courses
+            </a>
+            <h1 class="hero-title">
+                <i class="bi bi-people-fill"></i> Individual Student Fees
+            </h1>
+            <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
+                <span class="meta-pill-badge">
+                    <i class="bi bi-mortarboard-fill"></i> {{ course.course }}
+                </span>
+                <span class="meta-pill-badge">
+                    <i class="bi bi-journal-bookmark-fill"></i> Semester {{ semester }}
+                </span>
+            </div>
+        </div>
+
         {% if messages %}
             {% for message in messages %}
-            <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="bi {% if 'error' in message.tags %}bi-exclamation-triangle-fill{% else %}bi-check-circle-fill{% endif %} me-2"></i>
+                    <div>{{ message }}</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             {% endfor %}
         {% endif %}
-        <form method="post" action="{% url 'assign_student_fees' semester course.id %}" class="mb-4">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-success" onclick="return confirm('Assign the configured fee structure to all verified students shown here?');">
-                <i class="bi bi-person-check me-1"></i> Assign Fee Structure to Students
-            </button>
-        </form>
-        <div class="table-responsive bg-white shadow-sm rounded">
-            <table class="table table-striped align-middle mb-0">
-                <thead class="table-dark">
+
+        <!-- Bulk Fee Assignment Banner -->
+        <div class="action-card d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+                <h5 class="fw-bold text-dark mb-1">
+                    <i class="bi bi-magic text-primary me-2"></i> Bulk Fee Allocation
+                </h5>
+                <p class="text-muted small mb-0">
+                    Assign fee structure amounts automatically to all eligible students based on their seat type (Merit vs Management).
+                </p>
+            </div>
+            <form method="post" action="{% url 'assign_student_fees' semester course.id %}" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn-assign-fee text-nowrap w-100 w-md-auto" onclick="return confirm('Assign the fee structure according to each student\'s seat type? Management Seat students receive the management amount, Merit Seat students receive the merit amount, and students without a configured amount will be skipped.');">
+                    <i class="bi bi-person-check-fill me-2"></i> Assign Fee Structure
+                </button>
+            </form>
+        </div>
+
+        {% if students %}
+        <!-- Desktop Table View -->
+        <div class="desktop-table-view custom-table-container">
+            <table class="student-table">
+                <thead>
                     <tr>
                         <th>Reg No</th>
                         <th>Student Name</th>
                         <th>Assigned Amount</th>
-                        <th>Action</th>
+                        <th>Seat Type</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for student in students %}
-                    <tr>
-                        <td>{{ student.reg_no }}</td>
-                        <td>{{ student.name }}</td>
+                    <tr class="student-row">
+                        <td>
+                            <span class="reg-no-code">{{ student.reg_no }}</span>
+                        </td>
+                        <td>
+                            <span class="student-name-text">{{ student.name }}</span>
+                        </td>
                         <td>
                             {% with assigned_fee=student.assigned_fees|first %}
                                 {% if assigned_fee %}
-                                    <span class="fw-semibold text-success">{{ assigned_fee.total_amount }}</span>
+                                    <span class="amount-assigned">{{ assigned_fee.total_amount }}</span>
                                 {% else %}
-                                    <span class="text-muted">Not assigned</span>
+                                    <span class="amount-unassigned">Not assigned</span>
                                 {% endif %}
                             {% endwith %}
                         </td>
                         <td>
-                            <a href="{% url 'edit_individual_student_fee' semester course.id student.id %}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil-square me-1"></i> Edit Fee
-                            </a>
+                            {% if student.seat_type %}
+                                {% if student.seat_type == 'MGMT' or 'Management' in student.get_seat_type_display %}
+                                    <span class="badge-seat seat-management">
+                                        <i class="bi bi-briefcase-fill me-1"></i> {{ student.get_seat_type_display }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge-seat seat-merit">
+                                        <i class="bi bi-award-fill me-1"></i> {{ student.get_seat_type_display }}
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge-seat seat-unassigned">
+                                    <i class="bi bi-dash-circle me-1"></i> Not assigned
+                                </span>
+                            {% endif %}
                         </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center text-muted">No students found.</td>
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-2">
+                                <a href="{% url 'edit_individual_student_fee' semester course.id student.id %}" class="btn-action-edit">
+                                    <i class="bi bi-pencil-square me-1"></i> Edit Fee
+                                </a>
+                                <a href="{% url 'edit_student_seat_type' semester course.id student.id %}" class="btn-action-seat">
+                                    <i class="bi bi-person-badge me-1"></i> Seat Type
+                                </a>
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        <!-- Mobile Cards View -->
+        <div class="mobile-cards-view">
+            {% for student in students %}
+            <div class="mobile-student-card">
+                <div class="mobile-card-top">
+                    <div>
+                        <span class="reg-no-code d-inline-block mb-1">{{ student.reg_no }}</span>
+                        <h6 class="student-name-text mb-0">{{ student.name }}</h6>
+                    </div>
+                    <div>
+                        {% if student.seat_type %}
+                            {% if student.seat_type == 'MGMT' or 'Management' in student.get_seat_type_display %}
+                                <span class="badge-seat seat-management">
+                                    {{ student.get_seat_type_display }}
+                                </span>
+                            {% else %}
+                                <span class="badge-seat seat-merit">
+                                    {{ student.get_seat_type_display }}
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge-seat seat-unassigned">Unassigned</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mobile-detail-row">
+                    <span class="mobile-label">Assigned Amount</span>
+                    {% with assigned_fee=student.assigned_fees|first %}
+                        {% if assigned_fee %}
+                            <span class="amount-assigned">{{ assigned_fee.total_amount }}</span>
+                        {% else %}
+                            <span class="amount-unassigned">Not assigned</span>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
+                <div class="d-flex gap-2 mt-3 pt-2 border-top">
+                    <a href="{% url 'edit_individual_student_fee' semester course.id student.id %}" class="btn-action-edit flex-grow-1 justify-content-center">
+                        <i class="bi bi-pencil-square me-1"></i> Edit Fee
+                    </a>
+                    <a href="{% url 'edit_student_seat_type' semester course.id student.id %}" class="btn-action-seat flex-grow-1 justify-content-center">
+                        <i class="bi bi-person-badge me-1"></i> Seat Type
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-card">
+            <div class="empty-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <h4 class="fw-bold text-dark mb-2">No Students Found</h4>
+            <p class="text-muted small mb-3">There are no verified students registered for {{ course.course }} in Semester {{ semester }}.</p>
+            <a href="{% url 'individual_student_fee_courses' semester course.dep_id %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Return to Course List
+            </a>
+        </div>
+        {% endif %}
     </main>
+
+    <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>

@@ -17,6 +17,7 @@ urlpatterns = [
     path('individual-student-fee-management/semester/<int:semester>/course/<int:course_id>/', views.individual_student_fee_students, name='individual_student_fee_students'),
     path('individual-student-fee-management/semester/<int:semester>/course/<int:course_id>/assign/', views.assign_student_fees, name='assign_student_fees'),
     path('individual-student-fee-management/semester/<int:semester>/course/<int:course_id>/student/<int:student_id>/', views.edit_individual_student_fee, name='edit_individual_student_fee'),
+    path('individual-student-fee-management/semester/<int:semester>/course/<int:course_id>/student/<int:student_id>/seat-type/', views.edit_student_seat_type, name='edit_student_seat_type'),
     path('mark_office_attendance/', views.mark_office_attendance, name='mark_office_attendance'),
     path('change_password_office/', views.change_password_office, name='change_password_office'),
     path('apply_office_leave/', views.apply_office_leave, name='apply_office_leave'),

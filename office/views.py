@@ -5,12 +5,13 @@ from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import HttpResponseForbidden, JsonResponse
+from django.db import transaction
 from django.db.models import DecimalField, ExpressionWrapper, F, Prefetch, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from index.models import Course, DepTable, FeePayment, FeeStructure, OfficeFacultyRegistration, StudentFee, StudentReg
 from .models import OfficeAttendance, OfficeLeaveApplication
-from .forms import FeePaymentForm, FeeStructureForm, OfficeLeaveApplicationForm, StudentFeeForm, StudentPaymentSearchForm
+from .forms import FeePaymentForm, FeeStructureForm, OfficeLeaveApplicationForm, StudentFeeForm, StudentPaymentSearchForm, StudentSeatTypeForm
 from web_admin.attendance_utils import (
     compute_office_staff_attendance,
     get_holidays_dict,
@@ -178,7 +179,8 @@ def save_fee_structure(request, course_id):
         if fee_id:
             fee_structure = get_object_or_404(FeeStructure, id=fee_id, course=course)
             fee_structure.semester = form.cleaned_data['semester']
-            fee_structure.amount = form.cleaned_data['amount']
+            fee_structure.merit_amount = form.cleaned_data['merit_amount']
+            fee_structure.management_amount = form.cleaned_data['management_amount']
             fee_structure.due_date = form.cleaned_data['due_date']
             fee_structure.save()
             created = False
@@ -187,12 +189,14 @@ def save_fee_structure(request, course_id):
                 course=course,
                 semester=form.cleaned_data['semester'],
                 defaults={
-                    'amount': form.cleaned_data['amount'],
+                    'merit_amount': form.cleaned_data['merit_amount'],
+                    'management_amount': form.cleaned_data['management_amount'],
                     'due_date': form.cleaned_data['due_date'],
                 },
             )
             if not created:
-                fee_structure.amount = form.cleaned_data['amount']
+                fee_structure.merit_amount = form.cleaned_data['merit_amount']
+                fee_structure.management_amount = form.cleaned_data['management_amount']
                 fee_structure.due_date = form.cleaned_data['due_date']
                 fee_structure.save()
         action = 'added' if created else 'updated'
@@ -441,27 +445,46 @@ def assign_student_fees(request, semester, course_id):
         login_info__status='V',
     )
     assigned_count = 0
-    for student in students:
-        StudentFee.objects.update_or_create(
-            student=student,
-            fee_structure=fee_structure,
-            defaults={
-                'semester': semester,
-                'total_amount': fee_structure.amount,
-                'due_date': fee_structure.due_date,
-                'updated_by': office_staff,
-            },
-            create_defaults={
-                'semester': semester,
-                'total_amount': fee_structure.amount,
-                'due_date': fee_structure.due_date,
-                'created_by': office_staff,
-                'updated_by': office_staff,
-            },
-        )
-        assigned_count += 1
+    skipped_count = 0
+    with transaction.atomic():
+        for student in students:
+            if student.seat_type == 'MG':
+                amount = fee_structure.management_amount
+            elif student.seat_type == 'MS':
+                amount = fee_structure.merit_amount
+            else:
+                skipped_count += 1
+                continue
+
+            if amount is None:
+                skipped_count += 1
+                continue
+
+            StudentFee.objects.update_or_create(
+                student=student,
+                fee_structure=fee_structure,
+                defaults={
+                    'semester': semester,
+                    'total_amount': amount,
+                    'due_date': fee_structure.due_date,
+                    'updated_by': office_staff,
+                },
+                create_defaults={
+                    'semester': semester,
+                    'total_amount': amount,
+                    'due_date': fee_structure.due_date,
+                    'created_by': office_staff,
+                    'updated_by': office_staff,
+                },
+            )
+            assigned_count += 1
 
     messages.success(request, f'Fee structure assigned to {assigned_count} student(s).')
+    if skipped_count:
+        messages.warning(
+            request,
+            f'{skipped_count} student(s) were skipped because their seat type or matching fee amount is not set.',
+        )
     return redirect('individual_student_fee_students', semester=semester, course_id=course_id)
 
 
@@ -509,6 +532,34 @@ def edit_individual_student_fee(request, semester, course_id, student_id):
         'course': course,
         'semester': semester,
         'fee_structure': fee_structure,
+        'form': form,
+    })
+
+
+def edit_student_seat_type(request, semester, course_id, student_id):
+    office_staff = _get_billing_staff(request)
+    if not isinstance(office_staff, OfficeFacultyRegistration):
+        return office_staff
+
+    course = get_object_or_404(Course, id=course_id)
+    student = get_object_or_404(
+        StudentReg,
+        id=student_id,
+        sem=semester,
+        course=course,
+        login_info__status='V',
+    )
+    form = StudentSeatTypeForm(request.POST or None, instance=student)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, f'Seat type saved for {student}.')
+        return redirect('individual_student_fee_students', semester=semester, course_id=course_id)
+
+    return render(request, 'office/edit_student_seat_type.html', {
+        'office_staff': office_staff,
+        'student': student,
+        'course': course,
+        'semester': semester,
         'form': form,
     })
 

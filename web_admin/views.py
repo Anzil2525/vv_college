@@ -600,24 +600,44 @@ def change_sem(request, sem, course):
         semester=next_semester,
     ).order_by('-updated_at', '-id').first()
 
+    assigned_count = 0
+    skipped_count = 0
     with transaction.atomic():
         for student in students:
             student.sem = next_semester
             student.save(update_fields=['sem'])
 
             if fee_structure:
+                if student.seat_type == 'MG':
+                    amount = fee_structure.management_amount
+                elif student.seat_type == 'MS':
+                    amount = fee_structure.merit_amount
+                else:
+                    skipped_count += 1
+                    continue
+
+                if amount is None:
+                    skipped_count += 1
+                    continue
+
                 StudentFee.objects.update_or_create(
                     student=student,
                     fee_structure=fee_structure,
                     defaults={
                         'semester': next_semester,
-                        'total_amount': fee_structure.amount,
+                        'total_amount': amount,
                         'due_date': fee_structure.due_date,
                     },
                 )
+                assigned_count += 1
 
     if fee_structure:
-        messages.success(request, 'Semester changed and course fee assigned to students.')
+        messages.success(request, f'Semester changed and fees assigned to {assigned_count} student(s).')
+        if skipped_count:
+            messages.warning(
+                request,
+                f'{skipped_count} student(s) were skipped because their seat type or matching fee amount is not set.',
+            )
     else:
         messages.warning(request, 'Semester changed, but no fee structure is configured for the new semester.')
     return redirect('student_cat_admin')

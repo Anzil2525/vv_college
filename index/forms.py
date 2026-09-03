@@ -48,7 +48,7 @@ class GuadinRegForm(forms.ModelForm):
 class StudentRegForm(forms.ModelForm):
     class Meta:
         model = StudentReg
-        exclude = ['login_info', 'parent_1']
+        exclude = ['login_info', 'parent_1', 'seat_type']
         labels = {
             'reg_no': 'Reg No / APAAR ID'
         }

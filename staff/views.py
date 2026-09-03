@@ -55,26 +55,6 @@ def varify_students(request, id, boo):
         student.login_info.status = "V"
         student.login_info.save()
 
-        fee_structure = FeeStructure.objects.filter(
-            course=student.course,
-            semester=student.sem,
-        ).order_by('-updated_at', '-id').first()
-        if fee_structure:
-            StudentFee.objects.get_or_create(
-                student=student,
-                fee_structure=fee_structure,
-                defaults={
-                    'semester': student.sem,
-                    'total_amount': fee_structure.amount,
-                    'due_date': fee_structure.due_date,
-                },
-            )
-        else:
-            messages.warning(
-                request,
-                "Student verified, but no fee structure is configured for the student's course and semester.",
-            )
-
     messages.success(request, "Successfully Verified.")
     id = request.session.get("staff_login_id")
     log_ins = get_object_or_404(LoginTable, id=id)
