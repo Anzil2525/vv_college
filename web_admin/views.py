@@ -34,6 +34,19 @@ def admin_home(request):
 
 
 @admin_required
+def upi_payment_settings(request):
+    settings = UpiPaymentSettings.objects.first()
+    form = UpiPaymentSettingsForm(request.POST or None, request.FILES or None, instance=settings)
+
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'UPI payment settings saved successfully.')
+        return redirect('upi_payment_settings')
+
+    return render(request, 'web_admin/upi_payment_settings.html', {'form': form, 'settings': settings})
+
+
+@admin_required
 def new_staff(request):
     staffs = StaffReg.objects.filter(login_info__status = "P")
     office = OfficeFacultyRegistration.objects.filter(login_info__status = "P")

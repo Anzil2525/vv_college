@@ -1,6 +1,7 @@
 {% load static %}
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,7 +14,6 @@
     <link rel="stylesheet" href="{% static 'assets/css/responsive.css' %}">
 
     <style>
-        
         body {
             display: flex;
             min-height: 100vh;
@@ -28,7 +28,8 @@
 
         .sidebar {
             width: 250px;
-            background-color: #26282a; /* A nice dark blue */
+            background-color: #26282a;
+            /* A nice dark blue */
             border-right: 1px solid #34495e;
             padding-top: 60px;
             position: fixed;
@@ -42,18 +43,21 @@
         .sidebar .nav-link {
             padding: 15px 20px;
             font-size: 16px;
-            color: #ecf0f1; /* Light gray for text */
+            color: #ecf0f1;
+            /* Light gray for text */
             border-bottom: 1px solid #34495e;
         }
 
         .sidebar .nav-link:hover,
         .sidebar .nav-link.active {
-            background-color: #34495e; /* Slightly lighter dark blue for hover/active */
+            background-color: #34495e;
+            /* Slightly lighter dark blue for hover/active */
             color: #fff;
         }
 
         .sidebar .nav-link.text-danger {
-            color: #e74c3c; /* A brighter red for better contrast */
+            color: #e74c3c;
+            /* A brighter red for better contrast */
         }
 
         .sidebar .nav-link.text-danger:hover {
@@ -61,7 +65,8 @@
         }
 
         .content-header {
-            background-color: #171819; /* A color from the sidebar for consistency */
+            background-color: #171819;
+            /* A color from the sidebar for consistency */
             border-radius: 8px;
         }
 
@@ -112,56 +117,59 @@
         }
     </style>
 </head>
+
 <body>
 
-<!-- Toggle button for small screens -->
-<button class="sidebar-toggle btn" id="sidebarToggle">
-    <i class="bx bx-menu"></i>
-</button>
+    <!-- Toggle button for small screens -->
+    <button class="sidebar-toggle btn" id="sidebarToggle">
+        <i class="bx bx-menu"></i>
+    </button>
 
-<div class="wrapper">
-    <!-- Sidebar -->
-    <div class="sidebar shadow-sm" id="sidebar">
-        <!-- <div class="text-center mb-4">
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar shadow-sm" id="sidebar">
+            <!-- <div class="text-center mb-4">
             <img src="{% static 'assets/img/logo.png' %}" alt="Logo" width="140">
         </div> -->
-        <a href="{% url 'admin_home' %}" class="nav-link">🏠 Dashboard</a>
-        <a href="{% url 'view_staff_based_on_dep' %}" class="nav-link">👨‍🏫 Faculties</a>
-        <a href="{% url 'student_cat_admin' %}" class="nav-link">🎓 Students</a>
-        <a href="{% url 'new_staff' %}" class="nav-link">📄 Verification</a>
-        <a href="{% url 'view_rejected_staff' %}" class="nav-link">❌ Rejected List</a>
-        <a href="{% url 'view_dep' %}" class="nav-link">🏢 Departments</a>
-        <a href="{% url 'view_leave_application_admin' %}" class="nav-link">📝 Leave Application</a>
-        <a href="{% url 'log_out_function' %}" class="nav-link text-danger">🚪 Logout</a>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="content-header d-flex justify-content-center align-items-center p-3 mb-4">
-            <h1 class="h2 text-white mb-0">Principal Dashboard</h1>
+            <a href="{% url 'admin_home' %}" class="nav-link">🏠 Dashboard</a>
+            <a href="{% url 'view_staff_based_on_dep' %}" class="nav-link">👨‍🏫 Faculties</a>
+            <a href="{% url 'student_cat_admin' %}" class="nav-link">🎓 Students</a>
+            <a href="{% url 'new_staff' %}" class="nav-link">📄 Verification</a>
+            <a href="{% url 'view_rejected_staff' %}" class="nav-link">❌ Rejected List</a>
+            <a href="{% url 'view_dep' %}" class="nav-link">🏢 Departments</a>
+            <a href="{% url 'view_leave_application_admin' %}" class="nav-link">📝 Leave Application</a>
+            <a href="{% url 'upi_payment_settings' %}" class="nav-link">💳 UPI Payment Settings</a>
+            <a href="{% url 'log_out_function' %}" class="nav-link text-danger">🚪 Logout</a>
         </div>
-        {% block content %}
-        {% endblock %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="content-header d-flex justify-content-center align-items-center p-3 mb-4">
+                <h1 class="h2 text-white mb-0">Principal Dashboard</h1>
+            </div>
+            {% block content %}
+            {% endblock %}
+        </div>
     </div>
-</div>
 
-<!-- Footer -->
-<footer class="bg-light text-center p-3 mt-auto">
-    <div class="container">
-        <p class="mb-0">&copy; 2025 K.V.V.S College of Science & Technology. All rights reserved.</p>
-    </div>
-</footer>
+    <!-- Footer -->
+    <footer class="bg-light text-center p-3 mt-auto">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 V.V College of Science & Technology. All rights reserved.</p>
+        </div>
+    </footer>
 
-<!-- Scripts -->
-<script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
-<script>
-    const sidebar = document.getElementById("sidebar");
-    const toggleBtn = document.getElementById("sidebarToggle");
+    <!-- Scripts -->
+    <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
+    <script>
+        const sidebar = document.getElementById("sidebar");
+        const toggleBtn = document.getElementById("sidebarToggle");
 
-    toggleBtn.addEventListener("click", () => {
-        sidebar.classList.toggle("show");
-    });
-</script>
+        toggleBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("show");
+        });
+    </script>
 
 </body>
+
 </html>

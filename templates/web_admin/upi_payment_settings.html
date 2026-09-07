@@ -1,0 +1,415 @@
+{% extends "web_admin/header_footer.html" %}
+
+{% block title %}UPI Payment Settings{% endblock %}
+
+{% block content %}
+<style>
+    .upi-settings-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        overflow: hidden;
+    }
+
+    .upi-card-header {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: #ffffff;
+        padding: 20px 24px;
+    }
+
+    .upi-card-header h3 {
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #334155;
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        padding: 10px 14px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    }
+
+    /* Fixed Custom Switch Container */
+    .custom-switch-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        transition: background 0.2s ease;
+    }
+
+    .custom-switch-wrapper {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .custom-switch-input {
+        width: 2.8em !important;
+        height: 1.5em !important;
+        margin-top: 0.15em !important;
+        margin-left: 0 !important;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .qr-preview-card {
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .qr-preview-card:hover {
+        border-color: #6366f1;
+        background: #f1f5f9;
+    }
+
+    .qr-image-wrapper {
+        background: #ffffff;
+        padding: 14px;
+        border-radius: 14px;
+        display: inline-block;
+        box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+        max-width: 100%;
+    }
+
+    .qr-image-wrapper img {
+        max-width: 220px;
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        display: block;
+    }
+
+    .qr-badge-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .qr-badge-active {
+        background-color: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+    }
+
+    .qr-badge-inactive {
+        background-color: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-save-settings {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: #ffffff;
+        border: none;
+        padding: 12px 28px;
+        font-weight: 600;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        transition: all 0.2s ease;
+        justify-content: center;
+    }
+
+    .btn-save-settings:hover {
+        opacity: 0.95;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+        color: #ffffff;
+    }
+
+    .action-btn-pill {
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 9px 16px;
+        justify-content: center;
+    }
+
+    .info-box {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 18px;
+    }
+
+    /* Mobile Phone Responsive Optimizations */
+    @media (max-width: 767.98px) {
+        .upi-card-header {
+            padding: 16px 18px;
+        }
+
+        .upi-card-header h3 {
+            font-size: 18px;
+        }
+
+        .card-body-responsive {
+            padding: 18px !important;
+        }
+
+        .qr-image-wrapper img {
+            max-width: 180px;
+        }
+
+        .btn-save-settings {
+            width: 100%;
+        }
+
+        .mobile-btn-group {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .mobile-btn-group .btn {
+            width: 100%;
+        }
+
+        .info-box-row {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .info-box-col {
+            width: 100% !important;
+            text-align: left !important;
+        }
+    }
+</style>
+
+<div class="container-fluid px-0 py-2">
+    <!-- Messages Banner -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-dismissible fade show {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %} shadow-sm mb-4 rounded-3" role="alert">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bx {% if 'error' in message.tags %}bx-error-circle{% else %}bx-check-circle{% endif %} fs-4"></i>
+                    <span>{{ message }}</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Form Section Column -->
+        <div class="col-12 col-lg-7">
+            <div class="upi-settings-card">
+                <div class="upi-card-header">
+                    <h3>
+                        <i class="bx bx-qr-scan text-indigo"></i> UPI Payment Configuration
+                    </h3>
+                    <p class="mb-0 text-slate-300 small opacity-75 mt-1">Update official college UPI payment details and student QR code image.</p>
+                </div>
+
+                <div class="p-4 card-body-responsive">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.upi_id.id_for_label }}" class="form-label">
+                                <i class="bx bx-id-card text-primary me-1"></i> UPI ID / VPA
+                            </label>
+                            {{ form.upi_id }}
+                            {% if form.upi_id.help_text %}
+                                <small class="form-text text-muted">{{ form.upi_id.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.upi_id.errors %}
+                                <div class="text-danger small mt-1"><i class="bx bx-error-circle"></i> {{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.upi_phone.id_for_label }}" class="form-label">
+                                <i class="bx bx-phone text-primary me-1"></i> Registered Phone Number
+                            </label>
+                            {{ form.upi_phone }}
+                            {% for error in form.upi_phone.errors %}
+                                <div class="text-danger small mt-1"><i class="bx bx-error-circle"></i> {{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.qr_code.id_for_label }}" class="form-label">
+                                <i class="bx bx-image-add text-primary me-1"></i> Upload UPI QR Code Image
+                            </label>
+                            {{ form.qr_code }}
+                            <small class="form-text text-muted d-block mt-1">Upload a clear image of the UPI QR Code (PNG, JPG, or JPEG).</small>
+                            {% for error in form.qr_code.errors %}
+                                <div class="text-danger small mt-1"><i class="bx bx-error-circle"></i> {{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Fixed Enable Switch Card -->
+                        <div class="custom-switch-card mb-4">
+                            <div class="custom-switch-wrapper">
+                                <input type="checkbox" 
+                                       name="{{ form.is_active.name }}" 
+                                       id="{{ form.is_active.id_for_label }}" 
+                                       class="form-check-input custom-switch-input" 
+                                       role="switch" 
+                                       {% if form.is_active.value %}checked{% endif %}>
+                                <div>
+                                    <label class="form-check-label font-semibold text-dark mb-1 d-block" for="{{ form.is_active.id_for_label }}" style="cursor: pointer; font-size: 15px; font-weight: 600;">
+                                        Enable UPI payments for students
+                                    </label>
+                                    <small class="text-muted d-block" style="font-size: 12px; line-height: 1.4;">
+                                        When enabled, students will see this QR code and payment instructions during fee payment.
+                                    </small>
+                                </div>
+                            </div>
+                            {% for error in form.is_active.errors %}
+                                <div class="text-danger small mt-2"><i class="bx bx-error-circle me-1"></i>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div>
+                            <button type="submit" class="btn btn-save-settings d-inline-flex align-items-center gap-2">
+                                <i class="bx bx-save fs-5"></i> Save Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Uploaded QR Code Display Column -->
+        <div class="col-12 col-lg-5">
+            <div class="upi-settings-card">
+                <div class="upi-card-header">
+                    <h3>
+                        <i class="bx bx-show text-indigo"></i> Uploaded QR Code
+                    </h3>
+                    <p class="mb-0 text-slate-300 small opacity-75 mt-1">Live preview of the active payment QR Code.</p>
+                </div>
+
+                <div class="p-4 card-body-responsive text-center">
+                    {% if settings and settings.qr_code %}
+                        <div class="mb-3">
+                            {% if settings.is_active %}
+                                <span class="qr-badge-status qr-badge-active">
+                                    <i class="bx bxs-check-circle fs-6"></i> UPI Payments Enabled
+                                </span>
+                            {% else %}
+                                <span class="qr-badge-status qr-badge-inactive">
+                                    <i class="bx bxs-x-circle fs-6"></i> UPI Payments Disabled
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="qr-preview-card mb-4">
+                            <div class="qr-image-wrapper">
+                                <img src="{{ settings.qr_code.url }}" alt="Current Uploaded UPI QR Code" id="uploadedQrImg">
+                            </div>
+                        </div>
+
+                        <div class="info-box text-start mb-4">
+                            <div class="row info-box-row g-2">
+                                <div class="col-6 info-box-col">
+                                    <small class="text-muted d-block" style="font-size: 11px;">UPI ID</small>
+                                    <strong class="text-dark d-block text-truncate" title="{{ settings.upi_id }}" style="font-size: 14px;">{{ settings.upi_id }}</strong>
+                                </div>
+                                <div class="col-6 text-end info-box-col">
+                                    <small class="text-muted d-block" style="font-size: 11px;">Contact Phone</small>
+                                    <strong class="text-dark d-block" style="font-size: 14px;">{{ settings.upi_phone }}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-center mobile-btn-group">
+                            <button type="button" class="btn btn-outline-primary action-btn-pill d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#qrZoomModal">
+                                <i class="bx bx-zoom-in fs-5"></i> Enlarge QR Code
+                            </button>
+                            <a href="{{ settings.qr_code.url }}" download="UPI_Payment_QR.png" class="btn btn-primary action-btn-pill d-inline-flex align-items-center gap-1">
+                                <i class="bx bx-download fs-5"></i> Download QR
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="qr-preview-card py-5">
+                            <i class="bx bx-qr text-muted" style="font-size: 54px;"></i>
+                            <h5 class="text-secondary font-bold mt-3" style="font-size: 16px;">No QR Code Uploaded</h5>
+                            <p class="text-muted small mb-0 px-2" style="font-size: 13px;">Use the form on the left to upload your college UPI payment QR code image.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Enlarging QR Code (Fully Responsive on Phones) -->
+{% if settings and settings.qr_code %}
+<div class="modal fade" id="qrZoomModal" tabindex="-1" aria-labelledby="qrZoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mx-2 mx-sm-auto">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 bg-dark text-white p-3 px-4 rounded-top-4">
+                <h5 class="modal-title font-bold d-flex align-items-center gap-2" id="qrZoomModalLabel" style="font-size: 17px;">
+                    <i class="bx bx-qr-scan text-indigo"></i> College UPI Payment QR Code
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-3 p-sm-4">
+                <div class="bg-white p-2 p-sm-3 d-inline-block rounded-3 border shadow-sm mb-3 max-w-100">
+                    <img src="{{ settings.qr_code.url }}" alt="Enlarged UPI QR Code" class="img-fluid rounded" style="max-height: 320px; width: 100%; object-fit: contain;">
+                </div>
+                <div class="p-3 bg-light rounded-3 text-start border">
+                    <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-1">
+                        <span class="text-muted small">UPI ID:</span>
+                        <strong class="text-dark font-mono" style="font-size: 13px;">{{ settings.upi_id }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
+                        <span class="text-muted small">Phone:</span>
+                        <strong class="text-dark" style="font-size: 13px;">{{ settings.upi_phone }}</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light rounded-bottom-4 justify-content-center p-3">
+                <a href="{{ settings.qr_code.url }}" download="UPI_Payment_QR.png" class="btn btn-primary px-4 rounded-pill w-100 w-sm-auto">
+                    <i class="bx bx-download me-1"></i> Download High Quality QR
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Automatically ensure form inputs have bootstrap styling
+        const inputs = document.querySelectorAll('form input[type="text"], form input[type="file"]');
+        inputs.forEach(input => {
+            if (!input.classList.contains('form-control')) {
+                input.classList.add('form-control');
+            }
+        });
+    });
+</script>
+{% endblock %}
