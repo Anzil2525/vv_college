@@ -27,6 +27,60 @@
             {% endfor %}
         {% endif %}
 
+        {% if upi_settings %}
+        <div class="upi-student-card animate-fade-in">
+            <div class="upi-student-details">
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="upi-badge"><i class="bi bi-shield-check me-1"></i>Official UPI</span>
+                    <h2 class="upi-student-title mb-0"><i class="bi bi-qr-code-scan me-2 text-primary"></i>UPI Payment Details</h2>
+                </div>
+                <p class="text-secondary small mb-3">
+                    Scan the QR code with any UPI app (Google Pay, PhonePe, Paytm, BHIM) or copy the UPI ID below to pay your fee directly.
+                </p>
+                {% if upi_settings.upi_id %}
+                    <div class="upi-detail-row align-items-center flex-wrap gap-2">
+                        <span class="upi-detail-label">UPI ID / VPA</span>
+                        <div class="d-inline-flex align-items-center gap-2">
+                            <span class="upi-detail-value font-monospace bg-light px-3 py-1 rounded-3 border" id="upiIdText">{{ upi_settings.upi_id }}</span>
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1 copy-btn" onclick="copyUpiId()" title="Copy UPI ID">
+                                <i class="bi bi-clipboard"></i><span id="copyBtnText">Copy</span>
+                            </button>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if upi_settings.upi_phone %}
+                    <div class="upi-detail-row align-items-center mt-2">
+                        <span class="upi-detail-label">UPI Contact Phone</span>
+                        <span class="upi-detail-value fw-semibold text-dark">{{ upi_settings.upi_phone }}</span>
+                    </div>
+                {% endif %}
+                {% if not upi_settings.upi_id and not upi_settings.upi_phone and not upi_settings.qr_code %}
+                    <p class="text-muted mb-0">UPI payment details are not available yet.</p>
+                {% endif %}
+            </div>
+            {% if upi_settings.qr_code %}
+                <div class="upi-qr-preview">
+                    <p class="upi-qr-label mb-2"><i class="bi bi-camera me-1"></i>Scan to Pay</p>
+                    <div class="upi-qr-frame shadow-sm" data-bs-toggle="modal" data-bs-target="#studentQrModal" title="Click to enlarge QR Code">
+                        <img src="{{ upi_settings.qr_code.url }}" alt="UPI payment QR code" id="studentQrImg">
+                        <div class="upi-qr-overlay">
+                            <i class="bi bi-zoom-in fs-4"></i>
+                            <span>Tap to Enlarge</span>
+                        </div>
+                    </div>
+                    <div class="upi-qr-actions mt-3 d-flex gap-2 justify-content-center flex-wrap">
+                        <a href="{{ upi_settings.qr_code.url }}" download="College_UPI_Payment_QR.png" class="btn btn-sm btn-primary rounded-pill px-3 d-inline-flex align-items-center gap-1 shadow-xs">
+                            <i class="bi bi-download"></i> Download QR
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#studentQrModal">
+                            <i class="bi bi-zoom-in"></i> Zoom
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
         {% if student_fees %}
         <!-- Desktop Table View -->
         <div class="desktop-table-view custom-table-container">
@@ -155,6 +209,142 @@
         margin-bottom: 2rem;
         position: relative;
         overflow: hidden;
+    }
+
+    .upi-student-card {
+        display: flex;
+        justify-content: space-between;
+        gap: 2rem;
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+    }
+
+    .upi-badge {
+        background: #e0e7ff;
+        color: #4338ca;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .upi-student-title {
+        color: #1e293b;
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .upi-detail-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .upi-detail-label {
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 600;
+        min-width: 120px;
+    }
+
+    .upi-detail-value {
+        color: #0f172a;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .upi-qr-preview {
+        flex: 0 0 250px;
+        text-align: center;
+    }
+
+    .upi-qr-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #475569;
+    }
+
+    .upi-qr-frame {
+        position: relative;
+        width: 220px;
+        height: 220px;
+        margin: 0 auto;
+        padding: 10px;
+        background: #ffffff;
+        border: 2px solid #cbd5e1;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        overflow: hidden;
+    }
+
+    .upi-qr-frame:hover {
+        border-color: #3b82f6;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.18) !important;
+    }
+
+    .upi-qr-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    .upi-qr-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.75);
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        border-radius: 14px;
+    }
+
+    .upi-qr-frame:hover .upi-qr-overlay {
+        opacity: 1;
+    }
+
+    @media (max-width: 767.98px) {
+        .upi-student-card {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .upi-student-details {
+            width: 100%;
+        }
+
+        .upi-detail-row {
+            justify-content: center;
+        }
+
+        .upi-qr-preview {
+            flex-basis: auto;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .upi-qr-frame {
+            width: 240px;
+            height: 240px;
+        }
     }
     .fee-header-card::before {
         content: "";
@@ -414,5 +604,55 @@
         line-height: 1.5;
     }
 </style>
+
+{% if upi_settings and upi_settings.qr_code %}
+<!-- QR Code Zoom Modal -->
+<div class="modal fade" id="studentQrModal" tabindex="-1" aria-labelledby="studentQrModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-light pb-2">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="studentQrModalLabel">
+                    <i class="bi bi-qr-code-scan text-primary"></i> Official College Payment QR Code
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <p class="text-secondary small mb-3">Scan this code using Google Pay, PhonePe, Paytm, BHIM, or any banking app.</p>
+                <div class="qr-modal-frame p-3 bg-white border rounded-4 shadow-sm d-inline-block mb-3">
+                    <img src="{{ upi_settings.qr_code.url }}" alt="College UPI QR Code" class="img-fluid rounded" style="max-height: 360px; max-width: 360px; width: 100%; object-fit: contain;">
+                </div>
+                {% if upi_settings.upi_id %}
+                <div class="bg-light p-2 rounded-3 mb-3 d-flex justify-content-center align-items-center gap-2 flex-wrap">
+                    <span class="text-muted small">UPI ID:</span>
+                    <strong class="font-monospace text-dark">{{ upi_settings.upi_id }}</strong>
+                </div>
+                {% endif %}
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="{{ upi_settings.qr_code.url }}" download="College_UPI_Payment_QR.png" class="btn btn-primary rounded-pill px-4 py-2 w-100 shadow-sm d-inline-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-download fs-5"></i> Download High Resolution QR Code
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function copyUpiId() {
+    const upiText = document.getElementById('upiIdText')?.innerText;
+    if (upiText) {
+        navigator.clipboard.writeText(upiText.trim()).then(() => {
+            const btnText = document.getElementById('copyBtnText');
+            if (btnText) {
+                btnText.innerText = 'Copied!';
+                setTimeout(() => { btnText.innerText = 'Copy'; }, 2000);
+            }
+        }).catch(err => {
+            console.error('Failed to copy UPI ID: ', err);
+        });
+    }
+}
+</script>
 
 {% endblock %}
