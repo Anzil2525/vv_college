@@ -47,5 +47,6 @@ urlpatterns = [
     path('edit_course_admin/<int:id>/', views.edit_course_admin, name='edit_course_admin'),
     # path('search_attendance_admin/<str:course>/<int:sem>/', views.search_attendance_admin, name='search_attendance_admin')
     path('reset_password_of_staff/<int:id>/', views.reset_password_of_staff, name='reset_password_of_staff'),
-    path('view_report_card_admin/<int:id>/', views.view_report_card_admin, name='view_report_card_admin')
+    path('view_report_card_admin/<int:id>/', views.view_report_card_admin, name='view_report_card_admin'),
+    path('upi-payment-settings/', views.upi_payment_settings, name='upi_payment_settings'),
 ]

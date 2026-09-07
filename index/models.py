@@ -318,3 +318,15 @@ class FeePayment(models.Model):
     payment_method = models.CharField(max_length=20)
     reference_number = models.CharField(max_length=100, null=True, blank=True)
     remarks = models.TextField(null=True, blank=True)
+
+
+class UpiPaymentSettings(models.Model):
+    id = models.AutoField(primary_key=True)
+    upi_id = models.CharField(max_length=100, null=True, blank=True)
+    upi_phone = models.CharField(max_length=15, null=True, blank=True)
+    qr_code = models.ImageField(upload_to='upi_qr_codes/', max_length=255, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'upi_payment_settings'

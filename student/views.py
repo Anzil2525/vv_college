@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from index.models import StudentReg, LoginTable, Attendance, MarkList, TimeTable, TimeTableSet, StudentFee, FeePayment
+from index.models import StudentReg, LoginTable, Attendance, MarkList, TimeTable, TimeTableSet, StudentFee, FeePayment, UpiPaymentSettings
 from django.db.models import Sum
 from datetime import date, timedelta
 import calendar
@@ -244,10 +244,13 @@ def student_fee_overview(request):
             fee.payment_status = 'Paid'
         else:
             fee.payment_status = 'Partially Paid'
+
+    upi_settings = UpiPaymentSettings.objects.filter(is_active=True).first()
     
     return render(request, 'student/student_fee_overview.html', {
         'student': student,
         'student_fees': student_fees,
+        'upi_settings': upi_settings,
     })
 
 
