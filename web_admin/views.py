@@ -177,14 +177,19 @@ def add_course(request, id):
             return redirect('view_dep')
     else:
         form  = Course_form()
-    return render(request, 'web_admin/add_course.html', {'form':form})
+    return render(request, 'web_admin/add_course.html', {'form':form, 'course_type': 'Course'})
 
 
 @admin_required
 def view_course(request, id):
     dep = DepTable.objects.get(id = id)
     course = Course.objects.filter(dep = dep)
-    return render(request, 'web_admin/view_course.html', {'course':course})
+    minor_courses = MinorCourse.objects.filter(dep=dep)
+    return render(request, 'web_admin/view_course.html', {
+        'course': course,
+        'course_type': 'Course',
+        'minor_courses': minor_courses,
+    })
 
 
 @admin_required
@@ -201,6 +206,53 @@ def del_course(request, id):
         messages.error(request, "Can't delete the course because some students are registered in it.")
 
         return redirect('view_dep')
+
+
+@admin_required
+def add_minor_course(request, id):
+    dep = get_object_or_404(DepTable, id=id)
+    if request.method == 'POST':
+        form = MinorCourse_form(request.POST)
+        if form.is_valid():
+            minor_course = form.save(commit=False)
+            minor_course.dep = dep
+            minor_course.save()
+            messages.success(request, 'Successfully Created.')
+            return redirect('view_dep')
+    else:
+        form = MinorCourse_form()
+    return render(request, 'web_admin/add_course.html', {
+        'form': form,
+        'course_type': 'Minor Course',
+    })
+
+
+@admin_required
+def view_minor_course(request, id):
+    dep = get_object_or_404(DepTable, id=id)
+    minor_courses = MinorCourse.objects.filter(dep=dep)
+    return render(request, 'web_admin/view_course.html', {
+        'course': minor_courses,
+        'course_type': 'Minor Course',
+        'delete_url': 'del_minor_course',
+        'edit_url': 'edit_minor_course',
+    })
+
+
+@admin_required
+def del_minor_course(request, id):
+    minor_course = get_object_or_404(MinorCourse, id=id)
+    if StudentReg.objects.filter(minor_course=minor_course).exists():
+        messages.error(request, "Can't delete the minor course because some students are registered in it.")
+        return redirect('view_dep')
+
+    try:
+        minor_course.delete()
+    except ProtectedError:
+        messages.error(request, "Can't delete the minor course because some students are registered in it.")
+    else:
+        messages.success(request, 'Successfully Deleted.')
+    return redirect('view_dep')
 
 
 # def view_positions(request):
@@ -257,6 +309,7 @@ def view_office_staff_attendance(request, id):
     })
 
 
+        # Minor Course Views
 @admin_required
 def update_office_staff_attendance(request, id):
     staff = get_object_or_404(OfficeFacultyRegistration, id=id)
@@ -751,7 +804,24 @@ def edit_course_admin(request, id):
 
     else:
         form = Course_form(instance=course)
-    return render(request, 'web_admin/edit_course_admin.html', {'form':form})
+    return render(request, 'web_admin/edit_course_admin.html', {'form':form, 'course_type': 'Course'})
+
+
+@admin_required
+def edit_minor_course(request, id):
+    minor_course = get_object_or_404(MinorCourse, id=id)
+    if request.method == 'POST':
+        form = MinorCourse_form(request.POST, instance=minor_course)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Successfully Changed.')
+            return redirect('view_dep')
+    else:
+        form = MinorCourse_form(instance=minor_course)
+    return render(request, 'web_admin/edit_course_admin.html', {
+        'form': form,
+        'course_type': 'Minor Course',
+    })
 
 
 # @admin_required
