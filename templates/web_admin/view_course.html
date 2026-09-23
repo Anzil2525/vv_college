@@ -11,7 +11,7 @@
             {% endfor %}
         </div>
     {% endif %}
-    <h2 class="text-center mb-4 fw-bold border-bottom pb-2">Courses List</h2>
+    <h2 class="text-center mb-4 fw-bold border-bottom pb-2">{{ course_type|default:'Course' }}s List</h2>
 
     {% if course %}
     <!-- Table for Desktop -->
@@ -28,8 +28,8 @@
                 <tr>
                     <td>{{ i.course }}</td>
                     <td>
-                        <a href="{% url 'del_course' i.id %}" class="btn btn-danger btn-sm">Remove</a>
-                        <a href="{% url 'edit_course_admin' i.id %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url delete_url|default:'del_course' i.id %}" class="btn btn-danger btn-sm">Remove</a>
+                        <a href="{% url edit_url|default:'edit_course_admin' i.id %}" class="btn btn-warning btn-sm">Edit</a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -43,8 +43,8 @@
         <div class="card mb-3 shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">{{ i.course }}</h5>
-                <a href="{% url 'del_course' i.id %}" class="btn btn-danger btn-sm mt-2">Remove</a>
-                <a href="{% url 'edit_course_admin' i.id %}" class="btn btn-warning btn-sm mt-2">Edit</a>
+                <a href="{% url delete_url|default:'del_course' i.id %}" class="btn btn-danger btn-sm mt-2">Remove</a>
+                    <a href="{% url edit_url|default:'edit_course_admin' i.id %}" class="btn btn-warning btn-sm mt-2">Edit</a>
             </div>
         </div>
         {% endfor %}
@@ -53,6 +53,48 @@
     {% else %}
     <div class="alert alert-info text-center mt-4">
         No courses found.
+    </div>
+    {% endif %}
+
+    <h2 class="text-center mb-4 mt-5 fw-bold border-bottom pb-2">Minor Courses List</h2>
+
+    {% if minor_courses %}
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-striped table-bordered text-center align-middle shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Minor Course Name</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for minor_course in minor_courses %}
+                <tr>
+                    <td>{{ minor_course.course }}</td>
+                    <td>
+                        <a href="{% url 'del_minor_course' minor_course.id %}" class="btn btn-danger btn-sm">Remove</a>
+                        <a href="{% url 'edit_minor_course' minor_course.id %}" class="btn btn-warning btn-sm">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-md-none">
+        {% for minor_course in minor_courses %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ minor_course.course }}</h5>
+                <a href="{% url 'del_minor_course' minor_course.id %}" class="btn btn-danger btn-sm mt-2">Remove</a>
+                <a href="{% url 'edit_minor_course' minor_course.id %}" class="btn btn-warning btn-sm mt-2">Edit</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center mt-4">
+        No minor courses found.
     </div>
     {% endif %}
 
