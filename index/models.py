@@ -47,7 +47,13 @@ class Course(models.Model):
     def __str__(self):
         return self.course
     
+class MinorCourse(models.Model):
+    course = models.CharField(max_length=50, unique=True)
+    dep = models.ForeignKey(DepTable, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.course
+    
 class Positions(models.Model):
     pos = models.CharField(max_length=50)
 
@@ -93,6 +99,7 @@ class StudentReg(models.Model):
     parent_1 = models.ForeignKey(GuadinReg, on_delete=models.SET_NULL, null=True, blank=True, related_name="parent_1")
     dep = models.ForeignKey(DepTable, on_delete=models.SET_NULL, null=True)
     course = models.ForeignKey(Course, on_delete=models.PROTECT, null=True)
+    minor_course = models.ForeignKey(MinorCourse, on_delete=models.PROTECT, null=True, blank=True)
     login_info = models.ForeignKey(LoginTable, on_delete=models.CASCADE)
 
     def __str__(self):

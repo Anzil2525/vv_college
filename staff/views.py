@@ -5,7 +5,7 @@ from datetime import date, timedelta
 import calendar
 from django.forms import modelform_factory, inlineformset_factory
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 from io import BytesIO
@@ -91,10 +91,41 @@ def view_students(request, sem, course):
     students = StudentReg.objects.filter(
         dep=department, course=course, sem=sem, login_info__status="V"
     ).order_by("reg_no")
+    minor_courses = MinorCourse.objects.filter().order_by("course")
+
+    if request.method == "POST":
+        student = get_object_or_404(
+            students,
+            id=request.POST.get("student_id"),
+        )
+        minor_course_id = request.POST.get("minor_course")
+        if minor_course_id:
+            minor_course = get_object_or_404(
+                minor_courses,
+                id=minor_course_id,
+            )
+            student.minor_course = minor_course
+        else:
+            student.minor_course = None
+        student.save(update_fields=["minor_course"])
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({
+                "success": True,
+                "message": f"Minor course updated for {student.name}.",
+                "minor_course": student.minor_course.course if student.minor_course else "No minor course",
+            })
+        messages.success(request, f"Minor course updated for {student.name}.")
+        return redirect("view_students", sem=sem, course=course.course)
+
     return render(
         request,
         "staff/view_students.html",
-        {"students": students, "year": sem, "course": course},
+        {
+            "students": students,
+            "year": sem,
+            "course": course,
+            "minor_courses": minor_courses,
+        },
     )
 
 
@@ -694,6 +725,139 @@ def view_gud_data(request, id, course, sem):
         request,
         "staff/view_gud_data.html",
         {"student": student, "parent_log": parent_log},
+    )
+
+
+@staff_required
+def minor_course_cat(request):
+    sem = (
+        StudentReg.objects.filter(login_info__status="V", minor_course__isnull=False)
+        .values("sem")
+        .annotate(min_sem=Min("sem"))
+        .order_by("sem")
+    )
+    if not sem:
+        sem = (
+            StudentReg.objects.filter(login_info__status="V")
+            .values("sem")
+            .annotate(min_sem=Min("sem"))
+            .order_by("sem")
+        )
+
+    return render(request, "staff/minor_course_cat.html", {"sem": sem})
+
+
+@staff_required
+def minor_course_list(request, sem):
+    minor_courses = MinorCourse.objects.filter(
+        studentreg__sem=sem,
+        studentreg__login_info__status="V",
+        studentreg__minor_course__isnull=False,
+    ).distinct()
+
+    return render(
+        request,
+        "staff/minor_course_list.html",
+        {"minor_courses": minor_courses, "sem": sem},
+    )
+
+
+@staff_required
+def take_minor_attendance(request, sem, minor_id):
+    today = date.today()
+    id = request.session.get("staff_login_id")
+    log_ins = get_object_or_404(LoginTable, id=id)
+    staff_ins = get_object_or_404(StaffReg, login_info=log_ins)
+
+    minor_course_obj = get_object_or_404(MinorCourse, id=minor_id)
+    students = StudentReg.objects.filter(
+        sem=sem,
+        minor_course=minor_course_obj,
+        login_info__status="V",
+    ).order_by("reg_no")
+
+    if request.method == "POST":
+        for student in students:
+            instance, _ = Attendance.objects.get_or_create(student=student, date=today)
+
+            prefix = str(student.id)
+            form_data = {
+                "first_hour": request.POST.get(f"{prefix}-first_hour"),
+                "second_hour": request.POST.get(f"{prefix}-second_hour"),
+                "third_hour": request.POST.get(f"{prefix}-third_hour"),
+                "fourth_hour": request.POST.get(f"{prefix}-fourth_hour"),
+                "fifth_hour": request.POST.get(f"{prefix}-fifth_hour"),
+            }
+
+            form = AttendanceForm(form_data, instance=instance)
+            if form.is_valid():
+                ins = form.save(commit=False)
+                total = 0
+
+                now_time = datetime.datetime.now().strftime("%H:%M:%S")
+                staff_name = (
+                    staff_ins.__str__()
+                    if hasattr(staff_ins, "__str__")
+                    else staff_ins.login_info.email
+                )
+
+                # Morning session (3 periods)
+                morning_attendance = (
+                    ins.first_hour.upper() == "P"
+                    and ins.second_hour.upper() == "P"
+                    and ins.third_hour.upper() == "P"
+                )
+                if morning_attendance:
+                    total += 0.5
+
+                # Afternoon session (2 periods)
+                afternoon_attendance = (
+                    ins.fourth_hour.upper() == "P" and ins.fifth_hour.upper() == "P"
+                )
+                if afternoon_attendance:
+                    total += 0.5
+
+                if ins.first_hour != "PE" and not ins.first_attendance_time:
+                    ins.first_attendance_time = now_time
+                    ins.first_attendance_taken_by = staff_name
+                if ins.second_hour != "PE" and not ins.second_attendance_time:
+                    ins.second_attendance_time = now_time
+                    ins.second_attendance_taken_by = staff_name
+                if ins.third_hour != "PE" and not ins.third_attendance_time:
+                    ins.third_attendance_time = now_time
+                    ins.third_attendance_taken_by = staff_name
+                if ins.fourth_hour != "PE" and not ins.fourth_attendance_time:
+                    ins.fourth_attendance_time = now_time
+                    ins.fourth_attendance_taken_by = staff_name
+                if ins.fifth_hour != "PE" and not ins.fifth_attendance_time:
+                    ins.fifth_attendance_time = now_time
+                    ins.fifth_attendance_taken_by = staff_name
+
+                ins.today = total
+                ins.sem = student.sem
+                ins.save()
+
+        messages.success(request, "Minor Course Attendance Registered Successfully.")
+        return redirect("take_minor_attendance", sem=sem, minor_id=minor_id)
+
+    attendance_data = []
+    for student in students:
+        try:
+            instance = Attendance.objects.get(student=student, date=today)
+        except Attendance.DoesNotExist:
+            instance = None
+        form = AttendanceForm(instance=instance)
+        attendance_data.append((student, form))
+
+    return render(
+        request,
+        "staff/take_minor_attendance.html",
+        {
+            "attendance_data": attendance_data,
+            "today": today,
+            "sem": sem,
+            "minor_course": minor_course_obj,
+        },
     )
 
 

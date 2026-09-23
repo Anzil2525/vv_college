@@ -30,6 +30,7 @@
                         <div class="d-flex justify-content-center gap-2 flex-wrap">
                             <a href="{% url 'del_dep' dep.id %}" class="btn btn-danger btn-sm">Remove</a>
                             <a href="{% url 'add_course' dep.id %}" class="btn btn-warning btn-sm text-dark">Add Course</a>
+                            <a href="{% url 'add_minor_course' dep.id %}" class="btn btn-warning btn-sm text-dark">Add Minor Course</a>
                             <a href="{% url 'view_course' dep.id %}" class="btn btn-info btn-sm text-white">View Course</a>
                         </div>
                     </td>
@@ -48,6 +49,7 @@
                 <div class="d-grid gap-2 mt-3">
                     <a href="{% url 'del_dep' dep.id %}" class="btn btn-danger btn-sm">Remove</a>
                     <a href="{% url 'add_course' dep.id %}" class="btn btn-warning btn-sm text-dark">Add Course</a>
+                    <a href="{% url 'add_minor_course' dep.id %}" class="btn btn-warning btn-sm text-dark">Add Minor Course</a>
                     <a href="{% url 'view_course' dep.id %}" class="btn btn-info btn-sm text-white">View Course</a>
                 </div>
             </div>
