@@ -102,6 +102,17 @@ urlpatterns = [
         views.view_other_students,
         name="view_other_students",
     ),
+    path("minor_course_cat/", views.minor_course_cat, name="minor_course_cat"),
+    path(
+        "minor_course_list/<int:sem>/",
+        views.minor_course_list,
+        name="minor_course_list",
+    ),
+    path(
+        "take_minor_attendance/<int:sem>/<int:minor_id>/",
+        views.take_minor_attendance,
+        name="take_minor_attendance",
+    ),
     path(
         "view_all_att_by_staff/<str:course>/<int:sem>/",
         views.view_all_att_by_staff,

@@ -1,0 +1,160 @@
+{% extends "staff/head_foot.html" %}
+
+{% block content %}
+<style>
+    /* --- Page Background & Layout --- */
+    body {
+        background: linear-gradient(135deg, #c6d0ff 0%, #d2bfff 100%);
+        min-height: 100vh;
+    }
+
+    .container-custom {
+        margin-top: 7vw;
+        margin-bottom: 4vw;
+    }
+
+    /* --- Table Styling --- */
+    table {
+        border-radius: 0.8rem !important;
+        overflow: hidden;
+    }
+
+    thead.table-dark {
+        background-color: #343a40;
+        color: #fff;
+        border: none;
+    }
+
+    table td, table th {
+        vertical-align: middle;
+    }
+
+    /* --- Buttons --- */
+    .btn-primary {
+        background: linear-gradient(90deg, #007bff, #0056d2);
+        border: none;
+        transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(90deg, #0056d2, #003ea1);
+        transform: scale(1.05);
+    }
+
+    /* --- Card View --- */
+    .card {
+        border: none;
+        border-radius: 1rem;
+        background: #ffffffc7;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .card-title {
+        color: #222;
+        font-weight: 600;
+    }
+
+    /* --- Alerts --- */
+    .alert {
+        border-radius: 0.75rem;
+        font-weight: 500;
+    }
+
+    /* --- Header Responsiveness --- */
+    .header-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    @media (min-width: 576px) {
+        .header-wrapper {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+
+    /* --- Responsive Adjustments --- */
+    @media (max-width: 576px) {
+        .container-custom {
+            margin-top: 20vw;
+        }
+
+        .header-wrapper h2 {
+            font-size: 1.4rem;
+        }
+    }
+</style>
+
+<div class="container container-custom py-4 py-md-5">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- 🔹 Responsive Header -->
+    <div class="header-wrapper mb-4 border-bottom pb-3">
+        <h2 class="fw-bold m-0 text-dark">📚 Minor Course Base - Semester List</h2>
+        <div>
+            <a href="{% url 'student_cat' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1 fw-semibold">
+                ← Back to Category
+            </a>
+        </div>
+    </div>
+
+    {% if sem %}
+    <!-- ✅ Desktop Table View -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-bordered table-hover align-middle text-center shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width: 10%;">#</th>
+                    <th>Current Semester</th>
+                    <th style="width: 25%;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in sem %}
+                <tr>
+                    <td class="fw-bold">{{ forloop.counter }}</td>
+                    <td class="fs-5 fw-semibold">Semester {{ item.sem }}</td>
+                    <td>
+                        <a href="{% url 'minor_course_list' item.sem %}" class="btn btn-sm btn-primary rounded-pill px-4 py-2">
+                            View Minor Courses
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ✅ Mobile Card View (optimized for phone) -->
+    <div class="d-md-none">
+        {% for item in sem %}
+        <div class="card mb-3 shadow-sm border-0">
+            <div class="card-body p-4 text-center">
+                <h5 class="card-title fs-4 mb-3">Semester {{ item.sem }}</h5>
+                <a href="{% url 'minor_course_list' item.sem %}" class="btn btn-primary w-100 py-2 rounded-pill fw-semibold">
+                    View Minor Courses
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="alert alert-info text-center mt-4 p-4 rounded-3 shadow-sm">
+        <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+        No active semesters found for Minor Courses.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

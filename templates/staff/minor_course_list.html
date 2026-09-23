@@ -1,0 +1,123 @@
+{% extends "staff/head_foot.html" %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #c6d0ff 0%, #d2bfff 100%);
+        min-height: 100vh;
+    }
+
+    .container-custom {
+        margin-top: 7vw;
+        margin-bottom: 4vw;
+    }
+
+    .minor-card {
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .minor-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        background: #ffffff;
+    }
+
+    .btn-primary-custom {
+        background: linear-gradient(90deg, #007bff, #0056d2);
+        border: none;
+        color: white;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+    .btn-primary-custom:hover {
+        background: linear-gradient(90deg, #0056d2, #003ea1);
+        transform: scale(1.02);
+        color: white;
+    }
+
+    /* --- Responsive Header --- */
+    .header-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    @media (min-width: 576px) {
+        .header-wrapper {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .container-custom {
+            margin-top: 20vw;
+        }
+
+        .header-wrapper h2 {
+            font-size: 1.35rem;
+        }
+    }
+</style>
+
+<div class="container container-custom py-4 py-md-5">
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- 🔹 Responsive Header -->
+    <div class="header-wrapper mb-4 border-bottom pb-3">
+        <div>
+            <h2 class="fw-bold m-0 text-dark">📚 Minor Courses - Semester {{ sem }}</h2>
+            <p class="text-muted mb-0 small mt-1">Select a minor subject to take student attendance</p>
+        </div>
+        <div>
+            <a href="{% url 'minor_course_cat' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1 fw-semibold">
+                ← Back to Semesters
+            </a>
+        </div>
+    </div>
+
+    {% if minor_courses %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 g-md-4">
+        {% for minor in minor_courses %}
+        <div class="col">
+            <div class="card minor-card h-100 shadow-sm border-0">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                            <span class="badge bg-primary bg-gradient rounded-pill px-3 py-1">Minor Subject</span>
+                            {% if minor.dep %}
+                            <span class="badge bg-secondary rounded-pill px-3 py-1">{{ minor.dep.dep }}</span>
+                            {% endif %}
+                        </div>
+                        <h4 class="card-title fw-bold text-dark mt-3 mb-2 fs-5 fs-md-4">{{ minor.course }}</h4>
+                    </div>
+                    <a href="{% url 'take_minor_attendance' sem minor.id %}" class="btn btn-primary-custom w-100 rounded-pill py-2.5 mt-3 text-center">
+                        📋 Take Attendance
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center p-4 mt-4 rounded-3 shadow-sm">
+        <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+        No minor subjects selected by students in Semester {{ sem }}.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,10 +1,16 @@
 from django import forms
-from index.models import Course, UpiPaymentSettings
+from index.models import Course, MinorCourse, UpiPaymentSettings
 from index.models import Positions, StaffReg
 
 class Course_form(forms.ModelForm):
     class Meta:
         model = Course
+        fields = ['course']
+
+
+class MinorCourse_form(forms.ModelForm):
+    class Meta:
+        model = MinorCourse
         fields = ['course']
 
 
