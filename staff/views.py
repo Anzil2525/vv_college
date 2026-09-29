@@ -91,31 +91,7 @@ def view_students(request, sem, course):
     students = StudentReg.objects.filter(
         dep=department, course=course, sem=sem, login_info__status="V"
     ).order_by("reg_no")
-    minor_courses = MinorCourse.objects.filter().order_by("course")
-
-    if request.method == "POST":
-        student = get_object_or_404(
-            students,
-            id=request.POST.get("student_id"),
-        )
-        minor_course_id = request.POST.get("minor_course")
-        if minor_course_id:
-            minor_course = get_object_or_404(
-                minor_courses,
-                id=minor_course_id,
-            )
-            student.minor_course = minor_course
-        else:
-            student.minor_course = None
-        student.save(update_fields=["minor_course"])
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({
-                "success": True,
-                "message": f"Minor course updated for {student.name}.",
-                "minor_course": student.minor_course.course if student.minor_course else "No minor course",
-            })
-        messages.success(request, f"Minor course updated for {student.name}.")
-        return redirect("view_students", sem=sem, course=course.course)
+    minor_courses = MinorCourse.objects.filter(dep=department).order_by("course")
 
     return render(
         request,
@@ -125,6 +101,60 @@ def view_students(request, sem, course):
             "year": sem,
             "course": course,
             "minor_courses": minor_courses,
+        },
+    )
+
+
+@staff_required
+def student_minor_courses(request, student_id):
+    staff_login_id = request.session.get("staff_login_id")
+    log_ins = get_object_or_404(LoginTable, id=staff_login_id)
+    staff_ins = get_object_or_404(StaffReg, login_info=log_ins)
+    department = staff_ins.dep
+
+    student = get_object_or_404(
+        StudentReg,
+        id=student_id,
+        dep=department,
+        login_info__status="V",
+    )
+    minor_courses = MinorCourse.objects.all().order_by("dep__dep", "course")
+    selected_minor_course_ids = set(
+        StudentMinorCourse.objects.filter(student=student).values_list(
+            "minor_course_id", flat=True
+        )
+    )
+
+    if request.method == "POST":
+        submitted_ids = {
+            int(value)
+            for value in request.POST.getlist("minor_courses")
+            if value and value.isdigit()
+        }
+        valid_selected_ids = set(
+            minor_courses.filter(id__in=submitted_ids).values_list("id", flat=True)
+        )
+
+        StudentMinorCourse.objects.filter(student=student).exclude(
+            minor_course_id__in=valid_selected_ids
+        ).delete()
+
+        for minor_course_id in valid_selected_ids:
+            StudentMinorCourse.objects.get_or_create(
+                student=student,
+                minor_course_id=minor_course_id,
+            )
+
+        messages.success(request, f"Minor courses updated for {student.name}.")
+        return redirect("view_students", sem=student.sem, course=student.course.course)
+
+    return render(
+        request,
+        "staff/student_minor_courses.html",
+        {
+            "student": student,
+            "minor_courses": minor_courses,
+            "selected_minor_course_ids": selected_minor_course_ids,
         },
     )
 
@@ -730,30 +760,25 @@ def view_gud_data(request, id, course, sem):
 
 @staff_required
 def minor_course_cat(request):
-    sem = (
-        StudentReg.objects.filter(login_info__status="V", minor_course__isnull=False)
-        .values("sem")
-        .annotate(min_sem=Min("sem"))
-        .order_by("sem")
-    )
-    if not sem:
-        sem = (
-            StudentReg.objects.filter(login_info__status="V")
-            .values("sem")
-            .annotate(min_sem=Min("sem"))
-            .order_by("sem")
+    sem_values = list(
+        StudentMinorCourse.objects.filter(
+            student__login_info__status="V",
         )
+        .values_list("student__sem", flat=True)
+        .distinct()
+        .order_by("student__sem")
+    )
 
+    sem = [{"sem": item} for item in sem_values]
     return render(request, "staff/minor_course_cat.html", {"sem": sem})
 
 
 @staff_required
 def minor_course_list(request, sem):
     minor_courses = MinorCourse.objects.filter(
-        studentreg__sem=sem,
-        studentreg__login_info__status="V",
-        studentreg__minor_course__isnull=False,
-    ).distinct()
+        students__student__sem=sem,
+        students__student__login_info__status="V",
+    ).distinct().order_by("course")
 
     return render(
         request,
@@ -772,9 +797,9 @@ def take_minor_attendance(request, sem, minor_id):
     minor_course_obj = get_object_or_404(MinorCourse, id=minor_id)
     students = StudentReg.objects.filter(
         sem=sem,
-        minor_course=minor_course_obj,
         login_info__status="V",
-    ).order_by("reg_no")
+        minor_courses__minor_course=minor_course_obj,
+    ).distinct().order_by("reg_no")
 
     if request.method == "POST":
         for student in students:

@@ -1,0 +1,58 @@
+{% extends "staff/head_foot.html" %}
+
+{% block content %}
+<div class="container py-5" style="margin-top: 5em;">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if 'error' in message.tags %}alert-danger{% else %}alert-success{% endif %} mt-3">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow-sm border-0 mx-auto" style="max-width: 760px;">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="mb-1">Minor Courses</h3>
+                    <p class="text-muted mb-0">{{ student.name }} · {{ student.course.course }} · Semester {{ student.sem }}</p>
+                </div>
+                <a href="{% url 'view_students' student.sem student.course.course %}" class="btn btn-outline-secondary btn-sm">
+                    Back to Students
+                </a>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                {% if minor_courses %}
+                    <div class="row g-3">
+                        {% for minor_course in minor_courses %}
+                            <div class="col-md-6">
+                                <label class="border rounded p-3 d-flex align-items-center h-100 form-check-label" style="cursor: pointer;">
+                                    <input type="checkbox"
+                                           name="minor_courses"
+                                           value="{{ minor_course.id }}"
+                                           {% if minor_course.id in selected_minor_course_ids %}checked{% endif %}
+                                           class="form-check-input me-2">
+                                    <span>{{ minor_course.course }}</span>
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info mb-0">
+                        No minor courses are available for this department yet.
+                    </div>
+                {% endif %}
+
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                    <small class="text-muted">Select one or more minor courses.</small>
+                    <button type="submit" class="btn btn-primary" {% if not minor_courses %}disabled{% endif %}>
+                        Save Minor Courses
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
