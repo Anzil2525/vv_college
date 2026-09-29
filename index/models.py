@@ -99,11 +99,17 @@ class StudentReg(models.Model):
     parent_1 = models.ForeignKey(GuadinReg, on_delete=models.SET_NULL, null=True, blank=True, related_name="parent_1")
     dep = models.ForeignKey(DepTable, on_delete=models.SET_NULL, null=True)
     course = models.ForeignKey(Course, on_delete=models.PROTECT, null=True)
-    minor_course = models.ForeignKey(MinorCourse, on_delete=models.PROTECT, null=True, blank=True)
     login_info = models.ForeignKey(LoginTable, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
+
+class StudentMinorCourse(models.Model):
+    student = models.ForeignKey(StudentReg, on_delete=models.CASCADE, related_name='minor_courses')
+    minor_course = models.ForeignKey(MinorCourse, on_delete=models.PROTECT, related_name='students')
+
+    def __str__(self):
+        return f"{self.student.name} - {self.minor_course.course}"
 
 
 class TimeTableSet(models.Model):

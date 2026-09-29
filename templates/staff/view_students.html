@@ -38,28 +38,6 @@
                 <p class="mb-1"><strong>Department:</strong> {{ student.dep.dep|default:"N/A" }}</p>
                 <p class="mb-1"><strong>Course:</strong> {{ student.course.course|default:"N/A" }}</p>
                 <p class="mb-1"><strong>Semester:</strong> {{ student.sem }}</p>
-
-                <form method="post" class="mt-3 minor-course-form">
-                    {% csrf_token %}
-                    <input type="hidden" name="student_id" value="{{ student.id }}">
-                    <label for="minor-course-{{ student.id }}" class="form-label mb-1">
-                        <strong>Minor Course:</strong>
-                    </label>
-                    <div class="input-group">
-                        <select name="minor_course" id="minor-course-{{ student.id }}" class="form-select">
-                            <option value="">No minor course</option>
-                            {% for minor_course in minor_courses %}
-                                <option value="{{ minor_course.id }}" {% if student.minor_course_id == minor_course.id %}selected{% endif %}>
-                                    {{ minor_course.course }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        <button type="submit" class="btn btn-outline-primary set-minor-course-button">
-                            Set Minor Course
-                        </button>
-                    </div>
-                    <div class="minor-course-message mt-2" role="status"></div>
-                </form>
                 
                 <hr>
                 
@@ -136,6 +114,11 @@
                         <i class="bi bi-file-earmark-text"></i> Report Card
                     </a>
 
+                    <a href="{% url 'student_minor_courses' student.id %}"
+                    class="btn btn-outline-info btn-sm">
+                        Manage Minor Courses
+                    </a>
+
                     <a href="{% url 'edit_student_details' student.id 0 %}"
                        class="btn btn-warning btn-sm">
                         Edit Student
@@ -192,48 +175,6 @@
             });
         });
     }
-
-    document.querySelectorAll(".minor-course-form").forEach(form => {
-        form.addEventListener("submit", async function (event) {
-            event.preventDefault();
-
-            const button = form.querySelector(".set-minor-course-button");
-            const message = form.querySelector(".minor-course-message");
-            const originalText = button.textContent.trim();
-            button.disabled = true;
-            button.textContent = "Saving...";
-            message.textContent = "";
-            message.className = "minor-course-message mt-2";
-
-            try {
-                const response = await fetch(form.action || window.location.href, {
-                    method: "POST",
-                    body: new FormData(form),
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest"
-                    }
-                });
-                const data = await response.json();
-
-                if (!response.ok || !data.success) {
-                    throw new Error(data.message || "Unable to update minor course.");
-                }
-
-                message.textContent = data.message;
-                message.classList.add("text-success");
-                button.textContent = "Saved";
-                setTimeout(() => {
-                    button.textContent = originalText;
-                }, 1500);
-            } catch (error) {
-                message.textContent = error.message;
-                message.classList.add("text-danger");
-                button.textContent = originalText;
-            } finally {
-                button.disabled = false;
-            }
-        });
-    });
 });
 </script>
 
